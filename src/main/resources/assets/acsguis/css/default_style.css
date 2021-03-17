@@ -1,0 +1,196 @@
+button
+{
+    background-image: texture("textures/gui/widgets.png", 0, 66, 200, 20);
+    font-size: 9;
+    width: 200px;
+    height: 20px;
+}
+button:hover,button:active
+{
+    background-image: texture("textures/gui/widgets.png", 0, 86, 200, 20);
+}
+button:disabled
+{
+    background-image: texture("textures/gui/widgets.png", 0, 46, 200, 20);
+}
+
+progress_bar
+{
+    background-color: darkgray;
+    color: gray;
+}
+
+text_area,text_field
+{
+    background-color: black;
+    border: 1px gray;
+    color: white;
+    border-position: internal;
+}
+
+text_area:disabled
+{
+    color: lightgray;
+}
+
+text_field
+{
+    height: 20px;
+    padding-left: 4px;
+    padding-right: 4px;
+    text-align-vertical: center;
+}
+
+label
+{
+    border-width: 0px;
+    height: 20px;
+    padding: 4px;
+    text-align-vertical: center;
+    text-shadow: enable;
+    border-radius: 0;
+    font-size: 9;
+}
+
+combo_box>button
+{
+    width: 100%;
+    height: 15px;
+    background-color: rgba(112; 112; 255);
+    color: rgba(198, 198, 198, 255);
+}
+
+panel,tabbed_pane,scroll_pane,entity_render
+{
+    width: 100%;
+    height: 100%;
+}
+
+tabbed_pane>button
+{
+    left: auto;
+    height: 20px;
+    width: auto;
+    color: auto;
+}
+
+checkbox
+{
+    width: 110px;
+    height: 11px;
+    background-color: black;
+    color: white;
+}
+
+checkbox>button
+{
+    width: 11px;
+    height: 100%;
+    color: lightgray;
+    border-color: gray;
+    border-width: 1px;
+    background-image: none;
+    border-position: internal;
+}
+
+slider_horizontal
+{
+    height: 6px;
+    bottom: 0px;
+    width: 100%;
+    z-index: 100;
+}
+slider_horizontal>button
+{
+    left: auto;
+}
+
+slider_vertical
+{
+    width: 6px;
+    right: 0px;
+    height: 100%;
+    z-index: 100;
+}
+slider_vertical>button
+{
+    top: auto;
+}
+
+/** GuiSearchField */
+
+.search_bar1
+{
+    background-color: translucent;
+    max-height: 120px;
+}
+.search_bar1 text_field
+{
+    background-color: rgba(255, 255, 255, 150);
+    width: 100%;
+    height: 20px;
+}
+.search_bar1 text_field:active
+{
+    background-color: white;
+}
+.search_bar1 #search_bar_matches
+{
+    top: 20px;
+    height: auto;
+    max-height: 100px;
+    background-color: gray;
+    z-index: 500;
+}
+combo_box
+{
+    height: auto;
+    max-height: 100px;
+}
+combo_box>button
+{
+    width: 100%;
+}
+
+.search_bar1 .search_bar_match, combo_box .combo_button
+{
+    width: 80%;
+    height: 10px;
+    padding: 0 0 0 1px;
+    text-align-vertical: center;
+    text-shadow: none;
+    color: white;
+    z-index: 500;
+    background: darkgray none;
+    border: 1px solid gray;
+    left: 50%;
+    right: 50%;
+}
+.search_bar1 .search_bar_match:hover, combo_box .combo_button:hover
+{
+    background-color: lightgray;
+}
+
+#css_debug_pane
+{
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 120);
+    border: solid 3px rgba(0, 0, 0, 120);
+    width: 50%;
+    height: 60%;
+    z-index: 500;
+    component-layout: row 10 0;
+}
+#css_debug_pane>label
+{
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    padding: 0px;
+}
+#css_debug_pane>button
+{
+    top: auto;
+}
