@@ -1,6 +1,6 @@
 package fr.aym.acsguis.event;
 
-import fr.aym.acsguis.cssengine.CssGuiManager;
+import fr.aym.acsguis.cssengine.CssGuisManager;
 import fr.aym.acsguis.utils.CssReloadOrigin;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -8,7 +8,6 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 public class CssReloadEvent extends Event //TODO DOC
 {
     protected CssReloadOrigin reloadOrigin;
-    protected CssGuiManager manager;
 
     public CssReloadEvent(CssReloadOrigin reloadOrigin) {
         this.reloadOrigin = reloadOrigin;

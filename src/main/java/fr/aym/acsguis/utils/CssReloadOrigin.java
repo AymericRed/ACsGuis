@@ -3,7 +3,7 @@ package fr.aym.acsguis.utils;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.api.ACsGuisErrorTracker;
 import fr.aym.acsguis.component.panel.GuiFrame;
-import fr.aym.acsguis.cssengine.CssGuiManager;
+import fr.aym.acsguis.cssengine.CssGuisManager;
 import fr.aym.acsguis.cssengine.font.ICssFont;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
 import fr.aym.acsguis.event.CssReloadEvent;
@@ -17,10 +17,10 @@ import java.util.List;
 
 public class CssReloadOrigin implements ICssFont.FontReloadOrigin
 {
-    private final CssGuiManager manager;
+    private final CssGuisManager manager;
     private final boolean isHot;
 
-    public CssReloadOrigin(CssGuiManager manager, boolean isHot) {
+    public CssReloadOrigin(CssGuisManager manager, boolean isHot) {
         this.manager = manager;
         this.isHot = isHot;
     }
@@ -84,7 +84,7 @@ public class CssReloadOrigin implements ICssFont.FontReloadOrigin
         protected final List<ResourceLocation> sheets;
         protected Exception throwE;
 
-        public HotCssReloadOrigin(CssGuiManager manager, GuiFrame reloader) {
+        public HotCssReloadOrigin(CssGuisManager manager, GuiFrame reloader) {
             super(manager, true);
             this.sheets = reloader.getCssStyles();
         }

@@ -14,7 +14,6 @@ public class TestMod
     @Mod.EventHandler
     public void preInit(FMLInitializationEvent event) {
         ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.RESOURCE_LOCATION);
-        ACsGuiApi.init();
         MinecraftForge.EVENT_BUS.register(this);
     }
 
