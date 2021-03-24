@@ -11,6 +11,9 @@ import java.util.Collection;
 
 /**
  * The style manager of text elements, like labels, buttons or text fields
+ *
+ * @see fr.aym.acsguis.cssengine.style.CssTextComponentStyleManager
+ * @see ComponentStyleManager
  */
 public interface TextComponentStyleManager extends ComponentStyleManager
 {

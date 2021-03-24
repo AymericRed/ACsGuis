@@ -8,9 +8,12 @@ import fr.aym.acsguis.utils.CssReloadOrigin;
 import fr.aym.acslib.ACsPlatform;
 import fr.aym.acslib.services.ACsRegisteredService;
 import fr.aym.acslib.services.ACsService;
+import fr.aym.acslib.services.error_tracking.ErrorTrackingService;
+import fr.aym.acslib.services.error_tracking.TrackedErrorType;
 import fr.aym.acslib.services.thrload.ModLoadingSteps;
 import fr.aym.acslib.services.thrload.ThreadedLoadingService;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,14 +28,25 @@ import javax.annotation.Nullable;
 import javax.lang.model.type.ErrorType;
 import java.util.concurrent.Callable;
 
+/**
+ * ACsGuiApi main class <br>
+ *     You should register you css sheets here, during the fml pre-initialization <br>
+ *     Useful function to show the guis are also provided here
+ */
 @SideOnly(Side.CLIENT)
 @ACsRegisteredService(name = ACsGuiApi.RES_LOC_ID, version = ACsGuiApi.VERSION, sides = Side.CLIENT)
 public class ACsGuiApi implements ACsService
 {
     public static final String RES_LOC_ID = "acsguis";
-    public static final String VERSION = "1.0.1";
+    public static final String VERSION = "1.0.2";
     public static final Logger log = LogManager.getLogger("ACsGuis");
 
+    public static ErrorTrackingService errorTracker;
+    public static TrackedErrorType CSS_ERROR_TYPE;
+
+    /**
+     * Styles registry and gui helper
+     */
     private static final CssGuisManager manager = new CssGuisManager();
 
     @Override
@@ -48,7 +62,10 @@ public class ACsGuiApi implements ACsService
     @Override
     public void initService() {
         log.info("Initializing ACsGuis API by Aym', version "+VERSION);
-        MinecraftForge.EVENT_BUS.register(ACsGuiApi.getHudHandler());
+        MinecraftForge.EVENT_BUS.register(manager);
+
+        errorTracker = ACsPlatform.provideService("errtrack");
+        CSS_ERROR_TYPE = errorTracker.createErrorType(new ResourceLocation(RES_LOC_ID, "css"), "Css");
     }
 
     @Override
@@ -59,8 +76,8 @@ public class ACsGuiApi implements ACsService
     }
 
     /**
-     * Register a css style sheet to (re)load when resources packs are loaded <br>
-     *     Register all the sheets that you are using here, before api initialization
+     * Registers a css style sheet to (re)load when resources packs are loaded <br>
+     *     Register all the sheets that you are using here, before fml initialization
      *
      * @param location The style sheet to load
      */
@@ -70,7 +87,7 @@ public class ACsGuiApi implements ACsService
 
     /**
      * Loads a GuiFrame in another thread, then shows it <br>
-     *     Note : the css fonts are loaded in the client thread (needs open gl)
+     *     Note : the css fonts are loaded in the client thread (it needs open gl)
      *
      * @param guiName The gui name, used for log messages
      * @param guiInstance A function returning the gui, called by the external thread
@@ -81,14 +98,28 @@ public class ACsGuiApi implements ACsService
 
     /**
      * Loads a GuiFrame in another thread, then shows it on the HUD <br>
-     *     Note : the css fonts are loaded in the client thread (needs open gl)
+     *     A hud gui is only a visual gui, you can't interact with it <br>
+     *     Note : the css fonts are loaded in the client thread (it needs open gl)
      *
      * @param guiName The gui name, used for log messages
      * @param guiInstance A function returning the gui, called by the external thread
-     * @see CssHudHandler
      */
     public static void asyncLoadThenShowHudGui(String guiName, Callable<GuiFrame> guiInstance) {
         manager.asyncLoadThenShowHudGui(guiName, guiInstance);
+    }
+
+    /**
+     * @return the currently displayed hud gui
+     */
+    public static GuiFrame.APIGuiScreen getDisplayHudGui() {
+        return manager.getHud().getCurrentHUD();
+    }
+
+    /**
+     * Closes the currently displayed hud gui
+     */
+    public static void closeHudGui() {
+        manager.getHud().setCurrentHUD(null);
     }
 
     /**
@@ -118,9 +149,5 @@ public class ACsGuiApi implements ACsService
             event.getReloadOrigin().loadFonts();
             event.getReloadOrigin().postLoad();
         });
-    }
-
-    public static CssHudHandler getHudHandler() {
-        return manager.getHud();
     }
 }

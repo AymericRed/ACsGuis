@@ -140,6 +140,25 @@ public class ACsGuisCssParser
     }
 
     /**
+     * Read a CSS 3.0 declaration from a string using UTF-8 encoding.
+     */
+    public static Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> parseRawCss(GuiComponent<?> component, String css) {
+        // UTF-8 is the fallback if neither a BOM nor @charset rule is present
+        final CascadingStyleSheet aCSS = CSSReader.readFromString("#"+component.getCssId()+"{"+css+"}", StandardCharsets.UTF_8, ECSSVersion.CSS30);
+        if (aCSS == null)
+        {
+            // Most probably a syntax error
+            throw new IllegalStateException("[CSS] Failed to read CSS "+css+" - please see previous logging entries !");
+        }
+        Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> data = new HashMap<>();
+        ICSSVisitor visitor = new ACsGuisStringCssVisitor(component, data);
+        CSSVisitor.visitCSS(aCSS, visitor);
+        ACsGuiApi.log.info("[CSS] Parsed style "+css);
+        //System.out.println("Got style : "+cssStyleSheets);
+        return data;
+    }
+
+    /**
      * Helper method to create an input stream for a ResourceLocation, usable by the css parser
      */
     public static InputStream getResource(ResourceLocation location) throws IOException, IllegalAccessException {
@@ -207,6 +226,17 @@ public class ACsGuisCssParser
         }
         //if(component.getOwner() instanceof GuiPanel && component.getOwner().getCssClass() != null && component.getOwner().getCssId() != null)
         //System.out.println("WDH GET PROP FOR "+component.getOwner()+" / "+component.getOwner().getCssId()+" / "+component.getOwner().getCssClass()+" / "+propertyMap+" / "+cssSheets);
+
+        if(component.getCustomParsedStyle() != null) {
+            //Apply custom style, with higher priority
+            component.getCustomParsedStyle().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach((e) -> {
+                if (e.getKey().applies(component, null)) {
+                    if (!propertyMap.containsKey(e.getKey()))
+                        propertyMap.put(e.getKey(), new HashMap<>());
+                    propertyMap.get(e.getKey()).putAll(e.getValue());
+                }
+            });
+        }
         //Return the computed style
         return new CssStackElement(component.getParent() != null ? component.getParent().getCssStack() : null, propertyMap);
     }

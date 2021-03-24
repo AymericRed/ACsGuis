@@ -11,30 +11,61 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ *  Main ACsLib class <br>
+ *  Provides a stable services system, to load and use main functions of my mods without version conflicts <br>
+ *     Existing services : <br>
+ *          <li>ThrLoad : a threaded loading system for your mods <br></li>
+ *          <li>errtrack : an error tracking service to easily report and show your error to the users <br></li>
+ *          <li>acsguis : the ACsGuis api loader <br></li>
+ *          <li>MPS : a protected-resources (ciphered and/or remotely hosted) loader, implemented in DynamX <br></li>
+ *          <li>dnx_stats : an error and system info reporting service, implemented in DynamX</li>
+ *
+ * @see fr.aym.acslib.services.thrload.ThreadedLoadingService
+ * @see fr.aym.acslib.services.error_tracking.ErrorTrackingService
+ * @see fr.aym.acsguis.api.ACsGuiApi
+ */
 public class ACsPlatform
 {
-    public static final String MOD_ID = "acslib", NAME = "ACsLib", VERSION = "1.0.0", API_VERSION = "1.0";
-    private static Logger log = LogManager.getLogger("ACsLib");
+    public static final String MOD_ID = "acslib", NAME = "ACsLib", VERSION = "1.0.0";
+    private static final Logger log = LogManager.getLogger("ACsLib");
 
+    /**
+     * Loaded services
+     */
     private static final Map<String, ACsService> services = new HashMap<>();
 
+    /**
+     * @return True if this service is loaded
+     */
     public static boolean isServiceSupported(String serviceName) {
         return services.containsKey(serviceName);
     }
 
+    /**
+     * @param <T> The service base interface, to avoid a manual cast
+     * @return The requested service if loaded, or null
+     */
     public static <T extends ACsService> T provideService(String serviceName) {
         return (T) services.get(serviceName);
     }
 
+    /**
+     * Sends this event to all services
+     */
     protected static void notifyServices(FMLStateEvent event) {
         services.values().forEach(s -> s.onFMLStateEvent(event));
     }
 
+    /**
+     * Locates and loads all services
+     *
+     * @see ACsRegisteredService
+     */
     protected static void locateServices(FMLConstructionEvent event)
     {
         Set<ASMDataTable.ASMData> modData = event.getASMHarvestedData().getAll(ACsRegisteredService.class.getName());
@@ -74,7 +105,7 @@ public class ACsPlatform
     }
 
     /**
-     * Checks the sides where the addon is allowed to run
+     * Checks the sides where the service is allowed to run
      *
      * @param addonSides annotation data
      */
@@ -88,24 +119,45 @@ public class ACsPlatform
         return false;
     }
 
+    /**
+     * Logs a debug message
+     */
     public static void serviceDebug(ACsService service, String message) {
         log.debug("["+service.getName()+"] "+message);
     }
+    /**
+     * Logs an info message
+     */
     public static void serviceInfo(ACsService service, String message) {
         log.info("["+service.getName()+"] "+message);
     }
-    public static void serviceError(ACsService service, String message) {
-        log.error("["+service.getName()+"] "+message);
-    }
-    public static void serviceError(ACsService service, String message, Throwable e) {
-        log.error("["+service.getName()+"] "+message, e);
-    }
+    /**
+     * Logs a warning message
+     */
     public static void serviceWarn(ACsService service, String message) {
         log.warn("["+service.getName()+"] "+message);
     }
+    /**
+     * Logs an error message
+     */
+    public static void serviceError(ACsService service, String message) {
+        log.error("["+service.getName()+"] "+message);
+    }
+    /**
+     * Logs an error message and prints the error
+     */
+    public static void serviceError(ACsService service, String message, Throwable e) {
+        log.error("["+service.getName()+"] "+message, e);
+    }
+    /**
+     * Logs a fatal message
+     */
     public static void serviceFatal(ACsService service, String message) {
         log.fatal("["+service.getName()+"] "+message);
     }
+    /**
+     * Logs a fatal message and prints the error
+     */
     public static void serviceFatal(ACsService service, String message, Throwable e) {
         log.fatal("["+service.getName()+"] "+message, e);
     }

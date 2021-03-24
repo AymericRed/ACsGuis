@@ -4,10 +4,13 @@ import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
+import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.component.style.AutoStyleHandler;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.cssengine.style.CssComponentStyleManager;
+import fr.aym.acsguis.cssengine.style.CssStyleProperty;
+import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
 import fr.aym.acsguis.event.ComponentKeyboardEvent;
 import fr.aym.acsguis.event.ComponentMouseEvent;
 import fr.aym.acsguis.event.ComponentRenderEvent;
@@ -29,12 +32,39 @@ import org.lwjgl.opengl.GL11;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui implements Comparable<GuiComponent> {
-
+/**
+ * Base of any gui component
+ *
+ * @param <T> The type of the {@link ComponentStyleManager}
+ */
+public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui implements Comparable<GuiComponent<T>>
+{
+    /**
+     * Very useful
+     */
     protected static final Minecraft mc = Minecraft.getMinecraft();
 
+    /**
+     * The parent of this component
+     */
     protected GuiPanel parent;
+
+    /**
+     * The {@link ComponentStyleManager} of this component
+     */
+    protected T style;
+
+    /**
+     * The css id of this component
+     */
+    protected String cssId;
+
+    /**
+     * The css class of this component
+     */
+    protected String cssClass;
 
     protected boolean enabled;
     protected boolean hovered, pressed;
@@ -47,8 +77,6 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     /**Text to display when the component is hovered**/
     protected List<String> hoveringText = new ArrayList<String>();
 
-    protected String cssId, cssClass;
-
     protected final List<IMouseClickListener> clickListeners = new ArrayList<IMouseClickListener>();
     protected final List<IMouseExtraClickListener> extraClickListeners = new ArrayList<IMouseExtraClickListener>();
     protected final List<IMouseMoveListener> moveListeners = new ArrayList<IMouseMoveListener>();
@@ -60,11 +88,19 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     protected final List<IResizeListener> resizeListeners = new ArrayList<IResizeListener>();
     protected final List<IFocusListener> focusListeners = new ArrayList<IFocusListener>();
 
-    protected T style;
-
+    /**
+     * Creates a new component
+     */
     public GuiComponent() {
         this(0, 0, 0, 0);
     }
+
+    /**
+     * Creates a new component this custom pos and size
+     *
+     * @deprecated Use the css to modify element size and position
+     */
+    @Deprecated
     public GuiComponent(int x, int y, int width, int height) {
         style = createStyleManager();
         setEnabled(true);
@@ -76,33 +112,80 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         setCanLooseFocus(true);
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setCssClass(@Nullable String cssClass) {
+    /**
+     * Sets the css class of this component, use <code>.cssId</code> in your css code to refer to this element
+     */
+    public GuiComponent<T> setCssClass(@Nullable String cssClass) {
         this.cssClass = cssClass;
         getStyle().refreshCss(true, "set_class");
         return this;
     }
 
+    /**
+     * @return The css class of this component
+     */
     @Nullable
     public String getCssClass() {
         return cssClass;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setCssId(@Nullable String cssId) {
+    /**
+     * Sets the css id of this component, use <code>#cssId</code> in your css code to refer to this element <br>
+     *     It's a convention to make it unique for each component in your gui
+     */
+    public GuiComponent<T> setCssId(@Nullable String cssId) {
         this.cssId = cssId;
         getStyle().refreshCss(true, "set_id");
         return this;
     }
 
+    /**
+     * @return The css id of this component
+     */
     @Nullable
     public String getCssId() {
         return cssId;
     }
 
+    /**
+     * Sets custom css code for this element <br>
+     *     This code overrides (but does not replace) the style in css sheets <br>
+     *     This css is applied in all {@link EnumSelectorContext} <br>
+     *     <strong>You must set the css id of this element before calling this (or call the other setCssCode method). Also do not change the id or you will cancel the disable css code.</strong>
+     *
+     * @param cssCode The css code to set, this must be properties and values, but no selector is allowed here (as in html code)
+     */
+    public GuiComponent<T> setCssCode(String cssCode) {
+        if(getCssId() == null)
+            throw new IllegalArgumentException("You should the css id of the element before !");
+        Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> data = ACsGuisCssParser.parseRawCss(this, cssCode);
+        getStyle().setCustomParsedStyle(data);
+        return this;
+    }
+
+    /**
+     * Sets custom css code for this element <br>
+     *     This code overrides (but does not replace) the style in css sheets <br>
+     *     This css is applied in all {@link EnumSelectorContext} <br>
+     *     <strong>This also sets the css id of the component, do not change it or you will cancel the disable css code</strong>
+     *
+     * @param cssId the css id to set, use <code>#cssId</code> in your css code to refer to this element
+     * @param cssCode The css code to set, this must be properties and values, but no selector is allowed here (as in html code)
+     */
+    public GuiComponent<T> setCssCode(String cssId, String cssCode) {
+        setCssId(cssId);
+        return setCssCode(cssCode);
+    }
+
+    /**
+     * The component type, usable in css code to refer to all elements of this type
+     */
     public abstract EnumComponentType getType();
 
     /**
-     * Called before class init to get a {@link ComponentStyleManager}
-     * @return A new {@link CssComponentStyleManager} by default
+     * Called before class init to create a {@link ComponentStyleManager}
+     *
+     * @return By default, a new {@link CssComponentStyleManager}
      */
     protected T createStyleManager() {
         return (T) new CssComponentStyleManager(this);
@@ -116,6 +199,10 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         return Integer.compare(style.getZLevel(), other.style.getZLevel());
     }
 
+    /**
+     * Draws this component <br>
+     *     You can override drawBackground and drawForeground
+     */
     public final void render(int mouseX, int mouseY, float partialTicks)
     {
         if(isVisible() && !MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderAllEvent(this))) {
@@ -136,6 +223,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         }
     }
 
+    /**
+     * Draws the component background (texture, color and borders)
+     */
     public void drawBackground(int mouseX, int mouseY, float partialTicks)
     {
         if(getBorderSize() > 0) {
@@ -155,6 +245,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         drawTexturedBackground(mouseX, mouseY, partialTicks);
     }
 
+    /**
+     * Renders the background texture (if any)
+     */
     public void drawTexturedBackground(int mouseX, int mouseY, float partialTicks)
     {
         IGuiTexture renderTexture = style.getTexture();
@@ -168,6 +261,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         }
     }
 
+    /**
+     * Draws the component foreground (child elements, text, ...)
+     */
     public void drawForeground(int mouseX, int mouseY, float partialTicks) {
         if(isHovered() && !hoveringText.isEmpty()) {
             GuiFrame.hoveringText = hoveringText;
@@ -179,6 +275,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         }
     }
 
+    /**
+     * Computes and displays debug info of this component
+     */
     public void displayComponentOnDebugPane() {
         List<String> debug = new ArrayList<>();
         debug.add(TextFormatting.AQUA+"Element : "+getType()+" id="+getCssId()+" class="+getCssClass());
@@ -221,16 +320,22 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         return getParent() != null ? Math.min(getScreenY() + getHeight(), getParent().getRenderMaxY()) : getScreenY() + getHeight();
     }
 
+    /**
+     * @return X position on screen
+     */
     public int getScreenX() {
         return getX() + (getParent() != null ? getParent().getScreenX() : 0) + style.getOffsetX();
     }
 
+    /**
+     * @return Y position on screen
+     */
     public int getScreenY() {
         return getY() + (getParent() != null ? getParent().getScreenY() : 0) + style.getOffsetY();
     }
 
     /**
-     * @return Return the visual state of the component
+     * @return Return the state of this component
      */
     public EnumSelectorContext getState()
     {
@@ -240,6 +345,12 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         else return EnumSelectorContext.NORMAL;
     }
 
+    /**
+     * Resizes the component
+     *
+     * @param screenWidth Scaled screen width
+     * @param screenHeight Scaled screen height
+     */
     public void resize(int screenWidth, int screenHeight) {
         style.resize(screenWidth, screenHeight);
 
@@ -248,6 +359,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         }
     }
 
+    /**
+     * Updates the component
+     */
     public void tick()
     {
         if(isVisible() && !MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentTickEvent(this))) {
@@ -277,6 +391,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
             style.update();
     }
 
+    /**
+     * Handles keyboard input
+     */
     public void keyTyped(char typedChar, int keyCode)
     {
         if(canInteract() && !MinecraftForge.EVENT_BUS.post(new ComponentKeyboardEvent.ComponentKeyTypeEvent(this, typedChar, keyCode)))
@@ -294,6 +411,8 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
+     * Handles mouse move
+     *
      * @param mouseX X position of the mouse
      * @param mouseY Y position of the mouse
      * @param canBeHovered Return false if another component took the priority (depending on zLevel)
@@ -344,6 +463,8 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
+     * Handles mouse click
+     *
      * @param mouseX X position of the mouse
      * @param mouseY Y position of the mouse
      * @param mouseButton The pressed mouse button
@@ -373,45 +494,32 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
                             extraClickListener.onMouseDoubleClicked(mouseX, mouseY, mouseButton);
                         }
                     }
-
                 }
-
             } else {
-
                 if(canLooseFocus()) {
-
                     setFocused(false);
 
                     for(IFocusListener focusListener : focusListeners) {
                         focusListener.onFocusLoose();
                     }
                 }
-
                 setPressed(false);
             }
 
-
             if(this instanceof GuiPanel) {
-
                 boolean canBePressed1 = canBePressed;
-
-                for(GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
-
+                for(GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
                     component.mouseClicked(mouseX, mouseY, mouseButton, canBePressed1);
-
                     if(component.isPressed()) {
                         canBePressed1 = false;
                     }
                 }
             }
         } else {
-
             if(canLooseFocus()) {
                 setFocused(false);
             }
-
             setPressed(false);
-
         }
     }
 
@@ -425,7 +533,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
             }
 
             if(this instanceof GuiPanel) {
-                for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
                     component.mouseReleased(mouseX, mouseY, mouseButton);
                 }
             }
@@ -477,7 +585,6 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
             }
         }
     }
-
 
     public boolean isMouseOver(int mouseX, int mouseY)
     {
@@ -543,10 +650,16 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         return this;
     }
 
+    /**
+     * @return X position relative to parent component (or to the screen left)
+     */
     public int getX() {
         return style.getRenderX();
     }
 
+    /**
+     * @return Y position relative to parent component (or to the screen top)
+     */
     public int getY() {
         return style.getRenderY();
     }
@@ -561,19 +674,21 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
 
     public int getBorderSize() { return style.getBorderSize(); }
 
+    //TODO BETTER IMPLEMENTATION OF THIS
+    @Deprecated
     public int getBackgroundSrcBlend() {
         return backgroundSrcBlend;
     }
-
+    @Deprecated
     public GuiComponent<? extends ComponentStyleManager> setBackgroundSrcBlend(int backgroundSrcBlend) {
         this.backgroundSrcBlend = backgroundSrcBlend;
         return this;
     }
-
+    @Deprecated
     public int getBackgroundDstBlend() {
         return backgroundDstBlend;
     }
-
+    @Deprecated
     public GuiComponent<? extends ComponentStyleManager> setBackgroundDstBlend(int backgroundDstBlend) {
         this.backgroundDstBlend = backgroundDstBlend;
         return this;
@@ -772,6 +887,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
 
     }
 
+    /**
+     * @return The {@link ComponentStyleManager} of this component
+     */
     public T getStyle() {
         return style;
     }

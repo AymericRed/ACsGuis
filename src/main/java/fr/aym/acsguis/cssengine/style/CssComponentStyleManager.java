@@ -2,6 +2,7 @@ package fr.aym.acsguis.cssengine.style;
 
 import com.helger.css.ECSSUnit;
 import com.helger.css.propertyvalue.CSSSimpleValueWithUnit;
+import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
@@ -23,13 +24,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class CssComponentStyleManager implements ComponentStyleManager
 {
     private final GuiComponent<?> component;
     
     protected int computedX, computedY;
-    protected Position xPos = new Position(0, GuiConstants.ENUM_RELATIVE_POS.START, GuiConstants.ENUM_POSITION.ABSOLUTE), yPos = new Position(0, GuiConstants.ENUM_RELATIVE_POS.START, GuiConstants.ENUM_POSITION.ABSOLUTE);
+    protected Position xPos = new Position(0, GuiConstants.ENUM_POSITION.ABSOLUTE, GuiConstants.ENUM_RELATIVE_POS.START), yPos = new Position(0, GuiConstants.ENUM_POSITION.ABSOLUTE, GuiConstants.ENUM_RELATIVE_POS.START);
 
     protected int computedWidth, computedHeight;
     protected Size width = new Size(), height = new Size();
@@ -66,6 +68,8 @@ public class CssComponentStyleManager implements ComponentStyleManager
     protected CssStackElement cssStack;
     protected final List<AutoStyleHandler<?>> autoStyleHandler = new ArrayList<>();
 
+    protected Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> customStyle;
+
     public CssComponentStyleManager(GuiComponent<?> component)
     {
         this.component = component;
@@ -76,6 +80,17 @@ public class CssComponentStyleManager implements ComponentStyleManager
     @Nullable
     public CssStackElement getCssStack() {
         return cssStack;
+    }
+
+    @Override
+    public void setCustomParsedStyle(Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> data) {
+        this.customStyle = data;
+        refreshCss(true, "setCustomStyle");
+    }
+
+    @Override
+    public Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> getCustomParsedStyle() {
+        return customStyle;
     }
 
     @Override
@@ -189,6 +204,12 @@ public class CssComponentStyleManager implements ComponentStyleManager
         return borderRadius;
     }
 
+    /**
+     * Updates component size, sliders and borders...
+     *
+     * @param screenWidth scaled mc screen with
+     * @param screenHeight scaled mc screen height
+     */
     public void updateComponentSize(int screenWidth, int screenHeight)
     {
         int parentWidth = component.getParent() != null ? component.getParent().getWidth() : screenWidth;
@@ -217,6 +238,9 @@ public class CssComponentStyleManager implements ComponentStyleManager
 
     /**
      * Update the x and y coordinates
+     *
+     * @param screenWidth scaled mc screen with
+     * @param screenHeight scaled mc screen height
      */
     public void updateComponentPosition(int screenWidth, int screenHeight)
     {
@@ -231,10 +255,6 @@ public class CssComponentStyleManager implements ComponentStyleManager
         //System.out.println("Got "+computedY);
     }
 
-    /**
-     * @return Return the {@link GuiTextureSprite} for render depending
-     * on the component state.
-     */
     @Override
     public IGuiTexture getTexture()
     {

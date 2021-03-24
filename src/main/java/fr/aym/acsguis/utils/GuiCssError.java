@@ -20,8 +20,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Automatically shown when failing to show a gui
+ */
 public class GuiCssError extends GuiFrame
 {
+    /**
+     * Displays the given error
+     *
+     * @param guiName Name of the faulty gui
+     * @param e The error
+     */
     public GuiCssError(String guiName, Throwable e)
     {
         super(10, 10, 2000, 900, new GuiScaler.Identity());
@@ -47,6 +56,9 @@ public class GuiCssError extends GuiFrame
     private GuiPanel summary;
     private GuiComponent<?> displayed;
 
+    /**
+     * Displays all parsed data
+     */
     public GuiCssError()
     {
         super(10, 10, 2000, 900, new GuiScaler.Identity());

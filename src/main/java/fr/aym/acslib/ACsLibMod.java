@@ -3,6 +3,11 @@ package fr.aym.acslib;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.*;
 
+/**
+ * You can call it AymLib
+ *
+ * @see ACsPlatform
+ */
 @Mod(modid = ACsPlatform.MOD_ID, name = ACsPlatform.NAME, version = ACsPlatform.VERSION)
 public class ACsLibMod
 {

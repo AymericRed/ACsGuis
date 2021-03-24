@@ -11,6 +11,8 @@ public interface ThreadedLoadingService extends ACsService
     }
     void addTask(ModLoadingSteps finishFor, String taskName, Runnable task, @Nullable Runnable followingInThreadTask);
 
+    void step(ModLoadingSteps hook);
+
     boolean mcLoadingFinished();
 
     @Override

@@ -2,6 +2,8 @@ package fr.aym.acsguis.utils;
 
 /**
  * A texture for ACsGuis
+ *
+ * @see GuiTextureSprite
  */
 public interface IGuiTexture
 {

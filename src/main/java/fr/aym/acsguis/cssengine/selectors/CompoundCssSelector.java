@@ -125,6 +125,7 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
                 "target=" + target +
                 ", parentStrict=" + Arrays.toString(parentStrict) +
                 ", parents=" + Arrays.toString(parents) +
+                ", id=" + id +
                 '}';
     }
 
@@ -138,6 +139,7 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
         {
             data.add(TextFormatting.GOLD+"parentStrict="+Arrays.toString(parentStrict));
         }
+        data.add(TextFormatting.BLUE+"priority="+id);
     }
 
     @Override

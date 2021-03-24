@@ -1,13 +1,13 @@
 package fr.aym.acsguis.cssengine;
 
 import fr.aym.acsguis.api.ACsGuiApi;
-import fr.aym.acsguis.api.ACsGuisErrorTracker;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
 import fr.aym.acsguis.event.CssReloadEvent;
 import fr.aym.acsguis.utils.GuiCssError;
 import fr.aym.acsguis.utils.CssReloadOrigin;
 import fr.aym.acslib.ACsPlatform;
+import fr.aym.acslib.services.error_tracking.TrackedErrorLevel;
 import fr.aym.acslib.services.thrload.ModLoadingSteps;
 import fr.aym.acslib.services.thrload.ThreadedLoadingService;
 import net.minecraft.client.Minecraft;
@@ -107,7 +107,7 @@ public class CssGuisManager implements ISelectiveResourceReloadListener
                     if(reloadCss) {
                         ACsGuisCssParser.loadFonts((r, e) -> {
                             log.error("Error while loading css font " + r.toString(), e);
-                            ACsGuisErrorTracker.addError("Css fonts", "Font " + r.toString(), e, ACsGuisErrorTracker.ErrorLevel.LOW);
+                            ACsGuiApi.errorTracker.addError(ACsGuiApi.CSS_ERROR_TYPE, "Css fonts", "Font " + r.toString(), e, TrackedErrorLevel.LOW);
                         });
                         finalEvent.getReloadOrigin().postLoad();
                     }
@@ -145,13 +145,13 @@ public class CssGuisManager implements ISelectiveResourceReloadListener
                     if(MinecraftForge.EVENT_BUS.post(event)) return;
                     event.getReloadOrigin().loadStyles();
                 }
-                Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Loading CSS hud "+guiName+"...", true);
+                Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Displaying CSS hud "+guiName+"...", true);
                 CssReloadEvent.Pre finalEvent = event;
                 Minecraft.getMinecraft().addScheduledTask( () -> {
                     if(reloadCss) {
                         ACsGuisCssParser.loadFonts((r, e) -> {
                             log.error("Error while loading css font " + r.toString(), e);
-                            ACsGuisErrorTracker.addError("Css fonts", "Font " + r.toString(), e, ACsGuisErrorTracker.ErrorLevel.LOW);
+                            ACsGuiApi.errorTracker.addError(ACsGuiApi.CSS_ERROR_TYPE, "Css fonts", "Font " + r.toString(), e, TrackedErrorLevel.LOW);
                         });
                         finalEvent.getReloadOrigin().postLoad();
                     }

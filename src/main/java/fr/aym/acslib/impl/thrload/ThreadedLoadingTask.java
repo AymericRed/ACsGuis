@@ -47,7 +47,7 @@ public class ThreadedLoadingTask implements Runnable
     }
 
     public boolean shouldEndNow(ModLoadingSteps step) {
-        return endBefore.ordinal() <= step.ordinal();
+        return endBefore.getIndex() <= step.getIndex();
     }
 
     public int getId() {

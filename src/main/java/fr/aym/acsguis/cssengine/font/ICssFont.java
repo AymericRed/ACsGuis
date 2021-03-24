@@ -48,6 +48,9 @@ public interface ICssFont
      */
     int getWidth(String text);
 
+    /**
+     * Listener of font loading errors
+     */
     interface FontReloadOrigin
     {
         void handleFontException(ResourceLocation r, Exception e);

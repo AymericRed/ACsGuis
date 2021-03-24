@@ -1,7 +1,6 @@
 package fr.aym.acsguis.test;
 
 import fr.aym.acsguis.api.ACsGuiApi;
-import fr.aym.acsguis.api.ACsGuisErrorTracker;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
@@ -89,7 +88,7 @@ public class GuiDnxDebug extends GuiFrame
                 box3.setText("Rechargement en cours...");
                 ACsGuiApi.reloadCssStyles(this);
                 box3.setEnabled(true);
-                if(ACsGuisErrorTracker.hasErrors())
+                if(ACsGuiApi.errorTracker.hasErrors())
                         box3.setText(TextFormatting.RED+"Des styles css ont des erreurs");
                 else
                     box3.setText("Styles css rechargés");
@@ -102,7 +101,7 @@ public class GuiDnxDebug extends GuiFrame
                 box4.setText("Rechargement en cours...");
                 ACsGuiApi.reloadCssStyles(this);
                 box4.setEnabled(true);
-                if(ACsGuisErrorTracker.hasErrors())
+                if(ACsGuiApi.errorTracker.hasErrors())
                     box4.setText(TextFormatting.RED+"Des styles css ont des erreurs");
                 else
                     box4.setText("Styles css rechargés");
@@ -216,6 +215,9 @@ public class GuiDnxDebug extends GuiFrame
 
 
         add(new GuiLabel(0, 0, 0, 0, "Entièrement designé en CSS").setCssId("credits"));
+
+        setCssId("lol");
+        setCssCode("color: red; background-color: orange;");
     }
 
     @Override
@@ -230,6 +232,6 @@ public class GuiDnxDebug extends GuiFrame
 
     @Override
     public boolean needsCssReload() {
-        return true;
+        return false;
     }
 }

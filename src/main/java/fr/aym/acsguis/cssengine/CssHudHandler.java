@@ -2,19 +2,21 @@ package fr.aym.acsguis.cssengine;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+/**
+ * Handles hud guis display
+ */
 public class CssHudHandler
 {
-    private GuiScreen currentHUD;
+    private GuiFrame.APIGuiScreen currentHUD;
     private int displayWidth, displayHeight;
 
-    public GuiScreen getCurrentHUD() {
+    public GuiFrame.APIGuiScreen getCurrentHUD() {
         return currentHUD;
     }
 

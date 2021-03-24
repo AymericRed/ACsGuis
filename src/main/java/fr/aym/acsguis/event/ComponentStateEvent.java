@@ -7,9 +7,9 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 @Cancelable
 public abstract class ComponentStateEvent extends Event {
 
-    public final GuiComponent component;
+    public final GuiComponent<?> component;
 
-    public ComponentStateEvent(GuiComponent component) {
+    public ComponentStateEvent(GuiComponent<?> component) {
         this.component = component;
     }
 
@@ -20,14 +20,14 @@ public abstract class ComponentStateEvent extends Event {
 
     public static class ComponentCloseEvent extends ComponentStateEvent {
 
-        public ComponentCloseEvent(GuiComponent component) {
+        public ComponentCloseEvent(GuiComponent<?> component) {
             super(component);
         }
     }
 
     public static class ComponentOpenEvent extends ComponentStateEvent {
 
-        public ComponentOpenEvent(GuiComponent component) {
+        public ComponentOpenEvent(GuiComponent<?> component) {
             super(component);
         }
     }
@@ -36,7 +36,7 @@ public abstract class ComponentStateEvent extends Event {
 
         public final boolean gainFocus;
 
-        public ComponentFocusEvent(GuiComponent component) {
+        public ComponentFocusEvent(GuiComponent<?> component) {
             super(component);
             this.gainFocus = !component.isFocused();
         }
@@ -44,7 +44,7 @@ public abstract class ComponentStateEvent extends Event {
 
     public static class ComponentTickEvent extends ComponentStateEvent {
 
-        public ComponentTickEvent(GuiComponent component) {
+        public ComponentTickEvent(GuiComponent<?> component) {
             super(component);
         }
     }

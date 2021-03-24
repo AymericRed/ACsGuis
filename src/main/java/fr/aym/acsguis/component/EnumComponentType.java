@@ -1,7 +1,25 @@
 package fr.aym.acsguis.component;
 
-public enum EnumComponentType {
-    PANEL, TEXT_AREA, PROGRESS_BAR, SLOT, ENTITY_RENDER, CAMERA_VIEW, BUTTON, LABEL, CHECKBOX, SLIDER_HORIZONTAL, SLIDER_VERTICAL, TEXT_FIELD, TABBED_PANE, SCROLL_PANE, COMBO_BOX;
+/**
+ * All ACsGuis component types, usable in css code to refer to all elements of this type
+ */
+public enum EnumComponentType
+{
+    PANEL,
+    SCROLL_PANE,
+    TABBED_PANE,
+    LABEL,
+    TEXT_AREA,
+    TEXT_FIELD,
+    BUTTON,
+    SLIDER_HORIZONTAL,
+    SLIDER_VERTICAL,
+    CHECKBOX,
+    COMBO_BOX,
+    SLOT,
+    PROGRESS_BAR,
+    ENTITY_RENDER,
+    CAMERA_VIEW;
 
     public static EnumComponentType fromString(String value) {
         for(EnumComponentType t : values())

@@ -56,7 +56,7 @@ public class LightThreadedModLoader implements ThreadedLoadingService
                 followingInThreadTask.run();
             }
         }
-        else if(finishFor.ordinal() <= step.ordinal())
+        else if(finishFor.getIndex() <= step.getIndex())
         {
             ACsPlatform.serviceWarn(this, "Got a past task, running it now "+taskName);
             task.run();
@@ -70,7 +70,8 @@ public class LightThreadedModLoader implements ThreadedLoadingService
         }
     }
 
-    protected void step(ModLoadingSteps step) {
+    @Override
+    public void step(ModLoadingSteps step) {
         ACsPlatform.serviceDebug(this, "Transition: "+step);
         for(Map.Entry<ThreadedLoadingTask, Future<?>> task : tasks.entrySet()) {
             if(task.getKey().shouldEndNow(step) && !task.getValue().isDone()) {
