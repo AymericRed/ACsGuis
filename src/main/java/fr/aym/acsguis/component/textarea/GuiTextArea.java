@@ -21,8 +21,8 @@ import java.awt.*;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class GuiTextArea extends GuiComponent<TextComponentStyleManager> implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener {
-    
+public class GuiTextArea extends GuiComponent<TextComponentStyleManager> implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener, TextComponent
+{
     protected String text = "";
     protected String hintText = "";
 
@@ -225,6 +225,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         }
     }
 
+    @Override
     public GuiTextArea setText(String text)
     {
         if(text.isEmpty() || regexPattern.matcher(text).matches()) {
@@ -232,9 +233,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         } else {
             throw new IllegalStateException(String.format("The text %s doesn't match with the regex %s", text, regexPattern.toString()));
         }
-
         updateIndexes();
-	
 	    return this;
 	}
 
@@ -504,8 +503,8 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     public String getText() {
     	return text;
 	}
-	
-	/**
+
+    /**
 	 * @return Simple method to return a different rendered text
 	 * without modifying the actual text.
 	 */

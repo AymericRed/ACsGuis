@@ -1,0 +1,94 @@
+on script load:
+    print "testloaded"
+    set $moche to false
+
+function closeTheGui():
+    close css gui
+
+function switchMochete():
+    if $moche:
+        set $moche to false
+    else:
+        set $moche to true
+
+function switchMochete3(huit):
+    print huit
+    if $moche:
+        set $moche to false
+    else:
+        set $moche to true
+
+function showTheGui():
+#TODO SUPPORT LAYOUTS !!!!!!!!!!!!!!!!!!!!
+    set home to new gui panel ".home"
+
+    set pane to new gui tabbed_pane
+    set general to new gui panel "#general"
+    set pane1 to new gui scroll_pane
+
+    print "priz"
+    set arr to [-1,25]
+    set layout0 to new grid layout with size arr spacing 5 direction "horizontal" elements per line 1
+    print "hop"
+    print "tot"
+    add layout0 to pane1
+    print "pop"
+
+    set line to new gui panel ".option-desc"
+    set texte to "Rendu du debug : "
+    add $moche to texte
+    set label to new gui label texte "#t1"
+    add label to line
+    set b to new gui button switchMochete "" "#mochebu .switch-button-on"
+    add b to line
+    add line to pane1
+
+    set line to new gui panel ".option-desc"
+    set label to new gui label "Profilage : n/a" "#t2"
+    add label to line
+    set b to new gui button switchMochete3("test") "" "#mochebu .switch-button-off"
+    add b to line
+    add line to pane1
+
+    set b to new gui label "Recharger les packs" "#reload_packs .reload_button"
+    add b to pane1
+    set b to new gui label "Recharger les modèles" "#reload_models .reload_button"
+    add b to pane1
+    set b to new gui label "Recharger les styles css" "#reload_css .reload_button"
+    add b to pane1
+    set b to new gui label "Recharger tout" "#reload_all .reload_button"
+    add b to pane1
+
+    add pane1 to general
+    add general to pane
+    add pane to home
+    display css gui home "TestSqript_WAW" ["acsguis:css/dnx_debug.css"]
+
+
+function showTheTestGui():
+    set panel to new gui panel "#root"
+
+    set label to new gui label "Sqript est bô" "#lab1"
+    add label to panel
+
+    set label to new gui label "Un label random"
+    add label to panel
+
+    set label to new gui label "Bientôt sur Sqript : ACsGuis" "#warn"
+    override css of label with "color: yellow;"
+    add label to panel
+
+    set button to new gui button closeTheGui "Un bouton" "#button1"
+    add button to panel
+
+    display css gui panel "TestSqript" ["sample:css/test.css"]
+
+on acsguis load:
+    register css sheet "sample:css/test.css"
+
+on click with minecraft:stick :
+	send "Clicked" to player
+    showTheGui()
+
+on click with minecraft:apple :
+	send "ClickedApple" to player

@@ -49,6 +49,7 @@
     border-radius: 10px;
     background-color: rgb(180, 0, 0);
     background-image: none;
+    top: auto;
 }
 .switch-button-off:hover
 {
@@ -69,6 +70,10 @@
     background-color: green;
 }
 .option-desc
+{
+    top: auto;
+}
+.option-desc>label
 {
     left: 40px;
     font-family: "dnx:test_font";
@@ -124,6 +129,8 @@ tabbed_pane>button:hover,tabbed_pane>button:active
     border: 2px gray;
     border-radius: 10px;
     border-position: internal;
+
+    top: auto;
 }
 .reload_button:hover
 {
@@ -134,24 +141,7 @@ tabbed_pane>button:hover,tabbed_pane>button:active
     border-color: darkgreen;
 }
 
-#reload_packs
-{
-    top: 60px;
-}
-#reload_models
-{
-    top: 90px;
-}
-#reload_css
-{
-    top: 120px;
-}
-#reload_all
-{
-    top: 150px;
-}
-
-tabbed_pane>panel>scroll_pane
+#general>scroll_pane
 {
     top: 40px;
     height: 60%;

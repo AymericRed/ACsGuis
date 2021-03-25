@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.event.*;
  *
  * @see ACsPlatform
  */
-@Mod(modid = ACsPlatform.MOD_ID, name = ACsPlatform.NAME, version = ACsPlatform.VERSION)
+@Mod(modid = ACsPlatform.MOD_ID, name = ACsPlatform.NAME, version = ACsPlatform.VERSION, dependencies = "required-before:sqript@${version}")
 public class ACsLibMod
 {
     @Mod.Instance(value = ACsPlatform.MOD_ID)

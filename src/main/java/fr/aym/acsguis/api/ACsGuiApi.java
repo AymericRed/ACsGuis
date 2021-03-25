@@ -2,8 +2,9 @@ package fr.aym.acsguis.api;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.CssGuisManager;
-import fr.aym.acsguis.cssengine.CssHudHandler;
 import fr.aym.acsguis.event.CssReloadEvent;
+import fr.aym.acsguis.sqript.SqriptCompatiblity;
+import fr.aym.acsguis.sqript.SqriptSupport;
 import fr.aym.acsguis.utils.CssReloadOrigin;
 import fr.aym.acslib.ACsPlatform;
 import fr.aym.acslib.services.ACsRegisteredService;
@@ -13,7 +14,6 @@ import fr.aym.acslib.services.error_tracking.TrackedErrorType;
 import fr.aym.acslib.services.thrload.ModLoadingSteps;
 import fr.aym.acslib.services.thrload.ThreadedLoadingService;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import javax.lang.model.type.ErrorType;
 import java.util.concurrent.Callable;
 
 /**
@@ -48,6 +47,8 @@ public class ACsGuiApi implements ACsService
      * Styles registry and gui helper
      */
     private static final CssGuisManager manager = new CssGuisManager();
+
+    public static SqriptSupport support = new SqriptCompatiblity();
 
     @Override
     public String getName() {
@@ -127,6 +128,8 @@ public class ACsGuiApi implements ACsService
      * @param frame If not null, will handle error gui
      */
     public static void reloadCssStyles(@Nullable GuiFrame frame) {
+        System.out.println("ça reload");
+        support.onCssInit();
         CssReloadEvent.Pre event = new CssReloadEvent.Pre(frame != null ? new CssReloadOrigin.HotCssReloadOrigin(manager, frame) : new CssReloadOrigin(manager, false));
         if(MinecraftForge.EVENT_BUS.post(event)) return;
 

@@ -2,6 +2,7 @@ package fr.aym.acsguis.component.button;
 
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
+import fr.aym.acsguis.component.textarea.TextComponent;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.cssengine.font.CssFontHelper;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
@@ -19,8 +20,8 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiButton extends GuiComponent<TextComponentStyleManager> implements IMouseClickListener, IMouseMoveListener, IMouseExtraClickListener {
-
+public class GuiButton extends GuiComponent<TextComponentStyleManager> implements IMouseClickListener, IMouseMoveListener, IMouseExtraClickListener, TextComponent
+{
     public static final SoundEvent defaultClickButtonSound = SoundEvents.UI_BUTTON_CLICK;
 
     /*protected static final ResourceLocation widgetsTexture = new ResourceLocation("textures/gui/widgets.png");

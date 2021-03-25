@@ -24,9 +24,7 @@ public class GuiTabbedPane extends GuiPanel implements IGuiOpenListener, IGuiClo
 	protected List<GuiTabbedPaneButton> tabsButtons = new ArrayList<>();
 	protected List<GuiPanel> tabsContainers = new ArrayList<>();
 	
-	public GuiTabbedPane(int x, int y, int width, int height) {
-		super(x, y, width, height);
-		
+	public GuiTabbedPane() {
 		addOpenListener(this);
 		addCloseListener(this);
 		addKeyboardListener(this);

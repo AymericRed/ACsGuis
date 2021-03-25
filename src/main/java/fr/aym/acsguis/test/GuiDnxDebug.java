@@ -28,7 +28,7 @@ public class GuiDnxDebug extends GuiFrame
         style.setBackgroundColor(Color.TRANSLUCENT);
         setCssClass("home");
         //DnxCssParser.loadGui(this);
-        GuiTabbedPane pane = new GuiTabbedPane(0, 0, 0, 0);
+        GuiTabbedPane pane = new GuiTabbedPane();
 
         GuiPanel general = new GuiPanel(0, 0, 0, 0);
         general.setCssId("general");
