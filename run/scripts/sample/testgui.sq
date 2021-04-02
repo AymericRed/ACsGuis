@@ -1,3 +1,4 @@
+dgdgdytg
 on script load:
     print "testloaded"
     set $moche to false
@@ -17,6 +18,17 @@ function switchMochete3(huit):
         set $moche to false
     else:
         set $moche to true
+
+css_frame monGui:
+    initialisation (ou init):
+      set home to new gui panel ".home"
+
+      set pane to new gui tabbed_pane
+      set general to new gui panel "#general"
+      set pane1 to new gui scroll_pane
+      ...
+   on render tick (ou update ou ce que tu veux):
+      #possibilité de dessiner à l'écran ou de faire qq chose pendant que le gui est ouvert à chaque frame
 
 function showTheGui():
 #TODO SUPPORT LAYOUTS !!!!!!!!!!!!!!!!!!!!
