@@ -22,5 +22,4 @@ public class GuiCameraView extends GuiComponent {
 		//Gui.drawModalRectWithCustomSizedTexture(getScreenX(), getScreenY(), 0, 0, getWidth(), getHeight(), getWidth(), getHeight());
 		mc.fontRenderer.drawString("NOT FIXED", 2, 2, 0xFF0000);
 	}
-	
 }

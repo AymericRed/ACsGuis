@@ -1,5 +1,6 @@
 package fr.aym.acsguis.component.textarea;
 
+import com.helger.commons.functional.ITriConsumer;
 import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
@@ -12,6 +13,7 @@ import fr.aym.acsguis.event.listeners.ITickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
+import fr.nico.sqript.blocks.ScriptBlock;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -23,6 +25,23 @@ import java.util.regex.Pattern;
 
 public class GuiTextArea extends GuiComponent<TextComponentStyleManager> implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener, TextComponent
 {
+    public static final ITriConsumer<GuiComponent<?>, String, ScriptBlock.ScriptLineBlock> PROPERTIES_PARSER = (c, n, b) -> {
+        if(n.equalsIgnoreCase("text")) {
+            ((GuiTextArea)c).setText(b.getRawContent());
+        }
+        else if(n.equalsIgnoreCase("max_text_length")) {
+            ((GuiTextArea)c).setMaxTextLength(Integer.parseInt(b.getRawContent()));
+        }
+        else if(n.equalsIgnoreCase("hint_text")) {
+            ((GuiTextArea)c).setHintText(b.getRawContent());
+        }
+        else if(n.equalsIgnoreCase("regex")) {
+            ((GuiTextArea)c).setRegexPattern(Pattern.compile(b.getRawContent()));
+        }
+        else
+            throw new IllegalArgumentException("Cannot set "+n+" on component of type text_area, text_field or passworld_field");
+    };
+
     protected String text = "";
     protected String hintText = "";
 
@@ -41,7 +60,10 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     protected boolean editable;
 
     protected float textScale = 1;
-    
+
+    public GuiTextArea() {
+        this(0, 0, 100, 50);
+    }
 	public GuiTextArea(int x, int y, int width, int height) {
 		super(x, y, width, height);
 		setEditable(true);

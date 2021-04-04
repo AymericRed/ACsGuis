@@ -30,11 +30,13 @@ import java.util.regex.Pattern;
         examples = "add css component panel:",
         regex = "^add css component .*",
         side = Side.CLIENT,
-        fields = {"css_class","css_id","css_code"},
+        fields = {"css_class","css_id","css_code","text","onclick","max_text_length","checked","entity_to_render","choices","min_value","max_value","hint_text","regex"},
         reloadable = false
 )
 public class ScriptBlockGuiComponent extends ScriptBlock
 {
+    public static final String[] supportedFields = new String[] {"text", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"};
+
     private final String name;
 
     public ScriptBlockGuiComponent(ScriptLine head) throws ScriptException {
@@ -86,31 +88,12 @@ public class ScriptBlockGuiComponent extends ScriptBlock
 
     @Override
     protected void load() throws Exception {
-        GuiComponent<?> component = null;
         String name = this.name;
         if(name.contains(" with"))
             name = this.name.substring(0, this.name.indexOf(" with"));
         System.out.println("My name is "+name);
-        switch (name)
-        {
-            case "panel":
-                component = new GuiPanel();
-                break;
-            case "tabbed_pane":
-                component = new GuiTabbedPane();
-                break;
-            case "scroll_pane":
-                component = new GuiScrollPane();
-                break;
-            case "label":
-                component = new GuiLabel("not set");
-                break;
-            case "button":
-                component = new GuiButton("not set");
-                break;
-            default: //TODO CHANGE ERROR DESC
-                throw new ScriptException.ScriptMissingFieldException(this.getLine(),"add css component","invalid type");
-        }
+        ParseableComponent componentType = ParseableComponent.find(name);
+        GuiComponent<?> component = componentType.create();
 
         String patt = ""+name+" with id {string} and class {string}";
         List<String[]> params = test(patt, this.name);
@@ -170,6 +153,27 @@ public class ScriptBlockGuiComponent extends ScriptBlock
             component.setCssClass(getSubBlock("css_id").getRawContent());
         if(fieldDefined("css_code"))
             component.setCssCode(getSubBlock("css_code").getRawContent());
+        if(fieldDefined("onclick"))
+        {
+            ScriptLineBlock block = getSubBlock("onclick");
+            IScript script = block.compile(this, grs);
+            component.addClickListener((x, y, b) -> {
+                ScriptContext ctx = ScriptContext.fromGlobal();
+                ctx.put(new ScriptAccessor(new TypeComponent(component), "this component"));
+                ScriptClock clock = new ScriptClock(ctx);
+                try {
+                    System.out.println("Running the onclick "+script+" on "+component);
+                    clock.start(script);
+                } catch (ScriptException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        for(String s : supportedFields) {
+            if(fieldDefined(s)) {
+                componentType.getFieldHandler().accept(component, s, getSubBlock(s));
+            }
+        }
 
         this.component = component;
 

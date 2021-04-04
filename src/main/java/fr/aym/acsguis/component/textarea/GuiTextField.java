@@ -8,11 +8,6 @@ public class GuiTextField extends GuiTextArea
 		super(0, 0, 0, 0);
 	}
 
-	public GuiTextField(int x, int y, int width, int height) {
-		super(x, y, width, height);
-		setMaxTextLength(50);
-	}
-
 	@Override
 	public EnumComponentType getType() {
 		return EnumComponentType.TEXT_FIELD;

@@ -26,8 +26,7 @@ public class GuiComboBox extends GuiPanel {
 	
 	protected String defaultText = "";
 	
-	public GuiComboBox(int x, int y, int width, int height, String defaultText, List<String> entries) {
-		super(x, y, width, height);
+	public GuiComboBox(String defaultText, List<String> entries) {
 		this.defaultText = defaultText;
 
 		style.setBackgroundColor(new Color(0,0,0,0).getRGB());
@@ -38,6 +37,12 @@ public class GuiComboBox extends GuiPanel {
 		setEntries(entries);
 		setSelectedEntry(-1);
 		getStyle().addAutoStyleHandler(this);
+	}
+
+	public void setDefaultText(String defaultText) {
+		this.defaultText = defaultText;
+		if(selectedEntry == -1)
+			guiComboBoxButton.setText(defaultText);
 	}
 
 	@Override

@@ -4,12 +4,12 @@ import org.lwjgl.input.Keyboard;
 
 import java.util.List;
 
-public class GuiKeyLabel extends GuiLabel{
+public class GuiKeyLabel extends GuiLabel
+{
+    private int buttonPressed;
+    private int keyBind;
 
-    int buttonPressed;
-    int keyBind;
-
-    public GuiKeyLabel( int keyBind) {
+    public GuiKeyLabel(int keyBind) {
         super("");
         this.keyBind = keyBind;
         if(keyBind == 0){
@@ -63,5 +63,9 @@ public class GuiKeyLabel extends GuiLabel{
 
     public int getKeyBind() {
         return keyBind;
+    }
+
+    public int getButtonPressed() {
+        return buttonPressed;
     }
 }

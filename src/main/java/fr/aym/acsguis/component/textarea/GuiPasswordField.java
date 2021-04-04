@@ -1,11 +1,7 @@
 package fr.aym.acsguis.component.textarea;
 
-public class GuiPasswordField extends GuiTextField {
-	
-	public GuiPasswordField(int x, int y, int width, int height) {
-		super(x, y, width, height);
-	}
-    
+public class GuiPasswordField extends GuiTextField
+{
     @Override
     protected String getRenderedText() {
 		StringBuilder builder = new StringBuilder();
@@ -16,5 +12,4 @@ public class GuiPasswordField extends GuiTextField {
 		
 		return builder.toString();
 	}
-
 }

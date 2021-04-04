@@ -36,8 +36,8 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
 	protected int progressTextColor = Color.WHITE.getRGB();
 	protected String progressText = "";
 	
-	public GuiProgressBar(int x, int y, int width, int height) {
-		this(x, y, width, height, true);
+	public GuiProgressBar() {
+		this(true);
 	}
 
     @Override
@@ -50,8 +50,7 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
         return new ProgressBarStyleManager(this);
     }
 
-    public GuiProgressBar(int x, int y, int width, int height, boolean horizontal) {
-		super(x, y, width, height);
+    public GuiProgressBar(boolean horizontal) {
 		this.horizontal = horizontal;
 		setMinProgress(0);
 		setMaxProgress(100);

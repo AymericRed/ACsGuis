@@ -19,17 +19,12 @@ public class GuiEntityRender extends GuiComponent<ComponentStyleManager> impleme
 	protected int counter;
 	private boolean kept;
 
-	public GuiEntityRender(int x, int y, int width, int height) {
-		this(x, y, width, height, null);
-	}
-
     @Override
     public EnumComponentType getType() {
         return EnumComponentType.ENTITY_RENDER;
     }
 
-    public GuiEntityRender(int x, int y, int width, int height, EntityLivingBase entity) {
-		super(x, y, width, height);
+    public GuiEntityRender(EntityLivingBase entity) {
 		setEntity(entity);
 		int padding = (int) (0.125 * getHeight());
 		setPaddingTop(padding);
