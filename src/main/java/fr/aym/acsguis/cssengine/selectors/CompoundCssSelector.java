@@ -75,7 +75,7 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
      */
     public boolean applies(ComponentStyleManager to, @Nullable EnumSelectorContext targetContext) {
         //Debug
-        boolean out = to.getOwner().getCssId() != null && to.getOwner().getCssId().equals("lolt");//to.getOwner() instanceof GuiButton && ((GuiButton)to.getOwner()).getText().equals("Vehicles");// to.getOwner() instanceof TestGui;
+        boolean out = false;//to.getOwner().getCssId() != null && to.getOwner().getCssId().equals("lolt");//to.getOwner() instanceof GuiButton && ((GuiButton)to.getOwner()).getText().equals("Vehicles");// to.getOwner() instanceof TestGui;
         if(out)
             System.out.println("Apply "+this+" to "+to.getOwner());
         if(!target.applies(to.getOwner(), targetContext)) {

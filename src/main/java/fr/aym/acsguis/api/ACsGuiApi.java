@@ -3,6 +3,7 @@ package fr.aym.acsguis.api;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.CssGuisManager;
 import fr.aym.acsguis.event.CssReloadEvent;
+import fr.aym.acsguis.sqript.NoSqriptSupport;
 import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import fr.aym.acsguis.sqript.SqriptSupport;
 import fr.aym.acsguis.sqript.block.ScriptBlockGuiComponent;
@@ -46,7 +47,7 @@ import java.util.concurrent.Callable;
 public class ACsGuiApi implements ACsService
 {
     public static final String RES_LOC_ID = "acsguis";
-    public static final String VERSION = "1.0.2";
+    public static final String VERSION = "1.0.3";
     public static final Logger log = LogManager.getLogger("ACsGuis");
 
     public static ErrorTrackingService errorTracker;
@@ -57,7 +58,8 @@ public class ACsGuiApi implements ACsService
      */
     private static final CssGuisManager manager = new CssGuisManager();
 
-    public static SqriptSupport support = new SqriptCompatiblity();
+    //TODO AUTO-DETECT SQRIPT
+    public static SqriptSupport support = new NoSqriptSupport();
 
     @Override
     public String getName() {
@@ -77,10 +79,10 @@ public class ACsGuiApi implements ACsService
         errorTracker = ACsPlatform.provideService("errtrack");
         CSS_ERROR_TYPE = errorTracker.createErrorType(new ResourceLocation(RES_LOC_ID, "css"), "Css");
 
-        ScriptManager.parsers.add(new IScriptParser() {
+        /*ScriptManager.parsers.add(new IScriptParser() {
             @Override
             public IScript parse(ScriptLine line, ScriptCompileGroup compileGroup) {
-                BlockDefinition blockDefinition = ScriptDecoder.findBlockDefinition(line); //todo match only on my guis
+                BlockDefinition blockDefinition = ScriptDecoder.findBlockDefinition(line);
                 System.out.println("Definition ? "+blockDefinition+" "+line.text);
                 if(blockDefinition != null && blockDefinition.getSide().isStrictlyValid() && (!ScriptManager.RELOADING || blockDefinition.isReloadable())){
                     Class scriptBlockClass = blockDefinition.getBlockClass();
@@ -101,7 +103,7 @@ public class ACsGuiApi implements ACsService
                 }
                 return null;
             }
-        });
+        });*/
     }
 
     @Override

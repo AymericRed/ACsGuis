@@ -16,7 +16,7 @@ public class BorderedGridLayout extends GridLayout
      * @param height Tile height, use -1 to use parent height
      * @param spacing Space between tiles, in all directions
      * @param direction Primary direction of the alignment (direction of a "line")
-     * @param elementsPerLine Number of elements on each "lines"
+     * @param elementsPerLine Number of elements on each "lines", use -1 to automatically fill the lines
      * @param paddingLeft Left padding
      * @param paddingTop Top padding
      */

@@ -24,7 +24,7 @@ public class GridLayout implements PanelLayout<ComponentStyleManager>
      * @param height Tile height, use -1 to use parent height
      * @param spacing Space between tiles, in all directions
      * @param direction Primary direction of the alignment (direction of a "line")
-     * @param elementsPerLine Number of elements on each "lines"
+     * @param elementsPerLine Number of elements on each "lines", use -1 to automatically fill the lines
      */
     public GridLayout(int width, int height, int spacing, GridDirection direction, int elementsPerLine) {
         this.width = width;
@@ -32,7 +32,7 @@ public class GridLayout implements PanelLayout<ComponentStyleManager>
         this.spacing = spacing;
         this.direction = direction;
         this.elementsPerLine = elementsPerLine;
-        System.out.println("Inited LAYOUT "+width+" "+height+" "+spacing+" "+direction+" "+elementsPerLine);
+        //System.out.println("Inited LAYOUT "+width+" "+height+" "+spacing+" "+direction+" "+elementsPerLine);
     }
 
     @Override
@@ -40,6 +40,10 @@ public class GridLayout implements PanelLayout<ComponentStyleManager>
         if(!cache.containsKey(target)) {
             cache.put(target, nextIndex);
             nextIndex++;
+        }
+        int elementsPerLine = this.elementsPerLine;
+        if(direction == GridDirection.HORIZONTAL && elementsPerLine == -1) {
+            elementsPerLine = target.getParent().getRenderWidth()/getWidth(target);
         }
         return direction == GridDirection.HORIZONTAL ? (getWidth(target.getParent().getRenderWidth())+spacing)*(cache.get(target)%elementsPerLine) : (getWidth(target.getParent().getRenderWidth())+spacing)*(cache.get(target)/elementsPerLine);
     }
@@ -49,6 +53,10 @@ public class GridLayout implements PanelLayout<ComponentStyleManager>
         if(!cache.containsKey(target)) {
             cache.put(target, nextIndex);
             nextIndex++;
+        }
+        int elementsPerLine = this.elementsPerLine;
+        if(direction == GridDirection.VERTICAL && elementsPerLine == -1) {
+            elementsPerLine = target.getParent().getRenderHeight()/getHeight(target);
         }
         return direction == GridDirection.VERTICAL ? (getHeight(target.getParent().getRenderHeight())+spacing)*(cache.get(target)%elementsPerLine) : (getHeight(target.getParent().getRenderHeight())+spacing)*(cache.get(target)/elementsPerLine);
     }

@@ -269,7 +269,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
             GuiFrame.hoveringText = hoveringText;
         }
 
-        if(isHovered() && !GuiFrame.hasDebugInfo)
+        if(isHovered() && !isFocused() && !GuiFrame.hasDebugInfo)
         {
             displayComponentOnDebugPane();
         }

@@ -155,7 +155,8 @@ combo_box>button
 .search_bar1 .search_bar_match, combo_box .combo_button
 {
     width: 80%;
-    height: 10px;
+    height: auto;
+    top: auto;
     padding: 0 0 0 1px;
     text-align-vertical: center;
     text-shadow: none;
