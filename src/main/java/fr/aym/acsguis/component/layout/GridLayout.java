@@ -32,6 +32,7 @@ public class GridLayout implements PanelLayout<ComponentStyleManager>
         this.spacing = spacing;
         this.direction = direction;
         this.elementsPerLine = elementsPerLine;
+        System.out.println("Inited LAYOUT "+width+" "+height+" "+spacing+" "+direction+" "+elementsPerLine);
     }
 
     @Override

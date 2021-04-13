@@ -5,6 +5,8 @@ import fr.aym.acsguis.cssengine.CssGuisManager;
 import fr.aym.acsguis.event.CssReloadEvent;
 import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import fr.aym.acsguis.sqript.SqriptSupport;
+import fr.aym.acsguis.sqript.block.ScriptBlockGuiComponent;
+import fr.aym.acsguis.sqript.block.ScriptBlockGuiFrame;
 import fr.aym.acsguis.utils.CssReloadOrigin;
 import fr.aym.acslib.ACsPlatform;
 import fr.aym.acslib.services.ACsRegisteredService;
@@ -13,6 +15,12 @@ import fr.aym.acslib.services.error_tracking.ErrorTrackingService;
 import fr.aym.acslib.services.error_tracking.TrackedErrorType;
 import fr.aym.acslib.services.thrload.ModLoadingSteps;
 import fr.aym.acslib.services.thrload.ThreadedLoadingService;
+import fr.nico.sqript.ScriptManager;
+import fr.nico.sqript.blocks.ScriptBlock;
+import fr.nico.sqript.compiling.*;
+import fr.nico.sqript.meta.BlockDefinition;
+import fr.nico.sqript.structures.IScript;
+import fr.nico.sqript.structures.ScriptInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -25,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 
 /**
@@ -67,6 +76,32 @@ public class ACsGuiApi implements ACsService
 
         errorTracker = ACsPlatform.provideService("errtrack");
         CSS_ERROR_TYPE = errorTracker.createErrorType(new ResourceLocation(RES_LOC_ID, "css"), "Css");
+
+        ScriptManager.parsers.add(new IScriptParser() {
+            @Override
+            public IScript parse(ScriptLine line, ScriptCompileGroup compileGroup) {
+                BlockDefinition blockDefinition = ScriptDecoder.findBlockDefinition(line); //todo match only on my guis
+                System.out.println("Definition ? "+blockDefinition+" "+line.text);
+                if(blockDefinition != null && blockDefinition.getSide().isStrictlyValid() && (!ScriptManager.RELOADING || blockDefinition.isReloadable())){
+                    Class scriptBlockClass = blockDefinition.getBlockClass();
+                    System.out.println("Loading : "+scriptBlockClass.getSimpleName());
+                    if(scriptBlockClass == ScriptBlockGuiFrame.class || scriptBlockClass == ScriptBlockGuiComponent.class) {
+                        try {
+                            ScriptBlock scriptBlock = (ScriptBlock) scriptBlockClass.getConstructor(ScriptLine.class).newInstance(line);
+                            scriptBlock.setLine(line);
+                            scriptBlock.setScriptInstance(line.getScriptInstance());
+                            return scriptBlock;
+                        } catch (InvocationTargetException exception) {
+                            ScriptManager.handleError(line, exception.getTargetException());
+                        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException e) {
+                            ScriptManager.handleError(line, e);
+                        }
+                    }
+                    System.out.println("Eh be non");
+                }
+                return null;
+            }
+        });
     }
 
     @Override

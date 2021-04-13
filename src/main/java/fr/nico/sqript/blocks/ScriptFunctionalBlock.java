@@ -52,6 +52,7 @@ public class ScriptFunctionalBlock extends ScriptBlock {
         return compileGroup;
     }
 
+
     public String name;
 
 
@@ -76,10 +77,10 @@ public class ScriptFunctionalBlock extends ScriptBlock {
 
 
     @Override
-    public void init(int baseIndent, ScriptLineBlock block) throws Exception {
-        super.init(baseIndent, block);
+    public void init(int tabLevel, ScriptLineBlock block) throws Exception {
+        super.init(tabLevel, block);
         System.out.println("Loaded function : "+name);
-        setRoot(getMainField().compile(createCompileGroup()));
+        setRoot(getMainField().compile());
         //System.out.println(getRoot()==null);
         getScriptInstance().registerBlock(this);
     }

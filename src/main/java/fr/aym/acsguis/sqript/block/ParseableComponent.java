@@ -102,6 +102,7 @@ public enum ParseableComponent
             throw new IllegalArgumentException("Cannot set "+n+" on component of type combo_box");
     });
 
+    //TODO PARSER L'INTERIEUR DES VALEURS (genre dans text:, lire les variables
     //NOT SUPPORTED : GuiResizableButton, GuiSlider, GuiCameraView, GuiList, GuiKeyLabel, GuiProgressBar, GuiSearchField
     //TODO SLOTS
 

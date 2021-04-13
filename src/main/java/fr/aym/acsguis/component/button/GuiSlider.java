@@ -170,9 +170,9 @@ public class GuiSlider extends GuiPanel implements IMouseClickListener, IMouseEx
 	
 	    @Override public void onMouseUnhover(int mouseX, int mouseY) {}
     }
-	public static interface ISliderListener
+	public interface ISliderListener
 	{
-		public void onSliderChanged(double value);
+		void onSliderChanged(double value);
 	}
 	public GuiSlider addSliderListener(ISliderListener lis)
 	{

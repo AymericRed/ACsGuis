@@ -26,7 +26,6 @@ public class ScriptBlockTimeLoop extends ScriptBlock {
 
     public long delay;
 
-
     public ScriptBlockTimeLoop(ScriptLine head) {
         try{
             this.delay = getDelay(head);
@@ -38,17 +37,17 @@ public class ScriptBlockTimeLoop extends ScriptBlock {
     public long getDelay(ScriptLine line) throws Exception {
         line.text = line.text.replaceAll("every\\s+", "").replaceAll(":", "");
         ScriptExpression expr = ScriptDecoder.getExpression(line,new ScriptCompileGroup());
-        System.out.println("Loading time looping block :");
-        System.out.println(expr.getClass());
-        System.out.println(expr.get(new ScriptContext()).getClass());
-        System.out.println(expr.get(new ScriptContext()).getObject());
+        //System.out.println("Loading time looping block :");
+        //System.out.println(expr.getClass());
+        //System.out.println(expr.get(new ScriptContext()).getClass());
+        //System.out.println(expr.get(new ScriptContext()).getObject());
         return (((Long)expr.get(new ScriptContext()).getObject()));
     }
 
     @Override
-    public void init(int baseIndent, ScriptLineBlock scriptLineBlock) throws Exception {
-        ScriptCompileGroup group = new ScriptCompileGroup();
-        setRoot(scriptLineBlock.compile(group));
+    public void init(int tabLevel, ScriptLineBlock scriptLineBlock) throws Exception {
+        setRoot(scriptLineBlock.compile());
+        //System.out.println("Putting in loop with delay : "+delay);
         ScriptTimer.loopIScript(this,delay);
     }
 

@@ -20,7 +20,7 @@ public class ScriptBlockImport extends ScriptBlock {
     }
 
     @Override
-    public void init(int baseIndent, ScriptLineBlock scriptLineBlock) throws Exception {
+    public void init(int tabLevel, ScriptLineBlock scriptLineBlock) throws Exception {
         Pattern p = Pattern.compile("\\s+(.*) from (.*)");
         for(ScriptLine s : scriptLineBlock.getContent()){
             Matcher m = p.matcher(s.text);

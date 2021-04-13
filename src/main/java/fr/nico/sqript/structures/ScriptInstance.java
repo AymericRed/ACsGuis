@@ -63,7 +63,7 @@ public class ScriptInstance {
         //System.out.println("Trying to call event : "+event.getClass().getSimpleName());
         context.returnValue = new ScriptAccessor(TypeBoolean.FALSE(), "");
         //long t1 = //System.currentTimeMillis();
-        for (ScriptBlock b : getBlocksOfClass(ScriptBlockEvent.class)) { //TODO SUGGERER OPTI
+        for (ScriptBlock b : getBlocksOfClass(ScriptBlockEvent.class)) {
             ScriptBlockEvent t = (ScriptBlockEvent) b;
             //System.out.println("Checking for class : "+t.eventType+", are they equal : "+(t.eventType == event.getClass())+" is check : "+event.check(t.getParameters(),t.getMarks())+" is side ok: "+t.side.isEffectivelyValid());
             if (t.eventType == event.getClass() && event.check(t.getParameters(),t.getMarks()) && t.side.isEffectivelyValid()) {

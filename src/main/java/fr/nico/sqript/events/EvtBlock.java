@@ -8,9 +8,11 @@ import fr.nico.sqript.types.TypePlayer;
 import fr.nico.sqript.types.primitive.TypeResource;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.eventhandler.Cancelable;
 
 public class EvtBlock {
-
+    @Cancelable
     @Event(name = "Block placed",
             description = "Called when a player placed a block",
             examples = "on place of stone:",
@@ -32,7 +34,7 @@ public class EvtBlock {
             return (((TypeResource)parameters[0]).getObject().equals(placedBlock.getObject().getBlock().getRegistryName()));
         }
     }
-
+    @Cancelable
     @Event(name = "Block broken",
             description = "Called when a player breaks a block",
             examples = "on break of stone:",
@@ -54,7 +56,7 @@ public class EvtBlock {
             return (((TypeResource)parameters[0]).getObject().equals(brokenBlock.getObject().getBlock().getRegistryName()));
         }
     }
-
+    @Cancelable
     @Event(name = "Block right clicked",
             description = "Called when a player clicks on a block",
             examples = "on click on block of stone:",
@@ -68,7 +70,7 @@ public class EvtBlock {
         public EnumHand hand;
         public int clickType = 1; //1 = right, 0 = left
 
-        public EvtOnBlockClick(EntityPlayer player, TypeBlock clicked, EnumHand hand, int clickType) {
+        public EvtOnBlockClick(EntityPlayer player, TypeBlock clicked, EnumHand hand, int clickType, BlockPos pos) {
             super(new ScriptAccessor(new TypePlayer(player),"player"),new ScriptAccessor(clicked,"(clicked block|click-block)"));
             this.clickedBlock = clicked;
             this.hand = hand;

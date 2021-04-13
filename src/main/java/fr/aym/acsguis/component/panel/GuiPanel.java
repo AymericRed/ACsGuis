@@ -116,6 +116,7 @@ public class GuiPanel extends GuiComponent<PanelStyleManager> implements AutoSty
 	 */
 	public GuiPanel add(GuiComponent component) {
 		component.setParent(this);
+		System.out.println("Add "+component+" in "+this+" "+layout);
 		if(layout != null)
 			component.getStyle().addAutoStyleHandler(layout);
 		queuedComponents.add(component);

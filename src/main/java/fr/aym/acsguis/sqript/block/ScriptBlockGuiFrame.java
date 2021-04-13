@@ -3,6 +3,7 @@ package fr.aym.acsguis.sqript.block;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
+import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.sqript.expressions.TypeComponent;
 import fr.nico.sqript.ScriptManager;
 import fr.nico.sqript.blocks.ScriptBlock;
@@ -12,22 +13,22 @@ import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.compiling.ScriptLine;
 import fr.nico.sqript.meta.Block;
 import fr.nico.sqript.meta.BlockDefinition;
+import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.*;
 import fr.nico.sqript.types.TypeArray;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.*;
 
 @Block(name = "gui_frame",
         description = "gui frame block",
         examples = "define gui frame my_frame:",
         regex = "^define gui frame .*",
         side = Side.CLIENT,
-        fields = {"css_class","css_id","css_code","css_sheets"},
-        reloadable = false
+        fields = {"css_class","css_id","css_code","css_sheets"}
 )
 public class ScriptBlockGuiFrame extends ScriptBlock
 {
@@ -73,39 +74,10 @@ public class ScriptBlockGuiFrame extends ScriptBlock
         if(!fieldDefined("css_sheets"))
             throw new ScriptException.ScriptMissingFieldException(this.getLine(),"define gui frame","css_sheets");
 
-        List<ResourceLocation> lt = new ArrayList<>();
-        ((TypeArray) getSubBlock("css_sheets").evaluate()).getObject().forEach(t -> {
-            lt.add(new ResourceLocation(t.getObject().toString()));
-        });
-
-        System.out.println(lt);
-        GuiFrame frame = new GuiFrame(new GuiScaler.Identity()) {
-            @Override
-            public List<ResourceLocation> getCssStyles() {
-                return lt;
-            }
-        };
-        if(fieldDefined("css_class"))
-            frame.setCssClass(getSubBlock("css_class").evaluate().getObject().toString());
-        if(fieldDefined("css_id"))
-            frame.setCssClass(getSubBlock("css_id").evaluate().getObject().toString());
-        if(fieldDefined("css_code"))
-            frame.setCssCode(getSubBlock("css_code").evaluate().getObject().toString());
-
         System.out.println("Loading sub blocks");
         ScriptCompileGroup group = new ScriptCompileGroup();
         IScript script = getMainField().compile(group);
-        ScriptContext ctx = ScriptContext.fromGlobal();
-        ctx.put(new ScriptAccessor(new TypeComponent(frame), "this component"));
-        //Running the associated script
-        ScriptClock k = new ScriptClock(ctx);
-        try {
-            System.out.println("Running the command on "+script);
-            k.start(script);
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        }
-        this.frame = frame;
+        setRoot(script);
 
         getScriptInstance().registerBlock(this);
         System.out.println("RG "+getScriptInstance());
@@ -114,9 +86,56 @@ public class ScriptBlockGuiFrame extends ScriptBlock
 
     @Override
     public void execute(ScriptContext context) {
-        super.execute(context);
-        //TODO REèINSTANCIATE
-        System.out.println("SHOW "+frame);
-        ACsGuiApi.asyncLoadThenShowGui(name, () -> frame);
+        if(FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            System.out.println("AFFICHAGE ====================");
+            ACsGuiApi.asyncLoadThenShowGui(name, () -> {
+                try {
+                    List<ResourceLocation> lt = new ArrayList<>();
+                    ((TypeArray) getSubBlock("css_sheets").evaluate()).getObject().forEach(t -> {
+                        lt.add(new ResourceLocation(t.getObject().toString()));
+                    });
+
+                    System.out.println(lt);
+                    GuiFrame frame = new GuiFrame(new GuiScaler.Identity()) {
+                        @Override
+                        public List<ResourceLocation> getCssStyles() {
+                            return lt;
+                        }
+                    };
+                    if (fieldDefined("css_class"))
+                        frame.setCssClass(getSubBlock("css_class").evaluate().getObject().toString());
+                    if (fieldDefined("css_id"))
+                        frame.setCssClass(getSubBlock("css_id").evaluate().getObject().toString());
+                    if (fieldDefined("css_code"))
+                        frame.setCssCode(getSubBlock("css_code").evaluate().getObject().toString());
+                    this.frame = frame;
+
+
+                    ScriptContext ctx = ScriptContext.fromGlobal();
+                    ctx.put(new ScriptAccessor(new TypeComponent(frame), "this component"));
+                    ctx.put(new ScriptAccessor(new ScriptBlockGuiComponent.TypeGuiComponentQueue(new ArrayDeque<>(Arrays.asList(frame))), "component_queue"));
+                    //Running the associated script
+                    ScriptClock k = new ScriptClock(ctx);
+                    try {
+                        System.out.println("Running the command on " + getRoot());
+                        k.start(getRoot());
+                    } catch (ScriptException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println("SHOW " + frame);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return frame;
+            });
+        }
+    }
+
+    @Override
+    public IScript run(ScriptContext context) {
+        execute(context);
+        System.out.println("OH FRAME IS DOING DONE "+getRoot()+" "+getParent());
+        return getNext(context);
     }
 }

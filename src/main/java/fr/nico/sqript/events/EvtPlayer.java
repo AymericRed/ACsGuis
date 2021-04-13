@@ -32,7 +32,7 @@ public class EvtPlayer {
     @Event(name = "Item right clicked",
             description = "Called when a player right clicks an item",
             examples = "on click on stick:",
-            patterns = "[item] click [with {item}] [with ((1;left)|(2;right)) hand]",
+            patterns = "[item ]click [with {item}] [with ((1;left)|(2;right)) hand]", //TODO NICO ESPACE MAL PLACE (obligatoire)
             accessors = {"player:player","[click[ed]] item:item"
             }
     )
@@ -67,11 +67,11 @@ public class EvtPlayer {
 
 
     @Cancelable
-    @Event(name = "Player sends message",
+    @Event(name = "message sent",
             description = "Called when a player sends a message",
             examples = "on player sending message:",
-            patterns = "[player] send[ing] [a] message",
-            accessors = {"player|sender:player","message:string"}
+            patterns = "(([player] sen(d[ing]|t) [a] message|message sent))",
+            accessors = {"(player|sender):player","message:string"}
     )
     public static class EvtOnPlayerSendMessage extends ScriptEvent {
 
@@ -82,7 +82,7 @@ public class EvtPlayer {
     }
 
     @Cancelable
-    @Event(name = "Player pickups an item",
+    @Event(name = "Item pickup",
             description = "Called when a player pickups an item",
             examples = "on item pickup:",
             patterns = "(player pickup[s] item|item pickup)",
@@ -98,7 +98,8 @@ public class EvtPlayer {
 
     }
 
-    @Event(name = "Player used an item",
+    @Cancelable
+    @Event(name = "Item use",
             description = "Called when a player uses an item",
             examples = "on item use:",
             patterns = "(player use[s] item|item use)",
@@ -117,7 +118,7 @@ public class EvtPlayer {
 
 
     @Cancelable
-    @Event(name = "Player attacked",
+    @Event(name = "Player attack",
             description = "Called when a player is hit by another player",
             examples = "on player hit:",
             patterns = "player (hit|attacked)",
@@ -152,7 +153,7 @@ public class EvtPlayer {
     }
 
 
-
+    @Cancelable
     @Event(name = "Player login",
             description = "Called when a player logs in",
             examples = "on player login:",

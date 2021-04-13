@@ -4,14 +4,17 @@ import com.google.common.collect.SetMultimap;
 import fr.nico.sqript.ScriptManager;
 import fr.nico.sqript.blocks.ScriptBlockCommand;
 import fr.nico.sqript.events.EvtOnWindowSetup;
+import fr.nico.sqript.forge.common.ScriptBlock.ScriptBlock;
 import fr.nico.sqript.forge.common.ScriptEventHandler;
 import fr.nico.sqript.forge.common.SqriptCommand;
-import fr.nico.sqript.forge.common.item.ScriptItemBase;
+import fr.nico.sqript.forge.common.item.ScriptItem;
 import fr.nico.sqript.network.ScriptMessage;
 import fr.nico.sqript.network.ScriptNetworkManager;
 import fr.nico.sqript.network.ScriptSyncDataMessage;
 import fr.nico.sqript.meta.*;
+import net.minecraft.block.BlockAir;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.statemap.DefaultStateMapper;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -48,8 +51,12 @@ public class SqriptForge {
 
     public static File scriptDir;
 
-    public static ArrayList<ScriptItemBase> items = new ArrayList<>();
-    public static ArrayList<net.minecraft.block.Block> blocks = new ArrayList<>();
+    public static ArrayList<ScriptBlock> blocks = new ArrayList<>();
+
+
+
+    public static ArrayList<ScriptItem> scriptItems = new ArrayList<>();
+    public static ArrayList<Item> items = new ArrayList<>();
 
     @Mod.EventHandler
     public static void serverStartEvent(FMLServerStartingEvent event){
@@ -67,7 +74,8 @@ public class SqriptForge {
     }
 
     @Mod.EventHandler
-    public void construction(FMLConstructionEvent event) throws IOException {
+    public void
+    construction(FMLConstructionEvent event) throws IOException {
 
         scriptDir = new File("scripts");
         if (!scriptDir.exists()) {
@@ -88,18 +96,14 @@ public class SqriptForge {
         containerList.add(Loader.instance().activeModContainer());
         ScriptManager.log.info("Loading content of Sqript.");
         //Add dependants to be loaded
-        event.getReverseDependencies().forEach((a,b)->{
-            containerList.add(Loader.instance().getIndexedModList().get(b));
-        });
+        containerList.addAll(Loader.instance().getIndexedModList().values());
         try {
             for(ModContainer container : containerList){
-                if(container==null)
-                    return;
-                ScriptManager.log.info("Loading a Sqript Addon : "+container.getName());
+                if(container==null || container.getName().equalsIgnoreCase("Minecraft"))
+                    continue;
                 modBuilding(event,container);
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         ScriptManager.init();
         
@@ -118,6 +122,9 @@ public class SqriptForge {
         Set<ASMDataTable.ASMData> actions = modData.get(Action.class.getName());
         Set<ASMDataTable.ASMData> functions = modData.get(Native.class.getName());
         Set<ASMDataTable.ASMData> blocks = modData.get(Block.class.getName());
+        Set<ASMDataTable.ASMData> loops = modData.get(Loop.class.getName());
+
+
 
 
         for (ASMDataTable.ASMData c : primitives) {
@@ -152,7 +159,7 @@ public class SqriptForge {
                 if(!c.getAnnotationInfo().containsKey("side") || fr.nico.sqript.structures.Side.from(((ModAnnotation.EnumHolder)c.getAnnotationInfo().get("side")).getValue()).isStrictlyValid()) {
                     Class toRegister = Class.forName(c.getClassName());
                     Expression e = (Expression) toRegister.getAnnotation(Expression.class);
-                    ScriptManager.registerExpression(toRegister, e.name(), e.description(), e.examples(), e.priority(), e.patterns());
+                    ScriptManager.registerExpression(toRegister, e.name(), e.description(), e.examples(), e.priority(), e.side(), e.patterns());
                 }
             } catch (Exception e) {
                 ScriptManager.log.error("Error trying to load ScriptExpression : "+c.getClassName());
@@ -160,6 +167,18 @@ public class SqriptForge {
             }
         }
 
+
+        for (ASMDataTable.ASMData c : loops) {
+            try {
+                if(!c.getAnnotationInfo().containsKey("side") || fr.nico.sqript.structures.Side.from(((ModAnnotation.EnumHolder)c.getAnnotationInfo().get("side")).getValue()).isStrictlyValid()) {
+                    Class toRegister = Class.forName(c.getClassName());
+                    Loop e = (Loop) toRegister.getAnnotation(Loop.class);
+                    ScriptManager.registerLoop(toRegister,e.name(),e.pattern(),e.side(),e.priority());
+                }
+            } catch (Exception e) {
+                if (ScriptManager.FULL_DEBUG) e.printStackTrace();
+            }
+        }
 
 
         for (ASMDataTable.ASMData c : functions) {
@@ -195,7 +214,7 @@ public class SqriptForge {
                 if(!c.getAnnotationInfo().containsKey("side") || fr.nico.sqript.structures.Side.from(((ModAnnotation.EnumHolder)c.getAnnotationInfo().get("side")).getValue()).isStrictlyValid()){
                     Class toRegister = Class.forName(c.getClassName());
                     Action e = (Action) toRegister.getAnnotation(Action.class);
-                    ScriptManager.registerAction(toRegister, e.name(), e.description(), e.examples(),e.priority(), e.patterns());
+                    ScriptManager.registerAction(toRegister, e.name(), e.description(), e.examples(),e.priority(), e.side(), e.patterns());
                 }
             } catch (Exception e) {
                 ScriptManager.log.error("Error trying to load ScriptAction : "+c.getClassName());
@@ -265,8 +284,21 @@ public class SqriptForge {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        System.out.println("Registering Sqript items, there are : "+items.size()+" item(s) to register.");
-        for (ScriptItemBase e : items) {
+        System.out.println("Registering Sqript items, there are : "+ scriptItems.size()+" item(s) to register.");
+        for (ScriptItem e : scriptItems) {
+            System.out.println("Registering : "+e.getItem().getRegistryName());
+            event.getRegistry().register(e.getItem());
+        }
+        for (Item e : items) {
+            System.out.println("Registering : "+e.getRegistryName());
+            event.getRegistry().register(e);
+        }
+
+    }
+
+    @SubscribeEvent
+    public static void registerBlocks(RegistryEvent.Register<net.minecraft.block.Block> event){
+        for(net.minecraft.block.Block e : blocks){
             System.out.println("Registering : "+e.getRegistryName());
             event.getRegistry().register(e);
         }
@@ -275,13 +307,20 @@ public class SqriptForge {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
-        for (ScriptItemBase e : items) {
+        for (ScriptItem e : scriptItems) {
             if(e.customModel.isEmpty())
-                ModelLoader.setCustomModelResourceLocation(e, 0, new ModelResourceLocation(
-                    e.modid+":"+e.registryName, "inventory"));
+                ModelLoader.setCustomModelResourceLocation(e.getItem(), 0, new ModelResourceLocation(
+                    e.getItem().getRegistryName(), "inventory"));
             else
-                ModelLoader.setCustomModelResourceLocation(e, 0, new ModelResourceLocation(
+                ModelLoader.setCustomModelResourceLocation(e.getItem(), 0, new ModelResourceLocation(
                         e.customModel, "inventory"));
+        }
+        for(ScriptBlock e : blocks){
+            ModelLoader.setCustomStateMapper(e, new DefaultStateMapper());
+        }
+        for (Item e : items) {
+                ModelLoader.setCustomModelResourceLocation(e, 0, new ModelResourceLocation(
+                        e.getRegistryName(), "inventory"));
         }
 
     }

@@ -51,6 +51,7 @@ public class ExprGuiLayout extends ScriptExpression
                     if(a.getObject() instanceof GuiPanel)
                     { //TODO ASK GENERICIZATION TO NICO
                         ((GuiPanel) a.getObject()).setLayout((PanelLayout<?>) b.getObject());
+                        System.out.println("Layout mis !");
                     }
                     return a;
                 });

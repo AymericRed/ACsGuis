@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -63,13 +64,13 @@ public class ScriptBlockCommand extends ScriptBlock implements ICommand {
         if (fieldDefined("side"))
             this.setSide(fr.nico.sqript.structures.Side.from(getSubBlock("side").getRawContent()));
 
-
         ScriptCompileGroup compileGroup = new ScriptCompileGroup();
         //Adding the "arg" expression to the compile group to prevent false-positive errors
         for (int j = 0; j < argumentsDefinitions.length; j++) {
             compileGroup.add("arg[ument] " + (j + 1));
         }
         compileGroup.add("(sender|player|console|server)");
+
 
         this.setRoot(getMainField().compile(compileGroup));
 
@@ -199,7 +200,9 @@ public class ScriptBlockCommand extends ScriptBlock implements ICommand {
         try {
             //System.out.println("Running the command");
             k.start(this);
-        } catch (ScriptException e) {
+        } catch (Exception e) {
+            iCommandSender.sendMessage(new TextComponentString("\247cAn error occured while executing Sqript command : "));
+            iCommandSender.sendMessage(new TextComponentString("\247c"+e.getMessage()));
             e.printStackTrace();
         }
     }

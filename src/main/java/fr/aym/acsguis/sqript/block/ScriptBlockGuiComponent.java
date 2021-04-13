@@ -1,13 +1,7 @@
 package fr.aym.acsguis.sqript.block;
 
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.component.button.GuiButton;
-import fr.aym.acsguis.component.layout.GuiScaler;
-import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.panel.GuiScrollPane;
-import fr.aym.acsguis.component.panel.GuiTabbedPane;
-import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.sqript.expressions.TypeComponent;
 import fr.nico.sqript.blocks.ScriptBlock;
 import fr.nico.sqript.compiling.ScriptCompileGroup;
@@ -15,25 +9,23 @@ import fr.nico.sqript.compiling.ScriptDecoder;
 import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.compiling.ScriptLine;
 import fr.nico.sqript.meta.Block;
+import fr.nico.sqript.meta.Type;
 import fr.nico.sqript.structures.*;
-import net.minecraft.util.ResourceLocation;
+import fr.nico.sqript.types.ScriptType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+//TODO A DAY : LOOPS
 @Block(name = "gui_component",
         description = "gui component block",
         examples = "add css component panel:",
         regex = "^add css component .*",
         side = Side.CLIENT,
-        fields = {"css_class","css_id","css_code","text","onclick","max_text_length","checked","entity_to_render","choices","min_value","max_value","hint_text","regex"},
-        reloadable = false
+        fields = {"css_class","css_id","css_code","text","onclick","max_text_length","checked","entity_to_render","choices","min_value","max_value","hint_text","regex"}
 )
-public class ScriptBlockGuiComponent extends ScriptBlock
+public class ScriptBlockGuiComponent extends ScriptBlock implements IScriptLoop
 {
     public static final String[] supportedFields = new String[] {"text", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"};
 
@@ -200,31 +192,70 @@ public class ScriptBlockGuiComponent extends ScriptBlock
         }
     }
 
+    @Type(
+            name = "component_queue",
+            parsableAs = {}
+    )
+    public static class TypeGuiComponentQueue extends ScriptType<Deque<GuiPanel>>
+    {
+        public ScriptElement<?> parse(String typeName) {
+            return null;
+        }
+
+        public String toString() {
+            return this.getObject().toString();
+        }
+
+        public TypeGuiComponentQueue(Deque<GuiPanel> file) {
+            super(file);
+        }
+    }
+
+
     @Override
     public void execute(ScriptContext context) {
-        System.out.println("========== GROS PD DE FDP "+ ((TypeComponent)context.getAccessor("this component").element).getObject()+" ADDING "+component);
+        System.out.println("========== GROS PD DE FDP "+ ((TypeComponent)context.getAccessor("this component").element).getObject()+" ADDING "+component+" "+getNext(context)+" "+getRoot());
         ((GuiPanel)((TypeComponent)context.getAccessor("this component").element).getObject()).add(component);
-        if(component instanceof GuiPanel)
+        if(this.next == null && getRoot() == null) {
+            GuiPanel p = ((TypeGuiComponentQueue)context.getAccessor("component_queue").element).getObject().removeLast();
+            System.out.println("POP "+p);
+            context.put(new ScriptAccessor(new TypeComponent(p.getParent()), "this component"));
+        }
+        else if(component instanceof GuiPanel) { //TODO PAS COMPTER LES BLOCS VIDES
+            System.out.println("PUSH "+component);
+            ((TypeGuiComponentQueue)context.getAccessor("component_queue").element).getObject().add((GuiPanel) component);
             context.put(new ScriptAccessor(new TypeComponent(component), "this component"));
+        }
     }
 
     @Override
     public IScript run(ScriptContext context) {
         execute(context);
 
-        System.out.println("OWW I DOING DONE "+getRoot()+" "+getParent());
+        System.out.println("OWW I DOING DONE "+getRoot()+" "+getParent()+" "+this);
         IScript toDo = getRoot() == null ? getNext(context) : getRoot();
+        System.out.println("-------------> Return "+toDo+" "+this.next);
         return toDo;
     }
 
+    @Override
+    public void setNext(IScript next) {
+        System.out.println("OH ON SET MON PAPA !");
+        super.setNext(next);
+        //if(getRoot() != null)
+          //  getRoot().setNext(next);
+    }
+
+    @Override
     public IScript getNext(ScriptContext context) {
         if(next!=null)
             return next;
         else if(getParent()!=null && getParent() instanceof ScriptLoop) {
             return getParent().getNext(context);
         }else if(getParent()!=null && getParent() instanceof ScriptBlockGuiComponent) {
-            if(((ScriptBlockGuiComponent) getParent()).component instanceof GuiPanel)
-                context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this component"));
+            //if(((ScriptBlockGuiComponent) getParent()).component instanceof GuiPanel)
+              //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this component"));
+            System.out.println("Mais wtf le next de mon papa c'est " + getParent().getNext(context));
             return getParent().getNext(context);
         }else
             return null;
@@ -233,5 +264,10 @@ public class ScriptBlockGuiComponent extends ScriptBlock
     @Override
     public IScript getParent() {
         return parent;
+    }
+
+    @Override
+    public void initLoop(IScript script, int tabLevel, ScriptCompileGroup compileGroup, List<ScriptLine> forContainer) throws Exception {
+        init(tabLevel, new ScriptBlock.ScriptLineBlock("main", forContainer));
     }
 }
