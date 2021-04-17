@@ -10,6 +10,7 @@ import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.panel.GuiTabbedPane;
 import fr.aym.acsguis.component.textarea.*;
+import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import fr.nico.sqript.blocks.ScriptBlock;
 import fr.nico.sqript.compiling.ScriptCompileGroup;
 import fr.nico.sqript.structures.ScriptContext;
@@ -17,13 +18,10 @@ import fr.nico.sqript.types.ScriptType;
 import fr.nico.sqript.types.TypeArray;
 import fr.nico.sqript.types.TypePlayer;
 import net.minecraftforge.common.util.EnumHelper;
-import scala.tools.nsc.doc.model.TypeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
-import java.util.regex.Pattern;
 
 public enum ParseableComponent
 {
@@ -37,9 +35,9 @@ public enum ParseableComponent
         else
             throw new IllegalArgumentException("Cannot set "+n+" on component of type label");
     }),
-    TEXT_FIELD("text_field", GuiTextField::new, GuiTextArea.PROPERTIES_PARSER),
-    TEXT_AREA("text_area", GuiTextArea::new, GuiTextArea.PROPERTIES_PARSER),
-    PASSWORD_FIELD("password_field", GuiPasswordField::new, GuiTextArea.PROPERTIES_PARSER),
+    TEXT_FIELD("text_field", GuiTextField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
+    TEXT_AREA("text_area", GuiTextArea::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
+    PASSWORD_FIELD("password_field", GuiPasswordField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
     INTEGER_FIELD("integer_field", () -> new GuiIntegerField(0, 255), (c, n, b) -> {
         if(n.equalsIgnoreCase("text")) {
             ((GuiIntegerField)c).setText(b.getRawContent());

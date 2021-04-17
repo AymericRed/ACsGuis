@@ -79,6 +79,11 @@ public abstract class GuiSearchField extends GuiPanel
 					}
 
 					@Override
+					public Priority getPriority(ComponentStyleManager forT) {
+						return Priority.LAYOUT;
+					}
+
+					@Override
 					public List<EnumCssStyleProperties> getModifiedProperties(ComponentStyleManager target) {
 						return linesModifiedProperties;
 					}
