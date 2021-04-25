@@ -37,7 +37,7 @@ public class CssGuisManager implements ISelectiveResourceReloadListener
     public CssGuisManager()
     {
         registerStyleSheetToPreload(ACsGuisCssParser.DEFAULT_STYLE_SHEET);
-        MinecraftForge.EVENT_BUS.register(new CssHudHandler());
+        MinecraftForge.EVENT_BUS.register(hud);
     }
 
     public CssHudHandler getHud() {

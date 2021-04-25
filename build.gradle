@@ -104,6 +104,7 @@ task outputNoTestJar(type: Jar) {
     archiveName = builtFile
     project.logger.lifecycle("Copy from ${builtFile}")
     from(zipTree("build/libs/${builtFile}")) {
+        exclude '/fr/nico/'
         exclude '/fr/aym/acsguis/test/'
         exclude '/assets/acsguis/css/dnx_debug.css'
         exclude '/assets/acsguis/css/font2.ttf'
@@ -114,6 +115,7 @@ task outputNoTestJarSources(type: Jar) {
     destinationDir = new File("D:/Modding/ACsGuis/build/libs/fixed/")
     archiveName = builtFileSources
     from(zipTree("build/libs/${builtFileSources}")) {
+        exclude '/fr/nico/'
         exclude '/fr/aym/acsguis/test/'
         exclude '/assets/acsguis/css/dnx_debug.css'
         exclude '/assets/acsguis/css/font2.ttf'
