@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public class ACsPlatform
 {
-    public static final String MOD_ID = "acslib", NAME = "ACsLib", VERSION = "1.0.0";
+    public static final String MOD_ID = "acslib", NAME = "ACsLib", VERSION = "1.0.3";
     private static final Logger log = LogManager.getLogger("ACsLib");
 
     /**
