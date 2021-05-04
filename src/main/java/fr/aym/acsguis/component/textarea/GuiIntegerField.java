@@ -31,16 +31,22 @@ public class GuiIntegerField extends GuiTextField
     @Override
     public GuiTextArea setText(String text) {
         if (!text.isEmpty()) {
-            int color = (int) Float.parseFloat(text);
-            if (color > getMax()) {
-                this.text = ""+getMax();
-            } else if (color < getMin()) {
-                this.text = ""+getMin();
-            } else {
-                this.text = text;
-            }
+            try {
+                int color = Integer.parseInt(text);
+                if (color > getMax()) {
+                    this.text = ""+getMax();
+                } else if (color < getMin()) {
+                    this.text = ""+getMin();
+                } else {
+                    this.text = text;
+                }
+            } catch (NumberFormatException ignored) {}
         } else
             this.text = text;
         return this;
+    }
+
+    public int getValue() {
+        return Integer.parseInt(getText());
     }
 }

@@ -2,6 +2,7 @@ package fr.aym.acsguis.test;
 
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.button.GuiButton;
+import fr.aym.acsguis.component.button.GuiButtonWithItem;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
@@ -10,6 +11,7 @@ import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.utils.GuiCssError;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -107,6 +109,10 @@ public class GuiDnxDebug extends GuiFrame
                     box4.setText("Styles css rechargés");
             });
             pane1.add(box4);
+
+            GuiButtonWithItem icon = new GuiButtonWithItem(Items.ACACIA_BOAT, "");
+            icon.setCssId("acacia.icon");
+            pane1.add(icon);
 
             general.add(pane1);
         }

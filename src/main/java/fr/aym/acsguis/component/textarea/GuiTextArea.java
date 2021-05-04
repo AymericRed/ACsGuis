@@ -1,19 +1,17 @@
 package fr.aym.acsguis.component.textarea;
 
-import com.helger.commons.functional.ITriConsumer;
 import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
+import fr.aym.acsguis.component.style.TextComponentStyleManager;
 import fr.aym.acsguis.cssengine.font.CssFontHelper;
 import fr.aym.acsguis.cssengine.style.CssTextComponentStyleManager;
-import fr.aym.acsguis.component.style.TextComponentStyleManager;
 import fr.aym.acsguis.event.listeners.IFocusListener;
 import fr.aym.acsguis.event.listeners.IKeyboardListener;
 import fr.aym.acsguis.event.listeners.ITickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
-import fr.nico.sqript.blocks.ScriptBlock;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ChatAllowedCharacters;
@@ -25,7 +23,6 @@ import java.util.regex.Pattern;
 
 public class GuiTextArea extends GuiComponent<TextComponentStyleManager> implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener, TextComponent
 {
-
     protected String text = "";
     protected String hintText = "";
 

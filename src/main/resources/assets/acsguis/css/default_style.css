@@ -1,15 +1,15 @@
-button
+button,button_with_icon
 {
     background-image: texture("textures/gui/widgets.png", 0, 66, 200, 20);
     font-size: 9;
     width: 200px;
     height: 20px;
 }
-button:hover,button:active
+button:hover,button:active,button_with_icon:hover,button_with_icon:active
 {
     background-image: texture("textures/gui/widgets.png", 0, 86, 200, 20);
 }
-button:disabled
+button:disabled,button_with_icon:disabled
 {
     background-image: texture("textures/gui/widgets.png", 0, 46, 200, 20);
 }
@@ -194,4 +194,11 @@ combo_box>button
 #css_debug_pane>button
 {
     top: auto;
+}
+
+button_with_icon
+{
+    width: 40px;
+    height: 40px;
+    background-color: translucent;
 }

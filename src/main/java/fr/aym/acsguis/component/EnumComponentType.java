@@ -12,6 +12,7 @@ public enum EnumComponentType
     TEXT_AREA,
     TEXT_FIELD,
     BUTTON,
+    BUTTON_WITH_ICON,
     SLIDER_HORIZONTAL,
     SLIDER_VERTICAL,
     CHECKBOX,
