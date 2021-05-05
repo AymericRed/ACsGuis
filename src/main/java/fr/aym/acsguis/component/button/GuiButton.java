@@ -48,10 +48,6 @@ public class GuiButton extends GuiComponent<TextComponentStyleManager> implement
 
     protected String text;
 
-    public GuiButton(int x, int y, int width, int height) {
-        this(x, y, width, height, "");
-    }
-
     @Override
     public EnumComponentType getType() {
         return EnumComponentType.BUTTON;
@@ -62,13 +58,21 @@ public class GuiButton extends GuiComponent<TextComponentStyleManager> implement
         return new CssTextComponentStyleManager(this);
     }
 
-    public GuiButton(String text) {
-        this(0, 0, 100, 20, text);
+    public GuiButton() {
+        addClickListener(this);
     }
 
-    public GuiButton(int x, int y, int width, int height, String text) {
-        super(x, y, width, height);
+    public GuiButton(String text) {
+        this();
         setText(text);
+    }
+
+    /**
+     * @deprecated Use the css to modify element size and position
+     */
+    @Deprecated
+    public GuiButton(int x, int y, int width, int height) {
+        super(x, y, width, height);
         addClickListener(this);
     }
 

@@ -36,13 +36,9 @@ public class GuiResizableButton extends GuiButton implements IMouseMoveListener 
 	protected int lastWidth, lastHeight;
 	protected int lastX, lastY;
 	protected int minWidth = 4, minHeight = 4, maxWidth = Integer.MAX_VALUE, maxHeight = Integer.MAX_VALUE;
-	
-	public GuiResizableButton(int x, int y, int width, int height) {
-		this(x, y, width, height, "");
-	}
-	
-	public GuiResizableButton(int x, int y, int width, int height, String text) {
-		super(x, y, width, height, text);
+
+	public GuiResizableButton(String text) {
+		super(text);
 		addMoveListener(this);
 	}
 	

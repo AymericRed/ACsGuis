@@ -34,7 +34,7 @@ public class GuiSlider extends GuiPanel implements IMouseClickListener, IMouseEx
 	public GuiSlider(boolean horizontal) {
 		super();
 		this.horizontal = horizontal;
-		add(sliderButton = new GuiSliderButton(0, 0, 0, 0));
+		add(sliderButton = new GuiSliderButton());
 		sliderButton.getStyle().getWidth().setRelative(1F / (horizontal ? 5 : 1));
 		sliderButton.getStyle().getHeight().setRelative(1F / (horizontal ? 1 : 5));
 		/*sliderButton.getStyle().addAutoStyleHandler(new AutoStyleHandler<ComponentStyleManager>() {
@@ -132,8 +132,8 @@ public class GuiSlider extends GuiPanel implements IMouseClickListener, IMouseEx
 
 	protected class GuiSliderButton extends GuiButton implements IMouseMoveListener
     {
-        protected GuiSliderButton(int x, int y, int width, int height) {
-            super(x, y, width, height);
+        protected GuiSliderButton() {
+            super();
             addMoveListener(this);
             getStyle().addAutoStyleHandler(new AutoStyleHandler<ComponentStyleManager>() {
                 @Override

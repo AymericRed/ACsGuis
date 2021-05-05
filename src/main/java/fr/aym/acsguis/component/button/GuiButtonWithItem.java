@@ -16,7 +16,7 @@ public class GuiButtonWithItem extends GuiButton
     protected static final ResourceLocation buttonTextures = new ResourceLocation("textures/gui/widgets.png");
     /** The string displayed on this control. */
     public String hoverMessage;
-    public Item icon;
+    public ItemStack icon;
     /** True if this control is enabled, false to disable. */
     public boolean enabled;
     /** Hides the button completely if false. */
@@ -26,14 +26,9 @@ public class GuiButtonWithItem extends GuiButton
     
     private boolean hasNoBackground;
 
-    public GuiButtonWithItem(Item icon, String hoverMessage)
+    public GuiButtonWithItem(ItemStack icon, String hoverMessage)
     {
-    	this(0, 0, 20, 20, icon, hoverMessage);
-    }
-    public GuiButtonWithItem(int x, int y, int width, int height, Item icon, String hoverMessage)
-    {
-    	super(x, y, width, height);
-    	
+        super("");
         this.enabled = true;
         this.visible = true;
         this.hoverMessage = hoverMessage;
@@ -81,7 +76,6 @@ public class GuiButtonWithItem extends GuiButton
         itemRender.zLevel = 100.0F;*/
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
-        ItemStack itemstack = new ItemStack(icon);
         
         if(factorX != 1 || factorY != 1)
         {
@@ -89,7 +83,8 @@ public class GuiButtonWithItem extends GuiButton
         }
         int x = (int) (getScreenX()/factorX);
         int y = (int) (getScreenY()/factorY);
-        mc.getRenderItem().renderItemAndEffectIntoGUI(itemstack, x+2, y+2);
+        mc.getRenderItem().renderItemAndEffectIntoGUI(icon, x+2, y+2);
+        mc.getRenderItem().renderItemOverlayIntoGUI(fontrenderer, icon, x+2, y+2, null);
         //itemRender.renderItemOverlayIntoGUI(fontrenderer, mc.getTextureManager(), itemstack, yPosition, j, null);
         if(factorX != 1 || factorY != 1)
         {

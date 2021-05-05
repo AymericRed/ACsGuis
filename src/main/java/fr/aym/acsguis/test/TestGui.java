@@ -20,7 +20,7 @@ public class TestGui extends GuiFrame
         style.setBackgroundColor(Color.TRANSLUCENT);
         setCssClass("home");
         GuiPanel PD = new GuiPanel(0, 0, 0, 0);
-        PD.add(new GuiButton(10, 30, 0, 0, "Bouton css"));
+        PD.add(new GuiButton("Bouton css"));
         add(PD);
     }
 

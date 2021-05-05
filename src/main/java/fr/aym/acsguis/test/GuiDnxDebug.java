@@ -12,6 +12,7 @@ import fr.aym.acsguis.utils.GuiCssError;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -41,7 +42,7 @@ public class GuiDnxDebug extends GuiFrame
             //Render on/off
             GuiLabel label = new GuiLabel("Rendu du debug : " + (ClientDebugSystem.enableDebugDrawing ? "activé" : "désactivé"));
             pane1.add(label.setCssClass("option-desc"));
-            GuiButton b = new GuiButton(0, 0, 0, 0);
+            GuiButton b = new GuiButton();
             pane1.add(b.setCssClass("switch-button-" + (ClientDebugSystem.enableDebugDrawing ? "on" : "off")).addClickListener((x, y, button) -> {
                 ClientDebugSystem.enableDebugDrawing = !ClientDebugSystem.enableDebugDrawing;
                 b.setCssClass("switch-button-" + (ClientDebugSystem.enableDebugDrawing ? "on" : "off"));
@@ -55,7 +56,7 @@ public class GuiDnxDebug extends GuiFrame
             GuiLabel label1 = new GuiLabel("Profiling : " + (active ? "activé" : "désactivé"));
             pane1.add(label1.setCssClass("option-desc"));
 
-            GuiButton b1 = new GuiButton(0, 0, 0, 0);
+            GuiButton b1 = new GuiButton();
             pane1.add(b1.setCssClass("switch-button-" + (active ? "on" : "off")).addClickListener((mx, my, button) -> {
                 if (EnumTerrainDebugOptions.PROFILING.isActive(ClientDebugSystem.terrainDebugMode))
                     ClientDebugSystem.terrainDebugMode = EnumTerrainDebugOptions.PROFILING.removeDebugMode(ClientDebugSystem.terrainDebugMode);
@@ -110,7 +111,7 @@ public class GuiDnxDebug extends GuiFrame
             });
             pane1.add(box4);
 
-            GuiButtonWithItem icon = new GuiButtonWithItem(Items.ACACIA_BOAT, "");
+            GuiButtonWithItem icon = new GuiButtonWithItem(new ItemStack(Items.ACACIA_BOAT), "");
             icon.setCssId("acacia.icon");
             pane1.add(icon);
 
@@ -134,7 +135,7 @@ public class GuiDnxDebug extends GuiFrame
                 terrainLabels.put(option, label1);
                 pane1.add(label1.setCssClass("option-desc"));
 
-                GuiButton b1 = new GuiButton(0, 0, 0, 0);
+                GuiButton b1 = new GuiButton();
                 terrainButtons.put(option, b1);
                 pane1.add(b1.setCssClass("switch-button-" + (active ? "on" : "off")).addClickListener((mx, my, button) -> {
                     if (option.isActive(ClientDebugSystem.terrainDebugMode))
@@ -176,7 +177,7 @@ public class GuiDnxDebug extends GuiFrame
                 vehicleLabels.put(option, label1);
                 pane1.add(label1.setCssClass("option-desc"));
 
-                GuiButton b1 = new GuiButton(0, 0, 0, 0);
+                GuiButton b1 = new GuiButton();
                 vehicleButtons.put(option, b1);
                 pane1.add(b1.setCssClass("switch-button-" + (active ? "on" : "off")).addClickListener((mx, my, button) -> {
                     if (option.isActive(ClientDebugSystem.entityDebugMode))

@@ -53,7 +53,7 @@ public class GuiComboBox extends GuiPanel {
 	public class GuiComboBoxButton extends GuiButton implements IFocusListener {
 		
 		public GuiComboBoxButton(String defaultText) {
-			super(0, 0, 0, 0, defaultText);
+			super(defaultText);
 			style.getWidth().setRelative(1);
 			style.getHeight().setRelative(1);
 			addFocusListener(this);
@@ -259,7 +259,7 @@ public class GuiComboBox extends GuiPanel {
 		protected int entryId;
 		
 		public GuiEntryButton(int n, String entryName) {
-			super(0, 0, 0, 0, entryName);
+			super(entryName);
 			style.getWidth().setRelative(1);
 			this.entryId = n;
 		}
