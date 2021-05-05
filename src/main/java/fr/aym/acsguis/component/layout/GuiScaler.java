@@ -60,7 +60,7 @@ public interface GuiScaler
     }
 
     /**
-     * Adjusts the scale to let the gui take the entire screen
+     * Adjusts the scale to let the gui take the max desired relative size
      */
     class AdjustToScreenSize implements GuiScaler
     {

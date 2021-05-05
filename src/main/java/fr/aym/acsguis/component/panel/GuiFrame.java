@@ -4,10 +4,12 @@ import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.button.GuiSlider;
+import fr.aym.acsguis.component.style.PanelStyleManager;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
 import fr.aym.acsguis.component.style.AutoStyleHandler;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.cssengine.style.CssPanelStyleManager;
 import fr.aym.acsguis.event.listeners.IKeyboardListener;
 import fr.aym.acsguis.component.layout.GridLayout;
 import fr.aym.acsguis.component.layout.GuiScaler;
@@ -167,6 +169,28 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 		return (int) (getHeight()*guiScreen.scaleY);
 	}
 
+	@Override
+	protected PanelStyleManager createStyleManager() {
+		PanelStyleManager s = new CssPanelStyleManager(this) {
+			@Override
+			public void updateComponentPosition(int screenWidth, int screenHeight)
+			{
+				//Re-compute scales after computation of width and height
+				getGuiScreen().scaleX = getScale().getScaleX(GuiFrame.resolution, mc.displayWidth, GuiFrame.resolution.getScaledWidth(), getStyle().getRenderWidth());
+				getGuiScreen().scaleY = getScale().getScaleY(GuiFrame.resolution, mc.displayHeight, GuiFrame.resolution.getScaledHeight(), getStyle().getRenderHeight());
+
+				//And adapt component position (for relative positions, eg : center of the screen)
+				int parentWidth = (int) (screenWidth/getGuiScreen().scaleX);
+				int parentHeight = (int) (screenHeight/getGuiScreen().scaleY);
+
+				computedX = getXPos().computeValue(parentWidth, getRenderWidth());
+				computedY = getYPos().computeValue(parentHeight, getRenderHeight());
+			}
+		};
+		s.addAutoStyleHandler(this);
+		return s;
+	}
+
 	/**
 	 * Instance of the GuiScreen linked to this GuiFrame
 	 */
@@ -191,10 +215,6 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 			//Needed for scale
 			style.update();
 			debugPane.getStyle().update();
-			scaleX = getScale().getScaleX(resolution, mc.displayWidth, resolution.getScaledWidth(), getWidth());
-			//System.out.println("Got X "+scaleX+" "+resolution.getScaledWidth()+" "+getWidth());
-			scaleY = getScale().getScaleY(resolution, mc.displayHeight, resolution.getScaledHeight(), getHeight());
-			//System.out.println("Got Y "+scaleY+" "+resolution.getScaledHeight()+" "+getHeight());
 			//worldRenderBuffer.createBindFramebuffer(width * resolution.getScaleFactor(), height * resolution.getScaleFactor());
 		}
 		
@@ -325,7 +345,14 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 		public GuiFrame getFrame() {
 			return frame;
 		}
-		
+
+		public float getScaleX() {
+			return scaleX;
+		}
+
+		public float getScaleY() {
+			return scaleY;
+		}
 	}
 	
 	public boolean doesPauseGame() {
