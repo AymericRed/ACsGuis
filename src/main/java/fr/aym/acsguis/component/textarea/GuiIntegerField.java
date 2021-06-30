@@ -32,7 +32,7 @@ public class GuiIntegerField extends GuiTextField
     public GuiTextArea setText(String text) {
         if (!text.isEmpty()) {
             try {
-                int color = Integer.parseInt(text);
+                int color = Integer.parseInt(text.equals("-") ? text+"0" : text);
                 if (color > getMax()) {
                     this.text = ""+getMax();
                 } else if (color < getMin()) {
