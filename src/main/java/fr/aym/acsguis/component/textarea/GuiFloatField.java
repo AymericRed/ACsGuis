@@ -1,31 +1,31 @@
 package fr.aym.acsguis.component.textarea;
 
-public class GuiIntegerField extends GuiTextField
+public class GuiFloatField extends GuiTextField
 {
-    private int value;
-    private int min;
-    private int max;
+    private float value;
+    private float min;
+    private float max;
 
-    public GuiIntegerField(int min, int max) {
+    public GuiFloatField(float min, float max) {
         super();
         this.min = min;
         this.max = max;
         setText("0");
     }
 
-    public int getMin() {
+    public float getMin() {
         return min;
     }
 
-    public void setMin(int min) {
+    public void setMin(float min) {
         this.min = min;
     }
 
-    public int getMax() {
+    public float getMax() {
         return max;
     }
 
-    public void setMax(int max) {
+    public void setMax(float max) {
         this.max = max;
     }
 
@@ -33,7 +33,7 @@ public class GuiIntegerField extends GuiTextField
     public GuiTextArea setText(String text) {
         if (!text.isEmpty()) {
             try {
-                int color = Integer.parseInt(text.equals("-") ? text+"0" : text);
+                float color = Float.parseFloat(text.equals("-") ? text+"0" : text);
                 if (color > getMax()) {
                     this.text = ""+getMax();
                 } else if (color < getMin()) {
@@ -41,7 +41,7 @@ public class GuiIntegerField extends GuiTextField
                 } else {
                     this.text = text;
                 }
-                value = Integer.parseInt(text);
+                value = Float.parseFloat(text);
             } catch (NumberFormatException ignored) {}
         } else {
             this.text = text;
@@ -50,12 +50,12 @@ public class GuiIntegerField extends GuiTextField
         return this;
     }
 
-    public void setValue(int value) {
+    public void setValue(float value) {
         this.value = value;
         this.setText(""+value);
     }
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 }
