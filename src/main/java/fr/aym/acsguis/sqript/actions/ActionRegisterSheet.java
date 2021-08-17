@@ -21,7 +21,7 @@ public class ActionRegisterSheet extends ScriptAction
     public void execute(ScriptContext context) throws ScriptException {
         ScriptExpression firstParameter = getParameters().get(0);
         //On peut accéder aux éléments du contexte depuis le code java également.
-        ScriptManager.log.info(context.get("script file")+" : "+firstParameter.get(context));
+        ScriptManager.log.info(context.getVariable("script file")+" : "+firstParameter.get(context));
         System.out.println(firstParameter.get(context).getClass());
         ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(firstParameter.get(context).toString()));
     }

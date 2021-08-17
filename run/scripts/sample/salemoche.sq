@@ -1,44 +1,56 @@
 on script load:
-    print "testloaded"
-    set {$moche} to false
+	print "testloaded tabbed"
+	#set {$moche} to false
 
 function closeTheGui():
-    close css gui
+	close css gui
+
+function switchMochete():
+    print "mochete switchée"
 
 define gui frame monGui:
-    css_class: "home"
-    css_sheets: ["acsguis:css/dnx_debug.css"]
-    set {tcon} to "lol"
-    print "ceci est un test"
-    add css component tabbed_pane:
-        add css component panel with id "general":
-            add css component scroll_pane:
-                set {arr} to [-1,25]
-                set {layout} to new grid layout with size {arr} spacing 5 direction "horizontal" elements per line 1
-                add {layout} to this component
-                add css component panel with class "option-desc":
-                    set {texte} to "Rendu du debug : "
-                    #add {$moche} to {texte}
-                    add css component label with id "t1":
-                        text: {texte}
-                    add css component button with id "mochebu" and class "switch-button-on":
-                        action:
-                            switchMochete();
-                add css component panel with class "option-desc":
-                    add css component label with id "t2":
-                        content: "Profilage : n/a"
-                    add css component button with id "mochebu" and class "switch-button-off":
-                        action:
-                            switchMochete3("test");
-                add css component label with id "reload_models" and class "reload_button":
-                    text: "Recharger les packs"
+	css_class: "home"
+	css_sheets: ["acsguis:css/dnx_debug.css"]
+	set {tcon} to "lol"
+	print "ceci est un test"
+	set {$moche} to false
+	add css component tabbed_pane:
+		add css component panel with id "general":
+			add css component scroll_pane:
+				set {arr} to [-1,25]
+				set layout to new grid layout with size {arr} spacing 5 direction "horizontal" elements per line 1
+                #on component tick:
+                #   print "ticking..."
+				add css component panel with class "option-desc":
+	                print "yooooo STEP 1"
+					set {texteb} to "Rendu du debug : "
+	                print "yooooo STEP 2"
+					add {$moche} to {texteb}
+					add css component label with id "t1":
+						set text to {texteb}
+					add css component button with id "mochebu" and class "switch-button-on":
+						on component click:
+						    print "on tu as cliqué !"
+						    print [player's hunger]
+						    switchMochete()
+						set text to ""
+				add css component panel with class "option-desc":
+					add css component label with id "t2":
+						set text to "Profilage : n/a"
+					add css component button with id "mochebu" and class "switch-button-off":
+						on component click:
+						    print "on tu as cliqué 3 !"
+						    closeTheGui()
+						set text to ""
+				add css component label with id "reload_models" and class "reload_button":
+					set text to "Recharger les packs"
 
 on acsguis load:
-    register css sheet "sample:css/test.css"
+	register css sheet "sample:css/test.css"
 
 on click with minecraft:paper:
-	send "Clicked" to player
-    display css gui "monGui"
+	#send "Clicked" to player
+	display css gui "monGui"
 
 on click with minecraft:apple:
 	send "ClickedApple" to player

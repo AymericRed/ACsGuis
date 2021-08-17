@@ -21,6 +21,7 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -91,20 +92,29 @@ public class SqriptForge {
                 scriptDir.mkdirs();
         }
         ScriptManager.preInit(scriptDir);
-        List<ModContainer> containerList = new ArrayList<>();
-
-        containerList.add(Loader.instance().activeModContainer());
         ScriptManager.log.info("Loading content of Sqript.");
         //Add dependants to be loaded
-        containerList.addAll(Loader.instance().getIndexedModList().values());
+        ModContainer sqriptContainer = Loader.instance().activeModContainer();
         try {
-            for(ModContainer container : containerList){
-                if(container==null || container.getName().equalsIgnoreCase("Minecraft"))
+            modBuilding(event,sqriptContainer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        List<ModContainer> containerList = new ArrayList<>(Loader.instance().getIndexedModList().values());
+        containerList.remove(sqriptContainer);
+        for(ModContainer container : containerList){
+            try {
+                if(container==null || container.getName().equalsIgnoreCase("Minecraft") || container.getName().equalsIgnoreCase("Minecraft"))
                     continue;
                 modBuilding(event,container);
+            } catch (Exception e) {
+                if(!(e instanceof NullPointerException)) {
+                    ScriptManager.log.error("Error while loading Sqript addon : " + container.getName());
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
         }
+
         ScriptManager.init();
         
         ScriptManager.callEvent(new EvtOnWindowSetup());
@@ -197,11 +207,9 @@ public class SqriptForge {
 
         for (ASMDataTable.ASMData c : events) {
             try {
-                if(!c.getAnnotationInfo().containsKey("side") || fr.nico.sqript.structures.Side.from(((ModAnnotation.EnumHolder)c.getAnnotationInfo().get("side")).getValue()).isStrictlyValid()) {
-                    Class toRegister = Class.forName(c.getClassName());
-                    Event e = (Event) toRegister.getAnnotation(Event.class);
-                    ScriptManager.registerEvent(toRegister, e.name(), e.description(), e.examples(), e.patterns(), e.side(), e.accessors());
-                }
+                Class toRegister = Class.forName(c.getClassName());
+                Event e = (Event) toRegister.getAnnotation(Event.class);
+                ScriptManager.registerEvent(toRegister, e.name(), e.description(), e.examples(), e.patterns(), e.side(), e.accessors());
             } catch (Exception e) {
                 ScriptManager.log.error("Error trying to load ScriptEvent : "+c.getClassName());
                 if (ScriptManager.FULL_DEBUG) e.printStackTrace();
@@ -284,13 +292,13 @@ public class SqriptForge {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        System.out.println("Registering Sqript items, there are : "+ scriptItems.size()+" item(s) to register.");
+        //System.out.println("Registering Sqript items, there are : "+ scriptItems.size()+" item(s) to register.");
         for (ScriptItem e : scriptItems) {
-            System.out.println("Registering : "+e.getItem().getRegistryName());
+            //System.out.println("Registering : "+e.getItem().getRegistryName());
             event.getRegistry().register(e.getItem());
         }
         for (Item e : items) {
-            System.out.println("Registering : "+e.getRegistryName());
+            //System.out.println("Registering : "+e.getRegistryName());
             event.getRegistry().register(e);
         }
 
@@ -299,7 +307,7 @@ public class SqriptForge {
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<net.minecraft.block.Block> event){
         for(net.minecraft.block.Block e : blocks){
-            System.out.println("Registering : "+e.getRegistryName());
+            //System.out.println("Registering : "+e.getRegistryName());
             event.getRegistry().register(e);
         }
     }

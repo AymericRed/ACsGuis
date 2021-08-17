@@ -53,7 +53,7 @@ public class ActionShowGui extends ScriptAction
         else {
             ScriptExpression firstParameter = getParameters().get(0);
             //On peut accéder aux éléments du contexte depuis le code java également.
-            ScriptManager.log.info(context.get("script file") + " : " + firstParameter.get(context));
+            ScriptManager.log.info(context.getVariable("script file") + " : " + firstParameter.get(context));
 
             System.out.println("Value is " + firstParameter.getClass() + " " + firstParameter.get(context).getClass());
             System.out.println("Value is 2 " + firstParameter.getReturnType() + " " + firstParameter.get(context).getType());

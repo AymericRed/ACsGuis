@@ -13,7 +13,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 
-public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyleManager>
+public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyleManager> implements NumericComponent
 {
 	protected GuiTextureSprite emptyTexture, fullTexture;
 
@@ -23,7 +23,7 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
     protected GuiConstants.ENUM_SIZE progressTextureHorizontalSize = GuiConstants.ENUM_SIZE.ABSOLUTE;
     protected GuiConstants.ENUM_SIZE progressTextureVerticalSize = GuiConstants.ENUM_SIZE.ABSOLUTE;
 	
-	protected float minProgress, maxProgress, progress;
+	protected int minProgress, maxProgress, progress;
 	protected final boolean horizontal;
 
 	protected int fullProgressBarColor = Color.GRAY.getRGB();
@@ -52,8 +52,8 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
 
     public GuiProgressBar(boolean horizontal) {
 		this.horizontal = horizontal;
-		setMinProgress(0);
-		setMaxProgress(100);
+		setMin(0);
+		setMax(100);
 		setProgress(0);
 		//TODO COLOR AND TEXTURE CSS MANAGEMENT
 		setFullProgressBarColor(Color.GRAY.getRGB());
@@ -107,6 +107,26 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
         GlStateManager.disableBlend();
 		
 		drawString(mc.fontRenderer, progressText, (int) (getScreenX() + GuiAPIClientHelper.getRelativeTextX(progressText, getWidth(), horizontalTextAlignment, ACsGuisCssParser.DEFAULT_FONT, 1)), (int) (getScreenY() + GuiAPIClientHelper.getRelativeTextY(0, 1, getHeight(), verticalTextAlignment, mc.fontRenderer.FONT_HEIGHT)), progressTextColor);
+    }
+
+    @Override
+    public int getMin() {
+        return minProgress;
+    }
+
+    @Override
+    public int getMax() {
+        return maxProgress;
+    }
+
+    @Override
+    public void setMin(int min) {
+        this.minProgress = min;
+    }
+
+    @Override
+    public void setMax(int max) {
+        this.maxProgress = max;
     }
 
     public class ProgressBarStyleManager extends CssComponentStyleManager
@@ -214,31 +234,13 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
         return this;
     }
 
-    public GuiProgressBar setProgress(float progress) {
+    public GuiProgressBar setProgress(int progress) {
         this.progress = MathHelper.clamp(progress, minProgress, maxProgress);
         return this;
     }
 
-    public float getProgress() {
+    public int getProgress() {
         return progress;
-    }
-
-    public GuiProgressBar setMinProgress(float minProgress) {
-        this.minProgress = minProgress;
-        return this;
-    }
-
-    public float getMinProgress() {
-        return minProgress;
-    }
-
-    public GuiProgressBar setMaxProgress(float maxProgress) {
-        this.maxProgress = maxProgress;
-        return this;
-    }
-
-    public float getMaxProgress() {
-        return maxProgress;
     }
 
     public GuiProgressBar setProgressTextColor(int progressTextColor) {

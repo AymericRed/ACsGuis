@@ -20,8 +20,7 @@ import scala.annotation.meta.param;
         examples = "",
         patterns = {"override css [code] of {gui_component} with {string}",
                 "override css id of {gui_component} with {string}",
-                "override css class of {gui_component} with {string}", //TODO TEST IT
-                "override label of {gui_component} with {string}"
+                "override css class of {gui_component} with {string}" //TODO TEST IT
         }
 )
 public class ActionSetCssCode extends ScriptAction

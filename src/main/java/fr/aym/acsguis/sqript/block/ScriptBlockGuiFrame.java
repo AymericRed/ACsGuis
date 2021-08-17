@@ -3,25 +3,23 @@ package fr.aym.acsguis.sqript.block;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
-import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.sqript.expressions.TypeComponent;
+import fr.aym.acsguis.sqript.ComponentUtils;
 import fr.nico.sqript.ScriptManager;
 import fr.nico.sqript.blocks.ScriptBlock;
 import fr.nico.sqript.compiling.ScriptCompileGroup;
 import fr.nico.sqript.compiling.ScriptDecoder;
 import fr.nico.sqript.compiling.ScriptException;
-import fr.nico.sqript.compiling.ScriptLine;
+import fr.nico.sqript.compiling.ScriptToken;
 import fr.nico.sqript.meta.Block;
 import fr.nico.sqript.meta.BlockDefinition;
-import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.*;
 import fr.nico.sqript.types.TypeArray;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Block(name = "gui_frame",
         description = "gui frame block",
@@ -34,7 +32,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
 {
     private final String name;
 
-    public static ScriptBlock loadBlock(ScriptInstance instance, List<ScriptLine> block, ScriptLine line, ScriptLine head) throws Exception {
+    public static ScriptBlock loadBlock(ScriptInstance instance, List<ScriptToken> block, ScriptToken line, ScriptToken head) throws Exception {
         BlockDefinition blockDefinition = ScriptDecoder.findBlockDefinition(head);
         if(blockDefinition==null)
             throw new ScriptException.ScriptUnknownTokenException(head);
@@ -42,7 +40,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
             Class scriptBlockClass = blockDefinition.getBlockClass();
             //System.out.println("Loading : "+scriptBlockClass.getSimpleName());
             try{
-                ScriptBlock scriptBlock = (ScriptBlock) scriptBlockClass.getConstructor(ScriptLine.class).newInstance(head);
+                ScriptBlock scriptBlock = (ScriptBlock) scriptBlockClass.getConstructor(ScriptToken.class).newInstance(head);
                 scriptBlock.setLine(line);
                 scriptBlock.setScriptInstance(instance);
                 return scriptBlock;
@@ -53,9 +51,9 @@ public class ScriptBlockGuiFrame extends ScriptBlock
         return null;
     }
 
-    public ScriptBlockGuiFrame(ScriptLine head) throws ScriptException {
+    public ScriptBlockGuiFrame(ScriptToken head) throws ScriptException {
         super(head);
-        String text = head.text.trim().replaceFirst("(^|\\s+)define gui frame\\s+", ""); //Extracting the event parameters
+        String text = head.getText().trim().replaceFirst("(^|\\s+)define gui frame\\s+", ""); //Extracting the event parameters
         text = text.substring(0, text.length()-1); //Removing the last ":"
         this.name = text.trim();
         System.out.println("My name is "+name);
@@ -76,6 +74,9 @@ public class ScriptBlockGuiFrame extends ScriptBlock
 
         System.out.println("Loading sub blocks");
         ScriptCompileGroup group = new ScriptCompileGroup();
+        group.add("layout");
+        group.add("text");
+        group.add("action");
         IScript script = getMainField().compile(group);
         setRoot(script);
 
@@ -110,17 +111,21 @@ public class ScriptBlockGuiFrame extends ScriptBlock
                         frame.setCssCode(getSubBlock("css_code").evaluate().getObject().toString());
                     this.frame = frame;
 
-
                     ScriptContext ctx = ScriptContext.fromGlobal();
-                    ctx.put(new ScriptAccessor(new TypeComponent(frame), "this component"));
-                    ctx.put(new ScriptAccessor(new ScriptBlockGuiComponent.TypeGuiComponentQueue(new ArrayDeque<>(Arrays.asList(frame))), "component_queue"));
+                    System.out.println("1" + ctx.printVariables());
+                    ComponentUtils.pushComponentVariables(frame, ctx);
+                    System.out.println("2" + ctx.printVariables());
                     //Running the associated script
                     ScriptClock k = new ScriptClock(ctx);
+                    ScriptBlockGuiComponent.lastRuntTab = -1;
                     try {
                         System.out.println("Running the command on " + getRoot());
                         k.start(getRoot());
                     } catch (ScriptException e) {
                         e.printStackTrace();
+                    }
+                    while(ComponentUtils.lastComponent != null) {
+                        ComponentUtils.popComponentVariables(null, ctx);
                     }
 
                     System.out.println("SHOW " + frame);

@@ -13,7 +13,7 @@ public abstract class ScriptWrapper extends IScript {
         return wrapped;
     }
 
-    public void wrap(IScript wrapped) {
+    public void wrap(IScript parent, int tabLevel, IScript wrapped) {
         this.wrapped = wrapped;
     }
 

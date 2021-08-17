@@ -9,7 +9,9 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -37,28 +39,30 @@ public class SqriptCommand extends CommandBase {
                     ScriptManager.reload();
                 }catch(Throwable e){
                     if (e instanceof ScriptException.ScriptExceptionList) {
-                        sendMessage("\247cError while reloading the scripts : ",sender);
+                        sendError("\247cError while reloading the scripts : ",sender);
                         for(Throwable ex : ((ScriptException.ScriptExceptionList) e).exceptionList){
-                            sendMessage("\247c"+ex.getLocalizedMessage(),sender);
+                            sendError("\247c"+ex.getLocalizedMessage()+" (\2478"+ex.getStackTrace()[0]+"\247c)",sender);
                             ex.printStackTrace();
                         }
                     }
                     else{
-                        sendMessage("\247cError while reloading scripts, see stacktrace for more information.",sender);
-                        sendMessage("\247c"+e.getLocalizedMessage(),sender);
+                        sendError("\247cError while reloading scripts, see stacktrace for more information.",sender);
+                        sendError("\247c"+e.getLocalizedMessage(),sender);
                         e.printStackTrace();
                     }
 
                 }
                 sendMessage("Done in "+((System.currentTimeMillis()-t)/1000d)+" seconds",sender);
             }
-            if(args[0].equalsIgnoreCase("generateDoc")){
+            else if(args[0].equalsIgnoreCase("generateDoc")){
                 try {
                     SqriptUtils.generateDoc();
                     sendMessage("Generated documentation at scripts/doc.md",sender);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }else{
+                sendHelp(sender);
             }
         }else{
             sendHelp(sender);
@@ -74,7 +78,10 @@ public class SqriptCommand extends CommandBase {
     }
 
     private void sendMessage(String message, ICommandSender sender){
-        sender.sendMessage(new TextComponentString("\2478[\2473Sqript\2478]\247r "+message));
+        sender.sendMessage(new TextComponentString("\2478[\2473Sqript\2478]\247r ").appendSibling(new TextComponentString(message)));
+    }
+    private void sendError(String message, ICommandSender sender){
+        sender.sendMessage(new TextComponentString("\2478[\2473Sqript\2478]\247r ").appendSibling(new TextComponentString(message).setStyle(new Style().setColor(TextFormatting.RED))));
     }
 
     private void sendHelp(ICommandSender sender) {

@@ -62,7 +62,7 @@ public interface ComponentStyleManager
      */
     ComponentStyleManager removeAutoStyleHandler(AutoStyleHandler<?> handler);
     /**
-     * @return The auto styles applied to this component
+     * @return The auto styles applied to this_component
      */
     Collection<AutoStyleHandler<?>> getAutoStyleHandlers();
 

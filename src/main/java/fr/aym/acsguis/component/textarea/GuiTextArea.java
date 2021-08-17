@@ -28,16 +28,16 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
 
     /**Used to allow only a certain type of character or pattern**/
     protected Pattern regexPattern = Pattern.compile("(?s).*");
-    
+
     protected int maxTextLength;
-    
+
     protected int cursorCounter;
     protected int cursorIndex;
     protected int selectionEndIndex;
-    
+
     protected int lineScrollOffsetX;
     protected int lineScrollOffsetY;
-    
+
     protected boolean editable;
 
     protected float textScale = 1;
@@ -48,13 +48,13 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
 	public GuiTextArea(int x, int y, int width, int height) {
 		super(x, y, width, height);
 		setEditable(true);
-		
+
 		setMaxTextLength(140);
 		cursorIndex = 0;
 		selectionEndIndex = 0;
 		lineScrollOffsetX = 0;
 		lineScrollOffsetY = 0;
-		
+
 		addTickListener(this);
 		addKeyboardListener(this);
 		addClickListener(this);
@@ -151,7 +151,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     public void onFocus() {
 	    cursorCounter = 0;
     }
-    
+
     @Override public void onFocusLoose() {}
 
     protected void drawCursor(float scale)
@@ -370,13 +370,13 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         }
 
         int height = getHeight();//style.getVerticalSize() == GuiConstants.ENUM_SIZE.RELATIVE ? (int) (style.getRelativeHeight() * getParent().getHeight()) : getHeight();
-        
+
         if(l <= 0) {
             lineScrollOffsetY += l;
         } else if(l >= height - (getPaddingLeft() + getPaddingRight()) - 9) {
             lineScrollOffsetY += l - (height - (getPaddingTop() + getPaddingBottom())) + 9;
         }
-        
+
         if(lineScrollOffsetX >= mc.fontRenderer.getStringWidth(line) && line.length() > 0) {
         	lineScrollOffsetX = mc.fontRenderer.getStringWidth(line.substring(0, line.length() - 1));
 		}
@@ -502,7 +502,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
 
         return i;
     }
-    
+
     public String getText() {
     	return text;
 	}
@@ -547,7 +547,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     {
         return keyID == 30 && GuiScreen.isCtrlKeyDown() && !GuiScreen.isShiftKeyDown();
     }
-	
+
     @Override
     public void onKeyTyped(char typedChar, int keyCode)
     {
@@ -596,7 +596,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
                     moveCursorBy(-1);
                     writeText("");
                 }
-	
+
 				updateTextOffset();
 
                 break;
@@ -729,7 +729,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
             moveSelectionToCursor();
         }
     }
-	
+
 	@Override
 	public void onMouseMoved(int mouseX, int mouseY)
 	{
@@ -745,14 +745,18 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
             lineScrollOffsetY = (int) MathHelper.clamp(lineScrollOffsetY, 0, getRenderedTextLines().size() * textScale * 9 - getHeight());
         }
     }
-	
+
 	@Override public void onMouseHover(int mouseX, int mouseY) {}
-	
+
 	@Override public void onMouseUnhover(int mouseX, int mouseY) {}
-	
+
 	public GuiTextArea setHintText(String hintText) {
         this.hintText = hintText;
         return this;
+    }
+
+    public String getHintText() {
+        return hintText;
     }
 
     public boolean isEditable() {
@@ -791,7 +795,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
 	public int getPaddingRight() {
 		return getStyle().getPaddingRight();
 	}
-	
+
 	public int getLineScrollOffsetX() {
         return lineScrollOffsetX;
     }
@@ -819,7 +823,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         this.regexPattern = regexPattern;
 	    return this;
     }
-	
+
 	public GuiTextArea setMaxTextLength(int maxTextLength) {
         this.maxTextLength = maxTextLength;
 	    return this;

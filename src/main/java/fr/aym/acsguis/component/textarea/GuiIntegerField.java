@@ -1,6 +1,8 @@
 package fr.aym.acsguis.component.textarea;
 
-public class GuiIntegerField extends GuiTextField
+import scala.math.Numeric;
+
+public class GuiIntegerField extends GuiTextField implements NumericComponent
 {
     private int value;
     private int min;

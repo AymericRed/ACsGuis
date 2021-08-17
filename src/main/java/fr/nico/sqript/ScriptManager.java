@@ -5,7 +5,6 @@ import fr.nico.sqript.blocks.ScriptBlock;
 import fr.nico.sqript.blocks.ScriptBlockCommand;
 import fr.nico.sqript.compiling.*;
 import fr.nico.sqript.events.EvtOnScriptLoad;
-import fr.nico.sqript.events.EvtOnWindowSetup;
 import fr.nico.sqript.events.ScriptEvent;
 import fr.nico.sqript.blocks.ScriptBlockEvent;
 import fr.nico.sqript.expressions.ScriptExpression;
@@ -19,7 +18,6 @@ import fr.nico.sqript.types.primitive.PrimitiveType;
 import fr.nico.sqript.types.primitive.TypeBoolean;
 import fr.nico.sqript.meta.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IResourcePack;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -29,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,7 +96,6 @@ public class ScriptManager {
             if ((op = binaryOperations.get(o).get(a).get(b)) != null)
                 return op;
         }
-        log.error("Operation : '" + o + "' with " + b.getSimpleName() + " is not supported by " + a.getSimpleName());
         return null;
     }
 
@@ -142,7 +138,7 @@ public class ScriptManager {
     }
 
     public static void registerType(Class<? extends ScriptElement<?>> type, String name) throws Exception {
-        if (ScriptDecoder.getType(name) != null)
+        if (ScriptDecoder.parseType(name) != null)
             throw new Exception("a Type with the name " + name + " already exists !");
         TypeDefinition d = new TypeDefinition(name, new String[0], new String[]{""}, type);
         types.put(type, d);
@@ -207,12 +203,16 @@ public class ScriptManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        loadScriptElements();
+
+        initOperators();
+        buildOperators();
+        ScriptDecoder.init();
 
         try {
+            ScriptManager.log.info("Loading scripts.");
             loadScripts(scriptDir);
         }catch (Throwable e) {
-                ScriptManager.log.error(e.getMessage());
+            ScriptManager.log.error(e.getMessage());
         }
 
 
@@ -233,9 +233,8 @@ public class ScriptManager {
 
 
     //Built-in operators
-    private static void loadOperators() {
+    private static void initOperators() {
         registerOperator(ScriptOperator.PLUS_UNARY);
-        registerOperator(ScriptOperator.FACTORIAL);
         registerOperator(ScriptOperator.MINUS_UNARY);
         registerOperator(ScriptOperator.MULTIPLY);
         registerOperator(ScriptOperator.MOD);
@@ -247,21 +246,17 @@ public class ScriptManager {
         registerOperator(ScriptOperator.LTE);
         registerOperator(ScriptOperator.LT);
         registerOperator(ScriptOperator.MT);
-        registerOperator(ScriptOperator.EQUAL);
         registerOperator(ScriptOperator.NOT_EQUAL);
+        registerOperator(ScriptOperator.EQUAL);
         registerOperator(ScriptOperator.NOT);
         registerOperator(ScriptOperator.AND);
         registerOperator(ScriptOperator.EXP);
         registerOperator(ScriptOperator.OR);
+        registerOperator(ScriptOperator.FACTORIAL);
+
     }
 
-    private static void loadScriptElements() {
-        loadOperators();
-        buildOperators();
 
-        //Chargement des opérateurs
-        //TODO : Fire event
-    }
 
     private static void buildOperators() {
         for (ScriptOperator s : operators) {
@@ -272,11 +267,12 @@ public class ScriptManager {
             }else{
                 ScriptDecoder.operators_list.add(Pattern.quote(s.symbol));
             }
+            ScriptDecoder.operators_pattern.add(Pattern.compile(ScriptDecoder.operators_list.get(ScriptDecoder.operators_list.size()-1)));
         }
     }
 
-    public static void handleError(ScriptLine line, Throwable throwable){
-        ScriptManager.log.error("Error while loading " + line.scriptInstance.getName() + " : ");
+    public static void handleError(ScriptToken line, Throwable throwable){
+        ScriptManager.log.error("Error while loading " + line.getScriptInstance().getName() + " : ");
         if (throwable instanceof ScriptException) {
             for (String s : throwable.getMessage().split("\n"))
                 ScriptManager.log.error(s);
@@ -290,7 +286,8 @@ public class ScriptManager {
         for(File f : folder.listFiles()) {
             if(f.isDirectory()){
                 loadFolder(f);
-                ScriptManager.loadResources(f);
+                if(FMLCommonHandler.instance().getSide() == net.minecraftforge.fml.relauncher.Side.CLIENT)
+                    ScriptManager.loadResources(f);
             }
             else if (f.toPath().toString().endsWith(".sq")) {
                 ScriptLoader loader = new ScriptLoader(f);
@@ -321,7 +318,11 @@ public class ScriptManager {
 
         if(FULL_DEBUG)
             for(ScriptInstance instance : scripts){
-                for (ScriptBlock s : instance.getBlocksOfClass(ScriptBlockEvent.class)) {
+                List<ScriptBlock> list =  instance.getBlocksOfClass(ScriptBlockEvent.class);
+                list.addAll(instance.getBlocksOfClass(ScriptBlockCommand.class));
+                //System.out.println("# Of blocks : "+instance.getBlocks().size());
+                for (ScriptBlock s : list)  {
+                    //System.out.println("Displaying : "+s.getHead());
                     ScriptLoader.dispScriptTree(s, 0);
                 }
                 log.info("");
@@ -340,9 +341,9 @@ public class ScriptManager {
 
 
     //Runs the events triggers and returns the final context (that has passed through all the triggers)
-    public static ScriptContext callEventAndGetContext(ScriptEvent event) {
+    public static ScriptContext callEventAndGetContext(ScriptEvent event) throws ScriptException {
         ScriptContext context = new ScriptContext(GLOBAL_CONTEXT);
-        context.returnValue = new ScriptAccessor(TypeBoolean.FALSE(), "");
+        context.setReturnValue(new ScriptTypeAccessor(TypeBoolean.FALSE(), ""));
         for(ScriptInstance instance : scripts) {
             context = instance.callEventAndGetContext(context,event);
         }
@@ -352,13 +353,20 @@ public class ScriptManager {
 
     //True if the event has been cancelled
     public static boolean callEvent(ScriptEvent event) {
-        ScriptContext context = new ScriptContext(GLOBAL_CONTEXT);
-        for(ScriptInstance instance : scripts){
+        Optional<EventDefinition> optional = ScriptManager.events.stream().filter(a->a.eventClass == event.getClass()).findFirst();
+        EventDefinition eventDefinition = null;
+        if(optional.isPresent())
+            eventDefinition = optional.get();
+        if( eventDefinition!=null && eventDefinition.getSide().isStrictlyValid()) {
+            ScriptContext context = new ScriptContext(GLOBAL_CONTEXT);
             if(RELOADING)
                 return false;
-            if(instance.callEvent(context,event))
-            {
-                return true;
+            for (ScriptInstance script : scripts) {
+                if (RELOADING)
+                    return false;
+                if (script.callEvent(context, event)) {
+                    return true;
+                }
             }
         }
         return false;

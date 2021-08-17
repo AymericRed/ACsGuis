@@ -4,10 +4,7 @@ import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.CssGuisManager;
 import fr.aym.acsguis.event.CssReloadEvent;
 import fr.aym.acsguis.sqript.NoSqriptSupport;
-import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import fr.aym.acsguis.sqript.SqriptSupport;
-import fr.aym.acsguis.sqript.block.ScriptBlockGuiComponent;
-import fr.aym.acsguis.sqript.block.ScriptBlockGuiFrame;
 import fr.aym.acsguis.utils.CssReloadOrigin;
 import fr.aym.acslib.ACsPlatform;
 import fr.aym.acslib.services.ACsRegisteredService;
@@ -16,12 +13,6 @@ import fr.aym.acslib.services.error_tracking.ErrorTrackingService;
 import fr.aym.acslib.services.error_tracking.TrackedErrorType;
 import fr.aym.acslib.services.thrload.ModLoadingSteps;
 import fr.aym.acslib.services.thrload.ThreadedLoadingService;
-import fr.nico.sqript.ScriptManager;
-import fr.nico.sqript.blocks.ScriptBlock;
-import fr.nico.sqript.compiling.*;
-import fr.nico.sqript.meta.BlockDefinition;
-import fr.nico.sqript.structures.IScript;
-import fr.nico.sqript.structures.ScriptInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -34,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 
 /**

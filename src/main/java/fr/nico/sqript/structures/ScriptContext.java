@@ -1,143 +1,201 @@
 package fr.nico.sqript.structures;
 
 import fr.nico.sqript.ScriptManager;
+import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.types.ScriptType;
-import sun.font.Script;
 
 import java.util.*;
 import java.util.regex.Matcher;
 
+/**
+ * The ScriptContext is what contains the variables / elements common to different blocks of the script.
+ * It is distributed recursively to each sub-block, in particular so that a block can take advantage of the variables declared in the block which is superior to it.
+ * A ScriptContext comes down to a list of variables: the ScriptAccessor (accessor because they can be accessed from the script via a regex).
+ * Each ScriptEvent must be able to provide an initial ScriptContext during its construction, even empty.
+ */
 public class ScriptContext {
 
-    /*
-    Le ScriptContext est ce qui contient les variables/élements communs à différents blocs du scripts.
-    Il est distribué récursivement à chaque sous-bloc, notamment pour qu'un bloc puisse profiter des variables déclarées dans le bloc qui lui est supérieur.
-    Un ScriptContext se résume à une liste de variables : les ScriptAccessor (accessor car on peut les accéder depuis le script via une regex).
-    Chaque ScriptEvent doit être capable de fournir un ScriptContext initial lors de sa construction, même vide.
+    /**
+     * HashMap associating a ScriptAccessor to each variable hash
      */
+    private final HashMap<Integer, ScriptTypeAccessor> variables = new HashMap<>();
 
-    //HashMap associating a ScriptAccessor for each hash
-    private final HashMap<Integer,ScriptAccessor> variables = new HashMap<>();
+    /**
+     * The parent of this ScriptContext.
+     */
+    private ScriptContext parent;
 
-    public ScriptContext parent;
-
-    public void remove(String name){
-        ScriptAccessor a = getAccessor(name);
-        variables.remove(a);
+    /**
+     * Removes the variable associated to the given name from this ScriptContext.
+     *
+     * @param name The variable name.
+     */
+    public void remove(String name) {
+        ScriptTypeAccessor a = getAccessor(name);
+        variables.remove(a.hash);
     }
 
-    public void remove(int hash){
+    /**
+     * Removes the variable associated to the given hash from this ScriptContext.
+     *
+     * @param hash The variable hash.
+     */
+    public void remove(int hash) {
         variables.remove(hash);
     }
 
-    //A not-null accessor means that a returnValue is wanted here.
-    //If a child context has this accessor, to null, it will try to give the return to his parent, and recursively.
-    public ScriptAccessor returnValue = null;
+    /**
+     * A non-null accessor means that a returnValue is wanted here.
+     * If a child context has this accessor, to null, it will try to give the return to his parent, and recursively.
+     */
+    private ScriptTypeAccessor returnValue = null;
 
     /**
      * Utility method which creates a ScriptContext extending the global one
+     *
      * @return A ScriptContext extending the global one
      */
-    public static ScriptContext fromGlobal(){
+    public static ScriptContext fromGlobal() {
         return new ScriptContext(ScriptManager.GLOBAL_CONTEXT);
     }
 
-    public ScriptContext(){}
+    public ScriptContext() {
+    }
 
-    public ScriptContext(ScriptContext parent){
-        this.parent=parent;
+    public ScriptContext(ScriptContext parent) {
+        this.parent = parent;
     }
 
 
-    //Return value propagation
-    public void setReturnValue(ScriptType returnValue){
-        if(this.returnValue!=null)
-            this.returnValue.element=returnValue;
-        else if(parent!=null)
+    /**
+     * Propagates the return value of this ScriptContext to its parent.
+     */
+    public void setReturnValue(ScriptType returnValue) {
+        if (this.returnValue != null)
+            this.returnValue.element = returnValue;
+        else if (parent != null)
             parent.setReturnValue(returnValue);
     }
 
-    public String printVariables(){
-        String s = "("+this.hashCode()+") ";
-
-        for(int a : variables.keySet()){
-            s+=a +": "+ variables.get(a).pattern +":"+variables.get(a).element+" ";
+    /**
+     * Debug purpose only.
+     *
+     * @return a String holding information about this ScriptContext.
+     */
+    public String printVariables() {
+        String s = "(" + this.hashCode() + ") ";
+        for (int a : variables.keySet()) {
+            s += "[" + variables.get(a).key + "/" + a + ":" + variables.get(a).element + "] ";
         }
-        if(parent!=null)
-            s+=" => ["+parent.printVariables()+"]";
+        if (parent != null)
+            s += " => [" + parent.printVariables() + "]";
         return s;
     }
 
-    //We use hashes of strings to find the right variable stored in the con
-    public ScriptType<?> get(int hash){
-        //System.out.println("Getting for : "+hash+" in "+ this.hashCode());
+    /**
+     * Returns the variable associated to the given hash.
+     *
+     * @param hash The hash of the variable.
+     * @return the variable associated to the given hash.
+     */
+    public ScriptType<?> getVariable(int hash) {
+        //System.out.println("Getting variable for : "+hash+" in "+ this.hashCode());
         //System.out.println("It contains : "+printVariables());
-        final ScriptAccessor a = variables.get(hash);
-        if(a != null)
+        final ScriptTypeAccessor a = variables.get(hash);
+        if (a != null)
             return a.element;
-        else if(parent!=null)
-            return parent.get(hash);
+        else if (parent != null)
+            return parent.getVariable(hash);
         else return null;
     }
 
-    public int get(String match){
-        //System.out.println("Getting for : "+match+" in "+ this.hashCode());
-        //System.out.println("It contains : "+printVariables());
-        int i = 0;
-        for (ScriptAccessor a : variables.values()) {//Simple search first
-            if(a.pattern.pattern().equals(match))return i;
-            i++;
-        }
-        for (Integer hash : variables.keySet()) {//Pattern search second
-            Matcher m = variables.get(hash).pattern.matcher(match);
-            //System.out.println("check if "+variables.get(hash).pattern.pattern()+" matches "+match+" it's : "+m.matches());
-            if(m.matches())
-                return hash;
-        }
-        if(parent!=null)
-        {
-            return parent.get(match);
-        }
-        return 0;
+    public ScriptType<?> getVariable(String name) {
+        return getVariable(getHash(name));
     }
 
-    public Collection<ScriptAccessor> getAccessors(){
+    /**
+     * Returns the hash associated to the given variable name.
+     *
+     * @param variableName The variable's name.
+     * @return The hash associated to the given name.
+     */
+    public int getHash(String variableName) {
+        //System.out.println("Getting hash for : "+variableName+" in "+ this.hashCode());
+        for (ScriptTypeAccessor a : variables.values()) {//Simple search first
+            if (a.key != null && a.key.equals(variableName))
+                return a.hash;
+        }
+        for (Integer hash : variables.keySet()) {//Pattern search second
+            if (variables.get(hash).getPattern() != null) {
+                Matcher m = variables.get(hash).getPattern().matcher(variableName);
+                System.out.println("check if "+variables.get(hash).getPattern().pattern()+" matches "+variableName+" it's : "+m.matches());
+                if (m.matches())
+                    return hash;
+            }
+
+        }
+        if (parent != null) {
+            return parent.getHash(variableName);
+        }
+        return variableName.hashCode();
+        //TODO NICO return 0;
+    }
+
+    /**
+     * Returns the list of the inner variables of this context (those not declared in the script, but by the event or by other blocks).
+     *
+     * @return The list of this ScriptContext's accessors.
+     */
+    public Collection<ScriptTypeAccessor> getAccessors() {
         return variables.values();
     }
 
-    public ScriptAccessor getAccessor(String match){
-        for (ScriptAccessor a : variables.values()) {
-            //System.out.println("check if "+a.pattern.pattern()+" matches "+match);
-
-            if(match.equals(a.pattern.pattern()) || a.pattern.matcher(match).matches())return a;
+    /**
+     * Returns the TypeAccessor associated to the given string token.
+     *
+     * @param token The string token to parse into a ScriptTypeAccessor.
+     * @return the ScriptTypeAccessor matching the given string token.
+     */
+    public ScriptTypeAccessor getAccessor(String token) {
+        for (ScriptTypeAccessor a : variables.values()) {
+            if (a.getPattern() == null)
+                continue;
+            if (token.equals(a.key) || a.getPattern().matcher(token).matches()) return a;
         }
-        if(parent!=null)
-            return parent.getAccessor(match);
+        if (parent != null)
+            return parent.getAccessor(token);
         return null;
     }
 
-    public ScriptAccessor getAccessor(int hash){
-        final ScriptAccessor a = variables.get(hash);
-        if(a != null)
-            return a;
-        else if(parent!=null)
-            return parent.getAccessor(hash);
-        else return null;
+    public void put(ScriptTypeAccessor accessor) {
+        variables.put(accessor.hash, accessor);
     }
 
-    public void put(ScriptAccessor accessor){
-        variables.put(accessor.hash,accessor);
-    }
-
-    public ScriptContext wrap(ScriptAccessor... accessors){
-        for(ScriptAccessor accessor : accessors){
-            variables.put(accessor.hash,accessor);
+    /**
+     * Wraps the given ScriptTypeAccessor array into this ScriptContext.
+     *
+     * @param accessors The ScriptTypeAccessor array that will be wrapped.
+     * @return the instance of this ScriptContext once the array is wrapped.
+     */
+    public ScriptContext wrap(ScriptTypeAccessor... accessors) {
+        for (ScriptTypeAccessor accessor : accessors) {
+            variables.put(accessor.hash, accessor);
         }
         return this;
     }
 
-    public void empty(){
+    /**
+     * Clears this ScriptContext's variables array.
+     */
+    public void empty() {
         this.variables.clear();
     }
 
+    public ScriptTypeAccessor getReturnValue() {
+        return returnValue;
+    }
+
+    public void setReturnValue(ScriptTypeAccessor returnValue) {
+        this.returnValue = returnValue;
+    }
 }

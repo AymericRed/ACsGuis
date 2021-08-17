@@ -16,7 +16,7 @@ public class TypePanelLayout extends ScriptType<PanelLayout<?>>
     }
 
     public String toString() {
-        return this.getObject().toString();
+        return this.getObject() == null ? "null" : this.getObject().toString();
     }
 
     public TypePanelLayout(PanelLayout file) {

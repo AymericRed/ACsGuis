@@ -1,4 +1,4 @@
-package fr.aym.acsguis.sqript;
+package fr.aym.acsguis.sqript.events;
 
 import fr.nico.sqript.events.ScriptEvent;
 import fr.nico.sqript.meta.Event;

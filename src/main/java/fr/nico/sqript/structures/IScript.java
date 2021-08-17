@@ -1,14 +1,14 @@
 package fr.nico.sqript.structures;
 
 import fr.nico.sqript.compiling.ScriptException;
-import fr.nico.sqript.compiling.ScriptLine;
+import fr.nico.sqript.compiling.ScriptToken;
 
 public abstract class IScript {
 
     /**
      * Abstract method that describes the behavior of this Script
-     * @param context
-     * @throws ScriptException
+     * @param context The ScriptContext that the execution must use.
+     * @throws ScriptException if an error happens during execution.
      */
     public abstract void execute(ScriptContext context) throws ScriptException;
 
@@ -21,7 +21,7 @@ public abstract class IScript {
         this.next = next;
     }
 
-    public IScript getNext(ScriptContext context) {
+    public IScript getNext(ScriptContext context) throws ScriptException {
         if(next!=null)
             return next;
         else if(getParent()!=null && getParent() instanceof ScriptLoop) {
@@ -30,20 +30,15 @@ public abstract class IScript {
             return null;
     }
 
+    private ScriptToken line;
 
-
-
-    private ScriptLine line;
-
-    public ScriptLine getLine() {
+    public ScriptToken getLine() {
         return line;
     }
 
-    public void setLine(ScriptLine line) {
+    public void setLine(ScriptToken line) {
         this.line = line;
     }
-
-    public int hash;
 
     /**
      * The next <strong>direct</strong> parent of this script item
@@ -59,10 +54,10 @@ public abstract class IScript {
     }
 
     /**
-     * Should not be overriden for normal use.
-     * @param context
-     * @return The the next IScript to run
-     * @throws ScriptException
+     * Should not be overridden for normal use.
+     * @param context The context the running must use.
+     * @return The next IScript to run
+     * @throws ScriptException if an error happens during run.
      */
     public IScript run(ScriptContext context) throws ScriptException {
         execute(context);

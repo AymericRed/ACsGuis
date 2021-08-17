@@ -2,19 +2,14 @@ package fr.nico.sqript.types.primitive;
 
 import fr.nico.sqript.ScriptManager;
 import fr.nico.sqript.compiling.ScriptDecoder;
-import fr.nico.sqript.compiling.ScriptLine;
-import fr.nico.sqript.expressions.ExprReference;
 import fr.nico.sqript.meta.Primitive;
 import fr.nico.sqript.structures.ScriptElement;
 import fr.nico.sqript.structures.ScriptOperator;
-import fr.nico.sqript.types.interfaces.IComparable;
 import fr.nico.sqript.types.interfaces.ISerialisable;
 import fr.nico.sqript.types.ScriptType;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 @Primitive(name = "string",
         parsableAs = {},
@@ -38,10 +33,10 @@ public class TypeString extends PrimitiveType<String> implements ISerialisable {
 
     static {
         ScriptManager.registerBinaryOperation(ScriptOperator.ADD, TypeString.class, ScriptType.class,
-                (a, b) -> new TypeString(a.getObject() + b.toString()));
+                (a, b) -> new TypeString((a==null ? "null" : a.getObject()) + (b==null ? "null" : b.toString())));
 
         ScriptManager.registerBinaryOperation(ScriptOperator.ADD, ScriptType.class, TypeString.class,
-                (a, b) -> new TypeString(a.toString() + b.getObject()));
+                (a, b) -> new TypeString((a==null ? "null" : a.toString()) + (b==null ? "null" : b.getObject())));
 
         ScriptManager.registerBinaryOperation(ScriptOperator.MT, TypeString.class, TypeString.class,
                 (a, b) -> new TypeBoolean(((TypeString) a).getObject().compareTo(((TypeString) b).getObject()) > 0));
