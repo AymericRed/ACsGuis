@@ -32,7 +32,7 @@ define gui frame monGui:
 								set {btn_on} to false
 								set css class of this_component to "switch-button-off"
 								set text of this_component to "Off"
-							else::
+							else:
 								set {btn_on} to true
 								set class of this_component to "switch-button-on"
 								set text of this_component to "On"
@@ -42,8 +42,9 @@ define gui frame monGui:
 						on component click:
 							print "on tu as cliqué 3 !"
 							closeTheGui()
-					    print ":Oo"
-				add css component label with id "player_hunger" and class "reload_button" and text "To fill"
+						print ":Oo"
+				add css component label with id "player_hunger" and class "reload_button" and text "To fill":
+					set text to "Faim du joueur : " + (player's hunger)
 
 on acsguis load:
 	register css sheet "sample:css/test.css"

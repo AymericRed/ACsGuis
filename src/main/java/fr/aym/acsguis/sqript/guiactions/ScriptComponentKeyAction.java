@@ -16,7 +16,7 @@ public class ScriptComponentKeyAction extends GuiActionScriptLoop {
     public void appendListener(ScriptContext context, GuiComponent<?> component) {
         component.addKeyboardListener((typedChar, keyCode) -> {
             System.out.println("Running button action !!");
-            ScriptContext context1 = new ScriptContext(context); //todo voir si ça empêche de "faire sortir" des variables
+            ScriptContext context1 = context;
             context1.put(new ScriptTypeAccessor(new TypeNumber(typedChar), "typed_char"));
             context1.put(new ScriptTypeAccessor(new TypeNumber(keyCode), "key_code"));
             executeAction(context1);

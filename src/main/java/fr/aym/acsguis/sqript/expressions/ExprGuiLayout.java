@@ -42,18 +42,4 @@ public class ExprGuiLayout extends ScriptExpression
     public boolean set(ScriptContext context, ScriptType to, ScriptType[] parameters) throws ScriptException.ScriptUndefinedReferenceException {
         return false;
     }
-
-    static
-    {
-        ScriptManager.registerBinaryOperation(ScriptOperator.ADD, TypeComponent.class, TypePanelLayout.class,
-                (a,b) -> {
-                System.out.println("Add "+a+" with "+b);
-                    if(a.getObject() instanceof GuiPanel)
-                    { //TODO ASK GENERICIZATION TO NICO
-                        ((GuiPanel) a.getObject()).setLayout((PanelLayout<?>) b.getObject());
-                        System.out.println("Layout mis !");
-                    }
-                    return a;
-                });
-    }
 }

@@ -32,10 +32,9 @@ public class ActionShowGui extends ScriptAction
 {
     @Override
     public void execute(ScriptContext context) throws ScriptException {
-        if(getMatchedIndex() == 1)
+        if(getMatchedIndex() == 1) //TODO TEST WORKING GOOD
         {
             System.out.println("Line is "+getLine());
-            //TODO SAY TO NICO : NPE SUR GET LINE
             System.out.println("SC "+ScriptManager.getScriptFromName("salemoche"));
             System.out.println("SC2 "+ScriptManager.getScriptFromName("salemoche").getBlocksOfClass(ScriptBlockGuiFrame.class));
             System.out.println(ScriptManager.getScriptFromName("salemoche").getBlocksOfClass(ScriptBlock.class));

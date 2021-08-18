@@ -20,7 +20,7 @@ public class ScriptComponentClickAction extends GuiActionScriptLoop { //TODO AUT
             System.out.println("Running button action !!");
             ScriptContext context1 = context;//new ScriptContext(context); //todo voir si ça empêche de "faire sortir" des variables : oui
             //ComponentUtils.setComponentContext(component, context); //TODO FAIRE UNE EXPRESSION EVENT DATA OU TRUC DU GENRE ?
-            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
+            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component")); //TODO MOVE AT LOWER LEVER
             context1.put(new ScriptTypeAccessor(new TypeNumber(x), "click_x"));
             context1.put(new ScriptTypeAccessor(new TypeNumber(y), "click_y"));
             context1.put(new ScriptTypeAccessor(new TypeNumber(b), "click_b"));

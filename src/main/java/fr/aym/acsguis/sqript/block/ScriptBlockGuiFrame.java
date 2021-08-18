@@ -24,7 +24,7 @@ import java.util.List;
 @Block(name = "gui_frame",
         description = "gui frame block",
         examples = "define gui frame my_frame:",
-        regex = "^define gui frame .*",
+        regex = "^define gui frame .*:",
         side = Side.CLIENT,
         fields = {"css_class","css_id","css_code","css_sheets"}
 )
@@ -60,8 +60,6 @@ public class ScriptBlockGuiFrame extends ScriptBlock
     }
 
     public String getName() {
-        System.out.println("IT My name is "+name);
-        //TODO USE TO SHOW getScriptInstance().getBlocksOfClass(ScriptBlockGuiFrame.class).stream().filter(g -> ((ScriptBlockGuiFrame)g).getName().equalsIgnoreCase(name)).findFirst().get();
         return name;
     }
 

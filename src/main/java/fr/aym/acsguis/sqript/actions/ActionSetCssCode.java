@@ -23,7 +23,6 @@ import scala.annotation.meta.param;
                 "set [css] class of {gui_component} to {string}",
                 "set text of {gui_component} to {string}",
                 "set {string} of {gui_component} to {string}"
-                //TODO ETC
         }
 )
 public class ActionSetCssCode extends ScriptAction

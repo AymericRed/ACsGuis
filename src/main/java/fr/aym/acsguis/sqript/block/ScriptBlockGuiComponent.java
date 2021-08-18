@@ -23,8 +23,8 @@ import java.util.regex.Pattern;
         side = Side.CLIENT,
         fields = {"css_class", "css_id", "css_code", "text", "onclick", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"}
 )*/
-@Loop(name = "gui_component", //TODO SUPPORTER LES COMPOSANTS EN EXPRESSIONS (UNE LIGNE)
-        pattern = "^add css component .*",
+@Loop(name = "gui_component",
+        pattern = "^add css component .*:",
         side = Side.CLIENT
 )
 public class ScriptBlockGuiComponent extends ScriptLoop {
