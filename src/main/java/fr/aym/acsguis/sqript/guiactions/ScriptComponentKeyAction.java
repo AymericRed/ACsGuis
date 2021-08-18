@@ -8,7 +8,7 @@ import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
 @Loop(name = "gui_component_on_key",
-        pattern = "on component key input",
+        pattern = "on component key input:",
         side = Side.CLIENT
 )
 public class ScriptComponentKeyAction extends GuiActionScriptLoop {

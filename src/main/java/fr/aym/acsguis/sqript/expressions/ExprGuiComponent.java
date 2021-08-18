@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
-@Expression(name = "GuiComponent",
+/*@Expression(name = "GuiComponent",
         description = "Utilities about guis",
         examples = "gui label \"test\"",
         patterns = {"[a] [new] gui panel {string}:gui_component",
@@ -41,13 +41,8 @@ import java.util.function.BiFunction;
                 "[a] [new] gui tabbed_pane:gui_component",
                 "[a] [new] gui checkbox {string}:gui_component"},
         side = Side.CLIENT
-)
-/**
- * TODO :
- *
- * - tous les composants
- * - améliorer des boutons
- */
+)*/
+@Deprecated
 public class ExprGuiComponent extends ScriptExpression
 {
     public static final List<GuiPattern> patterns = new ArrayList<>();

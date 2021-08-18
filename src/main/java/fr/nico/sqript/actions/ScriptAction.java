@@ -71,7 +71,7 @@ public abstract class ScriptAction extends IScript {
     @Override
     public abstract void execute(ScriptContext context) throws ScriptException;
 
-    public void build(ScriptToken line, ScriptCompileGroup compileGroup, List<String> parameters, int matchedIndex, int marks) throws Exception {
+    public void build(ScriptToken line, ScriptCompileGroup compileGroup, List<String> parameters, int matchedIndex, int marks, int tabLevel) throws Exception {
         List<ScriptExpression> expressions = new ArrayList<>(parameters.size());
         //System.out.println("Building action for line : "+line+", parameters are :"+ Arrays.toString(parameters.toArray(new String[0])));
         //System.out.println("Marks are : "+Integer.toBinaryString(marks));

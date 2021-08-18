@@ -51,7 +51,7 @@ public class ActDefinition extends ScriptAction {
     }
 
     @Override
-    public void build(ScriptToken line, ScriptCompileGroup compileGroup, List<String> parameters, int matchedIndex, int marks) throws Exception {
+    public void build(ScriptToken line, ScriptCompileGroup compileGroup, List<String> parameters, int matchedIndex, int marks, int tabLevel) throws Exception {
         //If accessing a global variable,
         //we parse the argument as a string to make the action
         //able to register the new variable in the context
@@ -65,7 +65,7 @@ public class ActDefinition extends ScriptAction {
             this.setMatchedIndex(matchedIndex);
             this.setMarks(marks);
         } else {
-            super.build(line,compileGroup, parameters, matchedIndex, marks);
+            super.build(line,compileGroup, parameters, matchedIndex, marks, tabLevel);
         }
 
     }

@@ -18,9 +18,12 @@ import scala.annotation.meta.param;
 @Action(name = "Add component to panel",
         description ="",
         examples = "",
-        patterns = {"override css [code] of {gui_component} with {string}",
-                "override css id of {gui_component} with {string}",
-                "override css class of {gui_component} with {string}" //TODO TEST IT
+        patterns = {"set css [code] of {gui_component} to {string}",
+                "set [css] id of {gui_component} to {string}",
+                "set [css] class of {gui_component} to {string}",
+                "set text of {gui_component} to {string}",
+                "set {string} of {gui_component} to {string}"
+                //TODO ETC
         }
 )
 public class ActionSetCssCode extends ScriptAction
@@ -28,22 +31,29 @@ public class ActionSetCssCode extends ScriptAction
     @Override
     @SuppressWarnings("unchecked")
     public void execute(ScriptContext context) throws ScriptException {
-        ScriptType<GuiComponent<?>> param = getParameter(0).get(context);
+        ScriptType<GuiComponent<?>> param = getParameter(getMatchedIndex() == 4 ? 2 : 1).get(context);
+        System.out.println("SET ON "+getMatchedIndex()+" "+param.getObject());
         switch (getMatchedIndex()) {
             case 0:
-                param.getObject().setCssCode(getParameter(1).get(context).toString());
+                param.getObject().setCssCode(getParameter(2).get(context).toString());
                 break;
             case 1:
-                param.getObject().setCssId(getParameter(1).get(context).toString());
+                param.getObject().setCssId(getParameter(2).get(context).toString());
                 break;
             case 2:
-                param.getObject().setCssClass(getParameter(1).get(context).toString());
+                param.getObject().setCssClass(getParameter(2).get(context).toString());
                 break;
             case 3:
                 if(param.getObject() instanceof TextComponent)
-                    ((TextComponent) param.getObject()).setText(getParameter(1).get(context).toString());
+                    ((TextComponent) param.getObject()).setText(getParameter(2).get(context).toString());
                 else
                     throw new IllegalArgumentException(param.getObject()+" is not a TextComponent");
+                System.out.println("So text: "+((TextComponent) param.getObject()).getText());
+                break;
+            case 4:
+                //TODO PARSEABLE COMPONENTS ETC
+                String optn = getParameter(1).toString();
+                System.out.println("Try change "+optn+" : WIP");
                 break;
         }
     }

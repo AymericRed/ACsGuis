@@ -5,13 +5,15 @@ import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.TextComponent;
 import fr.aym.acsguis.sqript.ComponentUtils;
 import fr.aym.acsguis.sqript.expressions.TypeComponent;
+import fr.nico.sqript.actions.ScriptAction;
+import fr.nico.sqript.compiling.ScriptCompileGroup;
 import fr.nico.sqript.compiling.ScriptDecoder;
 import fr.nico.sqript.compiling.ScriptException;
+import fr.nico.sqript.compiling.ScriptToken;
+import fr.nico.sqript.meta.Action;
 import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,11 +25,11 @@ import java.util.regex.Pattern;
         side = Side.CLIENT,
         fields = {"css_class", "css_id", "css_code", "text", "onclick", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"}
 )*/
-@Loop(name = "gui_component", //TODO SUPPORTER LES COMPOSANTS EN EXPRESSIONS (UNE LIGNE)
-        pattern = "^add css component .*",
-        side = Side.CLIENT
-)
-public class ScriptBlockGuiComponent extends ScriptLoop {
+@Action(name = "gui_component",
+        description = "add gui component action",
+        examples = "add css component label with id \"reload_models\" and class \"reload_button\" and text \"Recharger les packs\"",
+        patterns = "^add css component .*")
+public class ActionGuiComponent extends ScriptAction {
     public static final String[] supportedFields = new String[]{"text", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"};
 
     private String name;
@@ -51,24 +53,24 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
         if(type.isEmpty()) {
             throw new ScriptException(getLine(), "No component found for type: "+type);
         }
-        //System.out.println("My type is " + type);
+        System.out.println("My type is " + type);
         ParseableComponent componentType = ParseableComponent.find(type);
         GuiComponent<?> component = componentType.create();
 
         String id = matcher.group(4);
-        //System.out.println("The id is "+id);
+        System.out.println("The id is "+id);
         if(id != null && !id.isEmpty()) {
             component.setCssId(id);
         }
 
         String clazz = matcher.group(7);
-        //System.out.println("The class is "+clazz);
+        System.out.println("The class is "+clazz);
         if(clazz != null && !clazz.isEmpty()) {
             component.setCssClass(clazz);
         }
 
         String text = matcher.group(10);
-        //System.out.println("The text is "+text);
+        System.out.println("The text is "+text);
         if(text != null) {
             if(component instanceof TextComponent) {
                 ((TextComponent) component).setText(text);
@@ -94,28 +96,22 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
         //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this_component").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
         System.out.println("HUAWEI To: "+((TypeComponent) context.getVariable("this_component")).getObject()+" adding: "+component);
         ((GuiPanel) ((TypeComponent) context.getAccessor("this_component").element).getObject()).add(component);
-        if (getWrapped() == null) {
-            System.out.println("WTF no wrapped for "+getLine());
-        } else {
-            ComponentUtils.pushComponentVariables(component, context);
-        }
+        ComponentUtils.pushComponentVariables(component, context);
     }
-
-    public static int lastRuntTab;
 
     @Override
     public IScript run(ScriptContext context) throws ScriptException {
         //System.out.println("OWW I DOING DONE " + getWrapped() + " " + getParent() + " " + this);
-        IScript toDo = getWrapped() == null ? getNext(context) : getWrapped();
+        IScript toDo = getNext(context);
         System.out.println("-------------> Return " + toDo + " " + this.next);
-        System.out.println("Last runt is "+lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
-        while (lastRuntTab >= this.tabLevel) {
-            lastRuntTab--;
+        System.out.println("Last runt is "+ScriptBlockGuiComponent.lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
+        while (ScriptBlockGuiComponent.lastRuntTab >= this.tabLevel) {
+            ScriptBlockGuiComponent.lastRuntTab--;
             ComponentUtils.popComponentVariables(component, context);
         }
 
         execute(context);
-        lastRuntTab = this.tabLevel;
+        ScriptBlockGuiComponent.lastRuntTab = this.tabLevel;
         return toDo;
     }
 
@@ -125,7 +121,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
             return next;
         else if (getParent() != null && getParent() instanceof ScriptLoop) {
             return getParent().getNext(context);
-        } else if (getParent() != null && getParent() instanceof ScriptBlockGuiComponent) {
+        } else if (getParent() != null && getParent() instanceof ActionGuiComponent) {
             //if(((ScriptBlockGuiComponent) getParent()).component instanceof GuiPanel)
             //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this_component"));
             System.out.println("Mais wtf le next de mon papa c'est " + getParent().getNext(context));
@@ -142,13 +138,13 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
     private int tabLevel;
 
     @Override
-    public void wrap(IScript parent, int tabLevel, IScript wrapped) {
-        String text = parent.getLine().getText().trim().replaceFirst("(^|\\s+)add css component\\s+", ""); //Extracting the event parameters
-        text = text.substring(0, text.length() - 1); //Removing the last ":"
+    public void build(ScriptToken line, ScriptCompileGroup compileGroup, List<String> parameters, int matchedIndex, int marks, int tabLevel) throws Exception {
+        super.build(line, compileGroup, parameters, matchedIndex, marks, tabLevel);
+        String text = line.getText().trim().replaceFirst("(^|\\s+)add css component\\s+", ""); //Extracting the event parameters
         this.name = text;
+        System.out.println("Line text "+tabLevel);
         this.tabLevel = tabLevel;
-        System.out.println("FILL "+text+" WITH TAB "+tabLevel);
+        System.out.println("FILL "+text+" WITH TAB "+ this.tabLevel);
         //System.out.println("Long name is " + name);
-        super.wrap(parent, tabLevel, wrapped);
     }
 }

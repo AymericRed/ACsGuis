@@ -8,7 +8,7 @@ import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
 @Loop(name = "gui_component_on_tick",
-        pattern = "on component tick",
+        pattern = "on component tick:",
         side = Side.CLIENT
 )
 public class ScriptComponentTickAction extends GuiActionScriptLoop {

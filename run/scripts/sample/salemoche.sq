@@ -1,49 +1,49 @@
 on script load:
 	print "testloaded tabbed"
-	#set {$moche} to false
+	#set {var2} to false
 
 function closeTheGui():
 	close css gui
 
-function switchMochete():
-    print "mochete switchée"
-
 define gui frame monGui:
 	css_class: "home"
 	css_sheets: ["acsguis:css/dnx_debug.css"]
-	set {tcon} to "lol"
 	print "ceci est un test"
-	set {$moche} to false
+	set {var2} to false
 	add css component tabbed_pane:
 		add css component panel with id "general":
 			add css component scroll_pane:
-				set {arr} to [-1,25]
-				set layout to new grid layout with size {arr} spacing 5 direction "horizontal" elements per line 1
-                #on component tick:
-                #   print "ticking..."
+				set layout to new grid layout with size [-1,25] spacing 5 direction "horizontal" elements per line 1
+				#on component tick:
+				#   print "ticking..."
+				add css component label with id "reload_models" and class "reload_button" and text "Recharger les packs"
 				add css component panel with class "option-desc":
-	                print "yooooo STEP 1"
+					print "Test 1"
 					set {texteb} to "Rendu du debug : "
-	                print "yooooo STEP 2"
-					add {$moche} to {texteb}
-					add css component label with id "t1":
+					add {var2} to {texteb}
+					add css component label with id "t1" and text "Loading":
 						set text to {texteb}
-					add css component button with id "mochebu" and class "switch-button-on":
+					add css component button with id "mochebu" class "switch-button-off" and text "":
+						set {btn_on} to false
 						on component click:
-						    print "on tu as cliqué !"
-						    print [player's hunger]
-						    switchMochete()
-						set text to ""
+							print "on tu as cliqué !"
+							print [player's hunger]
+							if {btn_on}:
+								set {btn_on} to false
+								set css class of this_component to "switch-button-off"
+								set text of this_component to "Off"
+							else::
+								set {btn_on} to true
+								set class of this_component to "switch-button-on"
+								set text of this_component to "On"
 				add css component panel with class "option-desc":
-					add css component label with id "t2":
-						set text to "Profilage : n/a"
-					add css component button with id "mochebu" and class "switch-button-off":
+					add css component label with id "t2" and text "Profilage : n/a"
+					add css component button with id "mochebu" and class "switch-button-off" and text "":
 						on component click:
-						    print "on tu as cliqué 3 !"
-						    closeTheGui()
-						set text to ""
-				add css component label with id "reload_models" and class "reload_button":
-					set text to "Recharger les packs"
+							print "on tu as cliqué 3 !"
+							closeTheGui()
+					    print ":Oo"
+				add css component label with id "player_hunger" and class "reload_button" and text "To fill"
 
 on acsguis load:
 	register css sheet "sample:css/test.css"

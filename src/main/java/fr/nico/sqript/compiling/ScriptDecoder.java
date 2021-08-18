@@ -868,6 +868,7 @@ public class ScriptDecoder {
      * @throws Exception if no action was parsed.
      */
     public static ScriptAction parseAction(ScriptToken line, ScriptCompileGroup compileGroup) throws Exception {
+        int tabLevel = getTabLevel(line.getText());
         line = line.with(line.getText().replaceFirst("\\s*", ""));
         //System.out.println("Getting action for : "+line.text);
         //Removing strings from the line in order to avoid interpretation issues
@@ -886,7 +887,7 @@ public class ScriptDecoder {
                 //System.out.println("Parameters size : "+parameters.size());
 
                 ScriptAction action = actionDefinition.getActionClass().getConstructor().newInstance();
-                action.build(line.with(lineWithStrings), compileGroup, parameters, index, marks);
+                action.build(line.with(lineWithStrings), compileGroup, parameters, index, marks, tabLevel);
                 return action;
             }
         }

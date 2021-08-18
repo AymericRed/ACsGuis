@@ -18,7 +18,7 @@ public class LoopDefinition {
     }
 
     public LoopDefinition(String pattern, Class cls, Side side, String name,int priority){
-        this.pattern = Pattern.compile(pattern+":");
+        this.pattern = Pattern.compile(pattern);
         this.cls = cls;
         this.side = side;
         this.name = name;
@@ -38,7 +38,7 @@ public class LoopDefinition {
     }
 
     public boolean matches(String line){
-        System.out.println("Check match between "+getName()+" : "+pattern.pattern()+" and "+line+" :"+pattern.matcher(line).matches());
+        //System.out.println("Check match between "+getName()+" : "+pattern.pattern()+" and "+line+" :"+pattern.matcher(line).matches());
         return pattern.matcher(line).matches();
     }
 

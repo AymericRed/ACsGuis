@@ -128,7 +128,7 @@ public class ScriptContext {
         for (Integer hash : variables.keySet()) {//Pattern search second
             if (variables.get(hash).getPattern() != null) {
                 Matcher m = variables.get(hash).getPattern().matcher(variableName);
-                System.out.println("check if "+variables.get(hash).getPattern().pattern()+" matches "+variableName+" it's : "+m.matches());
+                //System.out.println("check if "+variables.get(hash).getPattern().pattern()+" matches "+variableName+" it's : "+m.matches());
                 if (m.matches())
                     return hash;
             }

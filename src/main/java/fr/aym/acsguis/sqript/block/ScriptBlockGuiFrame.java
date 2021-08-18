@@ -77,6 +77,8 @@ public class ScriptBlockGuiFrame extends ScriptBlock
         group.add("layout");
         group.add("text");
         group.add("action");
+        group.add("this_component");
+        //TODO AND ALL ComponentProperties
         IScript script = getMainField().compile(group);
         setRoot(script);
 
@@ -110,6 +112,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
                     if (fieldDefined("css_code"))
                         frame.setCssCode(getSubBlock("css_code").evaluate().getObject().toString());
                     this.frame = frame;
+                    System.out.println("GUI CREATED "+frame+" "+frame.hashCode());
 
                     ScriptContext ctx = ScriptContext.fromGlobal();
                     System.out.println("1" + ctx.printVariables());

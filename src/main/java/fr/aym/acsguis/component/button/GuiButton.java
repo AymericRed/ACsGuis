@@ -380,11 +380,13 @@ public class GuiButton extends GuiComponent<TextComponentStyleManager> implement
         return this;
     }
 
+    @Override
     public GuiButton setText(String text) {
         this.text = text;
         return this;
     }
 
+    @Override
     public String getText() {
         return text;
     }
