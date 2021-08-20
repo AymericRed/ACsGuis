@@ -11,6 +11,7 @@ import fr.nico.sqript.types.ScriptType;
 import fr.nico.sqript.types.TypeArray;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +44,8 @@ public class ScriptLoop extends ScriptWrapper {
     }
 
     @Loop(name = "if", pattern = "if .*")
-    public class ScriptLoopIF extends ScriptLoop {
+    public static class ScriptLoopIF extends ScriptLoop {
+
         public ScriptLoopIF elseContainer;
         public ScriptExpression condition;
 
@@ -84,18 +86,21 @@ public class ScriptLoop extends ScriptWrapper {
 
         @Override
         public IScript run(ScriptContext context) throws ScriptException {
-            //System.out.println("At line "+getLine().number+", condition is : "+(condition==null?"null":condition.getClass()+" "+condition.getMatchedIndex()));
+            //System.out.println("At line "+getLine().getLineNumber()+", condition is : "+(condition==null?"null":condition.getClass()+" "+condition.getMatchedIndex()+" "+getWrapped()+ ":"+getWrapped().getLine()));
             if ((boolean) (condition.get(context).getObject())) {
+                //System.out.println("Returning wrapped");
                 return getWrapped();
             } else if (elseContainer != null) {
+                //System.out.println("Returning else container");
                 return elseContainer;
             }
+            //System.out.println("Returning getNext");
             return getNext(context);
         }
     }
 
     @Loop(name = "else", pattern = "else\\s*:")
-    public class ScriptLoopELSE extends ScriptLoopIF {
+    public static class ScriptLoopELSE extends ScriptLoopIF {
 
 
         public ScriptLoopELSE() {
@@ -103,6 +108,7 @@ public class ScriptLoop extends ScriptWrapper {
 
         @Override
         public IScript run(ScriptContext context) throws ScriptException {
+            //System.out.println("Returning wrapped");
             return getWrapped();
         }
 
@@ -120,7 +126,7 @@ public class ScriptLoop extends ScriptWrapper {
     }
 
     @Loop(name = "else if", pattern = "else if .*", priority = 1)
-    public class ScriptLoopELSEIF extends ScriptLoopIF {
+    public static class ScriptLoopELSEIF extends ScriptLoopIF {
 
         public IScript elseContainer;
 
@@ -152,7 +158,7 @@ public class ScriptLoop extends ScriptWrapper {
     }
 
     @Loop(name = "for", pattern = "for .*")
-    public class ScriptLoopFOR extends ScriptLoopRepeated {
+    public static class ScriptLoopFOR extends ScriptLoopRepeated {
 
         int varHash;
         String varName;
@@ -174,7 +180,7 @@ public class ScriptLoop extends ScriptWrapper {
                     throw new ScriptException.ScriptUnknownExpressionException(line);
 
                 if (scriptExpression.getClass().getAnnotation(Expression.class) != null)
-                    type = ScriptDecoder.parseType(scriptExpression.getClass().getAnnotation(Expression.class).patterns()[scriptExpression.getMatchedIndex()].split(":")[1]);
+                    type = ScriptDecoder.parseType(scriptExpression.getClass().getAnnotation(Expression.class).features()[scriptExpression.getMatchedIndex()].type());
                 else
                     type = scriptExpression.getReturnType();
 
@@ -185,6 +191,7 @@ public class ScriptLoop extends ScriptWrapper {
                 //System.out.println("This.varHash : " + varHash);
                 this.array = scriptExpression;
                 this.setLine(line);
+                compileGroup.add(varName+"'s index");
                 return;
             }
             throw new ScriptException.ScriptSyntaxException(line, "Incorrect for-loop definition");
@@ -229,7 +236,7 @@ public class ScriptLoop extends ScriptWrapper {
     }
 
     @Loop(name = "while", pattern = "while .*")
-    public class ScriptLoopWHILE extends ScriptLoopRepeated {
+    public static class ScriptLoopWHILE extends ScriptLoopRepeated {
         public ScriptExpression condition;
 
 

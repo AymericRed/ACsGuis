@@ -142,13 +142,14 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
     private int tabLevel;
 
     @Override
-    public void wrap(IScript parent, int tabLevel, IScript wrapped) {
-        String text = parent.getLine().getText().trim().replaceFirst("(^|\\s+)add css component\\s+", ""); //Extracting the event parameters
+    public void wrap(IScript wrapped) {
+        String text = getLine().getText().trim().replaceFirst("(^|\\s+)add css component\\s+", ""); //Extracting the event parameters
         text = text.substring(0, text.length() - 1); //Removing the last ":"
         this.name = text;
+        int tabLevel = ScriptDecoder.getTabLevel(getLine().getText());
         this.tabLevel = tabLevel;
         System.out.println("FILL "+text+" WITH TAB "+tabLevel);
         //System.out.println("Long name is " + name);
-        super.wrap(parent, tabLevel, wrapped);
+        super.wrap(wrapped);
     }
 }

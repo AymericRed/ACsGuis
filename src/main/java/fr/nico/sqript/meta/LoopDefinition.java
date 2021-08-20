@@ -38,7 +38,6 @@ public class LoopDefinition {
     }
 
     public boolean matches(String line){
-        //System.out.println("Check match between "+getName()+" : "+pattern.pattern()+" and "+line+" :"+pattern.matcher(line).matches());
         return pattern.matcher(line).matches();
     }
 

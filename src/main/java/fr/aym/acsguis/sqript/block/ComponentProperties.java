@@ -11,10 +11,12 @@ import fr.nico.sqript.structures.ScriptContext;
 import fr.nico.sqript.structures.ScriptTypeAccessor;
 import fr.nico.sqript.types.ScriptType;
 import fr.nico.sqript.types.TypeArray;
+import fr.nico.sqript.types.TypeEntity;
 import fr.nico.sqript.types.TypePlayer;
 import fr.nico.sqript.types.primitive.TypeBoolean;
 import fr.nico.sqript.types.primitive.TypeNumber;
 import fr.nico.sqript.types.primitive.TypeString;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;
@@ -38,8 +40,7 @@ public class ComponentProperties<A, B extends ScriptType<?>>
 
     public static final ComponentProperties<GuiCheckBox, TypeBoolean> CHECKED = new ComponentProperties<>("checked", c -> new TypeBoolean(c.isChecked()), (c, s) -> c.setChecked(s.getObject()));
 
-    //TODO TypeEntity
-    public static final ComponentProperties<GuiEntityRender, TypePlayer> ENTITY_TO_RENDER = new ComponentProperties<>("checked", c -> new TypePlayer((EntityPlayer) c.getEntity()), (c, s) -> c.setEntity(s.getObject()));
+    public static final ComponentProperties<GuiEntityRender, TypeEntity> ENTITY_TO_RENDER = new ComponentProperties<>("checked", c -> new TypeEntity(c.getEntity()), (c, s) -> c.setEntity((EntityLivingBase) s.getObject()));
 
     public static final ComponentProperties<GuiComboBox, TypeArray> COMBO_CHOICES = new ComponentProperties<>("checked", c -> new TypeArray((ArrayList<?>) c.getEntries()), (c, s) -> {
         List<String> entries = new ArrayList<>();

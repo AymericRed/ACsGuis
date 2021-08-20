@@ -11,8 +11,10 @@ import fr.nico.sqript.compiling.ScriptDecoder;
 import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.compiling.ScriptToken;
 import fr.nico.sqript.meta.Action;
-import fr.nico.sqript.meta.Loop;
-import fr.nico.sqript.structures.*;
+import fr.nico.sqript.meta.Feature;
+import fr.nico.sqript.structures.IScript;
+import fr.nico.sqript.structures.ScriptContext;
+import fr.nico.sqript.structures.ScriptLoop;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -26,9 +28,11 @@ import java.util.regex.Pattern;
         fields = {"css_class", "css_id", "css_code", "text", "onclick", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"}
 )*/
 @Action(name = "gui_component",
-        description = "add gui component action",
-        examples = "add css component label with id \"reload_models\" and class \"reload_button\" and text \"Recharger les packs\"",
-        patterns = "^add css component .*")
+        features = @Feature(
+                name = "Add a new gui component",
+                description = "Adds a new gui component to the current panel",
+                examples = "add css component label with id \"reload_models\" and class \"reload_button\" and text \"Recharger les packs\"",
+                pattern = "^add css component .*"))
 public class ActionGuiComponent extends ScriptAction {
     public static final String[] supportedFields = new String[]{"text", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"};
 
@@ -42,40 +46,40 @@ public class ActionGuiComponent extends ScriptAction {
     private GuiComponent component;
 
     protected void parseProperties() throws Exception {
-        System.out.println("PARSING "+name);
+        System.out.println("PARSING " + name);
         Pattern pattern = Pattern.compile("^([a-z_]*)?( with)?( id \"([a-z0-9_-]*)?\")?( and)?( class \"([a-z0-9_-]*)?\")?( and)?( text \"([a-zA-Z0-9 :/_-]*)?\")?$");
         String name = this.name.trim();
         Matcher matcher = pattern.matcher(name);
-        if(!matcher.matches()) {
-            throw new ScriptException(getLine(), "Line doesn't match required component definition : matching : "+name);
+        if (!matcher.matches()) {
+            throw new ScriptException(getLine(), "Line doesn't match required component definition : matching : " + name);
         }
         String type = matcher.group(1);
-        if(type.isEmpty()) {
-            throw new ScriptException(getLine(), "No component found for type: "+type);
+        if (type.isEmpty()) {
+            throw new ScriptException(getLine(), "No component found for type: " + type);
         }
         System.out.println("My type is " + type);
         ParseableComponent componentType = ParseableComponent.find(type);
         GuiComponent<?> component = componentType.create();
 
         String id = matcher.group(4);
-        System.out.println("The id is "+id);
-        if(id != null && !id.isEmpty()) {
+        System.out.println("The id is " + id);
+        if (id != null && !id.isEmpty()) {
             component.setCssId(id);
         }
 
         String clazz = matcher.group(7);
-        System.out.println("The class is "+clazz);
-        if(clazz != null && !clazz.isEmpty()) {
+        System.out.println("The class is " + clazz);
+        if (clazz != null && !clazz.isEmpty()) {
             component.setCssClass(clazz);
         }
 
         String text = matcher.group(10);
-        System.out.println("The text is "+text);
-        if(text != null) {
-            if(component instanceof TextComponent) {
+        System.out.println("The text is " + text);
+        if (text != null) {
+            if (component instanceof TextComponent) {
                 ((TextComponent) component).setText(text);
             } else {
-                throw new ScriptException(getLine(), "Component "+component+" cannot contain text !");
+                throw new ScriptException(getLine(), "Component " + component + " cannot contain text !");
             }
         }
 
@@ -94,7 +98,7 @@ public class ActionGuiComponent extends ScriptAction {
         //System.out.println("Context "+context);
         //System.out.println("Accessor : "+context.getAccessor("this_component"));
         //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this_component").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
-        System.out.println("HUAWEI To: "+((TypeComponent) context.getVariable("this_component")).getObject()+" adding: "+component);
+        System.out.println("HUAWEI To: " + ((TypeComponent) context.getVariable("this_component")).getObject() + " adding: " + component);
         ((GuiPanel) ((TypeComponent) context.getAccessor("this_component").element).getObject()).add(component);
         ComponentUtils.pushComponentVariables(component, context);
     }
@@ -104,7 +108,7 @@ public class ActionGuiComponent extends ScriptAction {
         //System.out.println("OWW I DOING DONE " + getWrapped() + " " + getParent() + " " + this);
         IScript toDo = getNext(context);
         System.out.println("-------------> Return " + toDo + " " + this.next);
-        System.out.println("Last runt is "+ScriptBlockGuiComponent.lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
+        System.out.println("Last runt is " + ScriptBlockGuiComponent.lastRuntTab + " and tabs " + tabLevel + " and this " + getLine());
         while (ScriptBlockGuiComponent.lastRuntTab >= this.tabLevel) {
             ScriptBlockGuiComponent.lastRuntTab--;
             ComponentUtils.popComponentVariables(component, context);
@@ -142,9 +146,9 @@ public class ActionGuiComponent extends ScriptAction {
         super.build(line, compileGroup, parameters, matchedIndex, marks, tabLevel);
         String text = line.getText().trim().replaceFirst("(^|\\s+)add css component\\s+", ""); //Extracting the event parameters
         this.name = text;
-        System.out.println("Line text "+tabLevel);
+        System.out.println("TABS LEVELS " + ScriptDecoder.getTabLevel(line.getText())+" AND "+ScriptDecoder.getTabLevel(getLine().getText()));
         this.tabLevel = tabLevel;
-        System.out.println("FILL "+text+" WITH TAB "+ this.tabLevel);
+        System.out.println("FILL " + text + " WITH TAB " + this.tabLevel);
         //System.out.println("Long name is " + name);
     }
 }

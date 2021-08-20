@@ -7,6 +7,7 @@ import fr.nico.sqript.ScriptManager;
 import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.expressions.ScriptExpression;
 import fr.nico.sqript.meta.Expression;
+import fr.nico.sqript.meta.Feature;
 import fr.nico.sqript.structures.ScriptContext;
 import fr.nico.sqript.structures.ScriptOperator;
 import fr.nico.sqript.structures.Side;
@@ -16,12 +17,12 @@ import fr.nico.sqript.types.primitive.TypeNumber;
 import java.util.ArrayList;
 
 @Expression(name = "GuiLayout",
+        features = @Feature(
+                name = "Define a gui layout",
         description = "g",
         examples = "h",
-        patterns = {
-        "new grid layout with size {array} spacing {number} direction {string} elements per line {number}:panel_layout"
-        },
-        side = Side.CLIENT
+        pattern = "new grid layout with size {array} spacing {number} direction {string} elements per line {number}:panel_layout",
+        side = Side.CLIENT)
 )
 public class ExprGuiLayout extends ScriptExpression
 {

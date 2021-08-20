@@ -128,7 +128,7 @@ public class ScriptContext {
         for (Integer hash : variables.keySet()) {//Pattern search second
             if (variables.get(hash).getPattern() != null) {
                 Matcher m = variables.get(hash).getPattern().matcher(variableName);
-                //System.out.println("check if "+variables.get(hash).getPattern().pattern()+" matches "+variableName+" it's : "+m.matches());
+                //System.out.println("check if "+variables.get(hash).pattern.pattern()+" matches "+variableName+" it's : "+m.matches());
                 if (m.matches())
                     return hash;
             }
@@ -138,7 +138,6 @@ public class ScriptContext {
             return parent.getHash(variableName);
         }
         return variableName.hashCode();
-        //TODO NICO return 0;
     }
 
     /**
@@ -164,7 +163,9 @@ public class ScriptContext {
         }
         if (parent != null)
             return parent.getAccessor(token);
-        return null;
+        ScriptTypeAccessor typeAccessor = new ScriptTypeAccessor(null, token);
+        put(typeAccessor);
+        return typeAccessor;
     }
 
     public void put(ScriptTypeAccessor accessor) {
@@ -197,5 +198,9 @@ public class ScriptContext {
 
     public void setReturnValue(ScriptTypeAccessor returnValue) {
         this.returnValue = returnValue;
+    }
+
+    public ScriptTypeAccessor getAccessor(Integer varHash) {
+        return variables.get(varHash);
     }
 }
