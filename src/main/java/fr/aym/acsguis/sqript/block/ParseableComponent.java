@@ -6,27 +6,27 @@ import fr.aym.acsguis.component.button.GuiCheckBox;
 import fr.aym.acsguis.component.entity.GuiEntityRender;
 import fr.aym.acsguis.component.panel.*;
 import fr.aym.acsguis.component.textarea.*;
-import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import fr.nico.sqript.structures.ScriptContext;
+import net.minecraftforge.common.util.EnumHelper;
 
 import java.util.concurrent.Callable;
 
 public enum ParseableComponent
 {
-    PANEL(GuiPanel.class, "panel", GuiPanel::new, ComponentProperties.LAYOUT),
-    TABBED_PANE(GuiTabbedPane.class, "tabbed_pane", GuiTabbedPane::new, ComponentProperties.LAYOUT),
-    SCROL_PANE(GuiScrollPane.class, "scroll_pane", GuiScrollPane::new, ComponentProperties.LAYOUT),
-    LABEL(GuiLabel.class, "label", () -> new GuiLabel("not set"), ComponentProperties.TEXT),
-    TEXT_FIELD(GuiTextField.class, "text_field", GuiTextField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
-    TEXT_AREA(GuiTextArea.class, "text_area", GuiTextArea::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
-    PASSWORD_FIELD(GuiPasswordField.class, "password_field", GuiPasswordField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
-    INTEGER_FIELD(GuiIntegerField.class, "integer_field", () -> new GuiIntegerField(0, 255), ComponentProperties.TEXT, ComponentProperties.MIN_VALUE, ComponentProperties.MAX_VALUE),
-    CHECKBOX(GuiCheckBox.class, "checkbox", GuiCheckBox::new, ComponentProperties.TEXT, ComponentProperties.CHECKED),
-    BUTTON(GuiButton.class, "button", () -> new GuiButton("not set"), ComponentProperties.TEXT),
-    ENTITY_RENDER(GuiEntityRender.class, "entity_render", () -> new GuiEntityRender(null), ComponentProperties.ENTITY_TO_RENDER),
-    COMBO_BOX(GuiComboBox.class, "combo_box", () -> new GuiComboBox("not set", null), ComponentProperties.TEXT, ComponentProperties.COMBO_CHOICES),
-    PROGRESS_BAR(GuiProgressBar.class, "progress_bar", GuiProgressBar::new, ComponentProperties.TEXT),
-    PROGRESS_BAR_VERTICAL(GuiProgressBar.class, "progress_bar_vertical", () -> new GuiProgressBar(false), ComponentProperties.TEXT);
+    PANEL(GuiPanel.class, "panel", GuiPanel::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT, ComponentProperties.NEXT_TAB_PANE),
+    TABBED_PANE(GuiTabbedPane.class, "tabbed_pane", GuiTabbedPane::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT),
+    SCROL_PANE(GuiScrollPane.class, "scroll_pane", GuiScrollPane::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT, ComponentProperties.NEXT_TAB_PANE),
+    LABEL(GuiLabel.class, "label", () -> new GuiLabel("not set"), ComponentProperties.SET_STYLE, ComponentProperties.TEXT),
+    //TEXT_FIELD(GuiTextField.class, "text_field", GuiTextField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
+    //TEXT_AREA(GuiTextArea.class, "text_area", GuiTextArea::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
+    //PASSWORD_FIELD(GuiPasswordField.class, "password_field", GuiPasswordField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
+    INTEGER_FIELD(GuiIntegerField.class, "integer_field", () -> new GuiIntegerField(0, 255), ComponentProperties.SET_STYLE, ComponentProperties.TEXT, ComponentProperties.MIN_VALUE, ComponentProperties.MAX_VALUE),
+    CHECKBOX(GuiCheckBox.class, "checkbox", GuiCheckBox::new, ComponentProperties.SET_STYLE, ComponentProperties.TEXT, ComponentProperties.CHECKED),
+    BUTTON(GuiButton.class, "button", () -> new GuiButton("not set"), ComponentProperties.SET_STYLE, ComponentProperties.TEXT),
+    ENTITY_RENDER(GuiEntityRender.class, "entity_render", () -> new GuiEntityRender(null), ComponentProperties.SET_STYLE, ComponentProperties.ENTITY_TO_RENDER),
+    COMBO_BOX(GuiComboBox.class, "combo_box", () -> new GuiComboBox("not set", null), ComponentProperties.SET_STYLE, ComponentProperties.TEXT, ComponentProperties.COMBO_CHOICES),
+    PROGRESS_BAR(GuiProgressBar.class, "progress_bar", GuiProgressBar::new, ComponentProperties.SET_STYLE, ComponentProperties.TEXT),
+    PROGRESS_BAR_VERTICAL(GuiProgressBar.class, "progress_bar_vertical", () -> new GuiProgressBar(false), ComponentProperties.SET_STYLE, ComponentProperties.TEXT, ComponentProperties.PROGRESS);
 
     //TODO NOT SUPPORTED : GuiResizableButton, GuiSlider, GuiCameraView, GuiList, GuiKeyLabel, GuiSearchField, tabs of GuiTabbedPane
     //TODO SLOTS
@@ -86,7 +86,7 @@ public enum ParseableComponent
         return componentCallable.call();
     }
 
-   /* TODO public static ParseableComponent injectComponentParser(String key, Callable<GuiComponent<?>> componentCallable, ITriConsumer<GuiComponent<?>, String, ScriptBlock.ScriptLineBlock> fieldHandler) {
-        return EnumHelper.addEnum(ParseableComponent.class, key, new Class<?>[] {String.class, Callable.class, ITriConsumer.class}, key, componentCallable, fieldHandler);
-    } */
+    public static ParseableComponent injectComponentParser(String key, Callable<GuiComponent<?>> componentCallable, ComponentProperties<?, ?>... properties) {
+        return EnumHelper.addEnum(ParseableComponent.class, key, new Class<?>[] {String.class, Callable.class, ComponentProperties[].class}, key, componentCallable, properties);
+    }
 }

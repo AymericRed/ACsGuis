@@ -1,5 +1,6 @@
 package fr.aym.acsguis.component.panel;
 
+import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.GuiComponent;
@@ -13,6 +14,7 @@ import fr.aym.acsguis.event.listeners.mouse.IMouseClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
+import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
@@ -50,7 +52,17 @@ public class GuiTabbedPane extends GuiPanel implements IGuiOpenListener, IGuiClo
 			tabContainer.render(mouseX, mouseY, partialTicks);
 		}*/
 	}
-	
+
+	@Override
+	public GuiPanel add(GuiComponent component) {
+		if(ACsGuiApi.support.isSqriptLoaded() && component instanceof GuiPanel) {
+			addTab(SqriptCompatiblity.nextPannedTabName, (GuiPanel) component);
+		} else {
+			super.add(component);
+		}
+		return this;
+	}
+
 	public void addTab(String tabName, GuiPanel tabContainer)
 	{
 		int width = mc.fontRenderer.getStringWidth(tabName) + 6;
@@ -69,7 +81,7 @@ public class GuiTabbedPane extends GuiPanel implements IGuiOpenListener, IGuiClo
 		tabContainer.setParent(this);
 		tabsContainers.add(tabContainer);
 		tabContainer.getStyle().setOffsetY(20);
-		add(tabContainer);
+		super.add(tabContainer);
 
 		selectTab(tabsContainers.size()-1);
 	}

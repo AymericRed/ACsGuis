@@ -8,22 +8,20 @@ import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
-@Loop(name = "gui_component_on_key",
-        pattern = "on component key input:",
+@Loop(name = "gui_component_on_mouse_wheel",
+        pattern = "on component mouse wheel:",
         side = Side.CLIENT
 )
-public class ScriptComponentKeyAction extends GuiActionScriptLoop {
+public class ScriptComponentMouseWheelAction extends GuiActionScriptLoop {
     @Override
     public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
-        component.addKeyboardListener((typedChar, keyCode) -> {
+        component.addWheelListener((dWheel) -> {
             System.out.println("Running button action !!");
             ScriptContext context1;
             try {
                 context1 = contextProvider.call();
-                context1.put(new ScriptTypeAccessor(new TypeNumber(typedChar), "typed_char"));
-                context1.put(new ScriptTypeAccessor(new TypeNumber(keyCode), "key_code"));
+                context1.put(new ScriptTypeAccessor(new TypeNumber(dWheel), "dWheel"));
                 executeAction(context1);
             } catch (Exception e) {
                 e.printStackTrace();

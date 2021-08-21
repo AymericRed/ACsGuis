@@ -3,10 +3,11 @@ package fr.aym.acsguis.component.panel;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.button.GuiSlider;
+import fr.aym.acsguis.component.textarea.IChildSizeUpdateListener;
 import fr.aym.acsguis.event.listeners.IResizeListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
 
-public class GuiScrollPane extends GuiPanel implements IMouseWheelListener, IResizeListener
+public class GuiScrollPane extends GuiPanel implements IMouseWheelListener, IResizeListener, IChildSizeUpdateListener
 {
 	protected int lastScrollAmountX;
 	protected int lastScrollAmountY;
@@ -152,5 +153,10 @@ public class GuiScrollPane extends GuiPanel implements IMouseWheelListener, IRes
 	}
 	public GuiSlider getySlider() {
 		return ySlider;
+	}
+
+	@Override
+	public void onComponentChildSizeUpdate() {
+		updateSlidersVisibility();
 	}
 }

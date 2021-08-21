@@ -76,10 +76,10 @@ public class ExprReference extends ScriptExpression {
             ScriptTypeAccessor typeAccessor = context.getAccessor(var);
             typeAccessor.setElement(to);
         } else {
-            //System.out.println("Setting reference for : "+line.text+", its null ? : "+(context.get(varHash)==null));
-            //System.out.println("varHash : "+this.varHash);
-            //System.out.println("Context vars are : "+context.printVariables());
-            //System.out.println("Result is null : "+(context.get(this.varHash)==null));
+            /*System.out.println("Setting reference for : "+line.getText()+", its null ? : "+(context.getAccessor(varHash)==null));
+            System.out.println("varHash : "+this.varHash);
+            System.out.println("Context vars are : "+context.printVariables());
+            System.out.println("Result is null : "+(context.getAccessor(this.varHash)==null));*/
             ScriptTypeAccessor typeAccessor = context.getAccessor(varHash);
             typeAccessor.setElement(to);
         }

@@ -4,6 +4,7 @@ import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.CssGuisManager;
 import fr.aym.acsguis.event.CssReloadEvent;
 import fr.aym.acsguis.sqript.NoSqriptSupport;
+import fr.aym.acsguis.sqript.SqriptCompatiblity;
 import fr.aym.acsguis.sqript.SqriptSupport;
 import fr.aym.acsguis.utils.CssReloadOrigin;
 import fr.aym.acslib.ACsPlatform;
@@ -13,10 +14,12 @@ import fr.aym.acslib.services.error_tracking.ErrorTrackingService;
 import fr.aym.acslib.services.error_tracking.TrackedErrorType;
 import fr.aym.acslib.services.thrload.ModLoadingSteps;
 import fr.aym.acslib.services.thrload.ThreadedLoadingService;
+import fr.nico.sqript.forge.SqriptForge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLStateEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -48,7 +51,6 @@ public class ACsGuiApi implements ACsService
      */
     private static final CssGuisManager manager = new CssGuisManager();
 
-    //TODO AUTO-DETECT SQRIPT
     public static SqriptSupport support = new NoSqriptSupport();
 
     @Override
@@ -68,6 +70,10 @@ public class ACsGuiApi implements ACsService
 
         errorTracker = ACsPlatform.provideService("errtrack");
         CSS_ERROR_TYPE = errorTracker.createErrorType(new ResourceLocation(RES_LOC_ID, "css"), "Css");
+        if(Loader.isModLoaded("sqript")) {
+            log.info("Sqript detected, loading compatibility");
+            support = new SqriptCompatiblity();
+        }
 
         /*ScriptManager.parsers.add(new IScriptParser() {
             @Override

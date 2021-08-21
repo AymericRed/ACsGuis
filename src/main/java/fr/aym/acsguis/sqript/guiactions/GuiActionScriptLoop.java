@@ -8,16 +8,24 @@ import fr.nico.sqript.structures.IScript;
 import fr.nico.sqript.structures.ScriptContext;
 import fr.nico.sqript.structures.ScriptLoop;
 import fr.nico.sqript.structures.ScriptTypeAccessor;
-import fr.nico.sqript.types.primitive.TypeNumber;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 
-public abstract class GuiActionScriptLoop extends ScriptLoop
-{
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+
+public abstract class GuiActionScriptLoop extends ScriptLoop {
     @Override
     public void execute(ScriptContext context) throws ScriptException {
         GuiComponent<?> component = ((TypeComponent) context.getAccessor("this_component").element).getObject();
         System.out.println("Action : component is " + component);
-        appendListener(context, component);
+        appendListener(() -> {
+            ScriptContext context1 = new ScriptContext(context);
+            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
+            return context1;
+        }, component);
     }
 
     @Override
@@ -25,9 +33,9 @@ public abstract class GuiActionScriptLoop extends ScriptLoop
         execute(context);
         return getNext(context);
     }
-    
-    public abstract void appendListener(ScriptContext context, GuiComponent<?> component);
-    
+
+    public abstract void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component);
+
     public void executeAction(ScriptContext context) {
         try {
             System.out.println("Wrapped is " + getWrapped());
@@ -52,8 +60,9 @@ public abstract class GuiActionScriptLoop extends ScriptLoop
 
             } while (next != null && ScriptDecoder.getTabLevel(next.getLine().getText()) > tab);
         } catch (ScriptException e) {
-            //TODO MESSAGE IN CHAT
             e.printStackTrace();
+            if(Minecraft.getMinecraft().player != null)
+                Minecraft.getMinecraft().player.sendMessage(new TextComponentString("\247c"+e.getMessage()).setStyle(new Style().setColor(TextFormatting.RED)));
         }
     }
 }

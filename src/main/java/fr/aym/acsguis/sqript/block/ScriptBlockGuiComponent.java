@@ -10,9 +10,6 @@ import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,7 +108,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
         System.out.println("Last runt is "+lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
         while (lastRuntTab >= this.tabLevel) {
             lastRuntTab--;
-            ComponentUtils.popComponentVariables(component, context);
+            ComponentUtils.popComponentVariables(context);
         }
 
         execute(context);

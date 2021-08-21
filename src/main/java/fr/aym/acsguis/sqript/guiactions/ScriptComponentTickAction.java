@@ -7,15 +7,22 @@ import fr.nico.sqript.structures.ScriptTypeAccessor;
 import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+
 @Loop(name = "gui_component_on_tick",
         pattern = "on component tick:",
         side = Side.CLIENT
 )
 public class ScriptComponentTickAction extends GuiActionScriptLoop {
     @Override
-    public void appendListener(ScriptContext context, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
         component.addTickListener(() -> {
-            executeAction(context);
+            try {
+                executeAction(contextProvider.call());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 }

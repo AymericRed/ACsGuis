@@ -2,6 +2,8 @@ package fr.aym.acsguis.sqript.actions;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.textarea.TextComponent;
+import fr.aym.acsguis.sqript.block.ComponentProperties;
+import fr.aym.acsguis.sqript.block.ParseableComponent;
 import fr.nico.sqript.actions.ScriptAction;
 import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.meta.Action;
@@ -62,9 +64,20 @@ public class ActionSetCssCode extends ScriptAction {
                 System.out.println("So text: " + ((TextComponent) param.getObject()).getText());
                 break;
             case 4:
-                //TODO PARSEABLE COMPONENTS ETC
                 String optn = getParameter(1).toString();
                 System.out.println("Try change " + optn + " : WIP");
+                boolean found = false;
+                ParseableComponent componentType = ParseableComponent.find(param.getObject());
+                for(ComponentProperties<?, ?> property : componentType.getProperties()) {
+                    if(property.getName().equals(optn)) {
+                        ((ComponentProperties<?, Object>) property).setValueOnComponent(param.getObject(), getParameter(2).get(context).getObject());
+                        System.out.println("Success on "+property.getName());
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                    throw new ScriptException.ScriptBadVariableNameException(getLine());
                 break;
         }
     }

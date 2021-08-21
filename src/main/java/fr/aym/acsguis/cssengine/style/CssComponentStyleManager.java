@@ -2,12 +2,12 @@ package fr.aym.acsguis.cssengine.style;
 
 import com.helger.css.ECSSUnit;
 import com.helger.css.propertyvalue.CSSSimpleValueWithUnit;
+import fr.aym.acsguis.component.textarea.IChildSizeUpdateListener;
 import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.style.AutoStyleHandler;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
@@ -15,7 +15,6 @@ import fr.aym.acsguis.cssengine.selectors.CssStackElement;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.cssengine.positionning.Position;
 import fr.aym.acsguis.cssengine.positionning.Size;
-import fr.aym.acsguis.utils.GuiTextureSprite;
 import fr.aym.acsguis.utils.IGuiTexture;
 import net.minecraft.util.math.MathHelper;
 
@@ -223,8 +222,8 @@ public class CssComponentStyleManager implements ComponentStyleManager
         if(relBorderRadius != -1)
             this.borderRadius = (int) (relBorderRadius * getRenderWidth());
 
-        if(component.getParent() instanceof GuiScrollPane) { //TODO MOVE THIS
-            ((GuiScrollPane) component.getParent()).updateSlidersVisibility();
+        if(component.getParent() instanceof IChildSizeUpdateListener) {
+            ((IChildSizeUpdateListener) component.getParent()).onComponentChildSizeUpdate();
         }
 
         if(getTextureHorizontalSize() == GuiConstants.ENUM_SIZE.RELATIVE) {

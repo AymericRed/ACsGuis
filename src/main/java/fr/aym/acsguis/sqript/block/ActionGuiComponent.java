@@ -111,7 +111,7 @@ public class ActionGuiComponent extends ScriptAction {
         System.out.println("Last runt is " + ScriptBlockGuiComponent.lastRuntTab + " and tabs " + tabLevel + " and this " + getLine());
         while (ScriptBlockGuiComponent.lastRuntTab >= this.tabLevel) {
             ScriptBlockGuiComponent.lastRuntTab--;
-            ComponentUtils.popComponentVariables(component, context);
+            ComponentUtils.popComponentVariables(context);
         }
 
         execute(context);

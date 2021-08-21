@@ -72,11 +72,10 @@ public class ScriptBlockGuiFrame extends ScriptBlock
 
         System.out.println("Loading sub blocks");
         ScriptCompileGroup group = new ScriptCompileGroup();
-        group.add("layout");
-        group.add("text");
-        group.add("action");
         group.add("this_component");
-        //TODO AND ALL ComponentProperties
+        for(ComponentProperties<?, ?> property : ComponentProperties.getProperties()) {
+            group.add(property.getName());
+        }
         IScript script = getMainField().compile(group);
         setRoot(script);
 
@@ -88,7 +87,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
     @Override
     public void execute(ScriptContext context) {
         if(FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            System.out.println("AFFICHAGE ====================");
+            //System.out.println("AFFICHAGE ====================");
             ACsGuiApi.asyncLoadThenShowGui(name, () -> {
                 try {
                     List<ResourceLocation> lt = new ArrayList<>();
@@ -96,7 +95,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
                         lt.add(new ResourceLocation(t.getObject().toString()));
                     });
 
-                    System.out.println(lt);
+                    //System.out.println(lt);
                     GuiFrame frame = new GuiFrame(new GuiScaler.Identity()) {
                         @Override
                         public List<ResourceLocation> getCssStyles() {
@@ -110,26 +109,26 @@ public class ScriptBlockGuiFrame extends ScriptBlock
                     if (fieldDefined("css_code"))
                         frame.setCssCode(getSubBlock("css_code").evaluate().getObject().toString());
                     this.frame = frame;
-                    System.out.println("GUI CREATED "+frame+" "+frame.hashCode());
+                    //System.out.println("GUI CREATED "+frame+" "+frame.hashCode());
 
                     ScriptContext ctx = ScriptContext.fromGlobal();
-                    System.out.println("1" + ctx.printVariables());
+                    //System.out.println("1" + ctx.printVariables());
                     ComponentUtils.pushComponentVariables(frame, ctx);
-                    System.out.println("2" + ctx.printVariables());
+                    //System.out.println("2" + ctx.printVariables());
                     //Running the associated script
                     ScriptClock k = new ScriptClock(ctx);
                     ScriptBlockGuiComponent.lastRuntTab = -1;
                     try {
-                        System.out.println("Running the command on " + getRoot());
+                        //System.out.println("Running the command on " + getRoot());
                         k.start(getRoot());
                     } catch (ScriptException e) {
                         e.printStackTrace();
                     }
-                    while(ComponentUtils.lastComponent != null) {
-                        ComponentUtils.popComponentVariables(null, ctx);
+                    while(ComponentUtils.lastAddedComponent != null) {
+                        ComponentUtils.popComponentVariables(ctx);
                     }
 
-                    System.out.println("SHOW " + frame);
+                    //System.out.println("SHOW " + frame);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -141,7 +140,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
     @Override
     public IScript run(ScriptContext context) {
         execute(context);
-        System.out.println("OH FRAME IS DOING DONE "+getRoot()+" "+getParent());
+        //System.out.println("OH FRAME IS DOING DONE "+getRoot()+" "+getParent());
         return getNext(context);
     }
 }

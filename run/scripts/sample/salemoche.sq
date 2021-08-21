@@ -2,7 +2,8 @@ on script load:
 	print "testloaded tabbed"
 	#set {var2} to false
 
-function closeTheGui():
+function closeTheGui({test}):
+    print {test}
 	close css gui
 
 define gui frame monGui:
@@ -10,7 +11,10 @@ define gui frame monGui:
 	css_sheets: ["acsguis:css/dnx_debug.css"]
 	print "ceci est un test"
 	set {var2} to false
-	add css component tabbed_pane:
+    set next_tab_pane_name to "TestTab"
+	add css component tabbed_pane with id "tabbed":
+	    set style to "color: red;"
+
 		add css component panel with id "general":
 			add css component scroll_pane:
 				set layout to new grid layout with size [-1,25] spacing 5 direction "horizontal" elements per line 1
@@ -41,7 +45,7 @@ define gui frame monGui:
 					add css component button with id "mochebu" and class "switch-button-off" and text "":
 						on component click:
 							print "on tu as cliqué 3 !"
-							closeTheGui()
+							closeTheGui("test1")
 						print ":Oo"
 				add css component label with id "player_hunger" and class "reload_button" and text "To fill":
 					set text to "Faim du joueur : " + (player's hunger)

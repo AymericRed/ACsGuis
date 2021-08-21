@@ -8,23 +8,18 @@ import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
-@Loop(name = "gui_component_on_key",
-        pattern = "on component key input:",
+@Loop(name = "gui_component_close",
+        pattern = "on component close:",
         side = Side.CLIENT
 )
-public class ScriptComponentKeyAction extends GuiActionScriptLoop {
+public class ScriptComponentCloseAction extends GuiActionScriptLoop {
     @Override
     public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
-        component.addKeyboardListener((typedChar, keyCode) -> {
+        component.addCloseListener(() -> {
             System.out.println("Running button action !!");
-            ScriptContext context1;
             try {
-                context1 = contextProvider.call();
-                context1.put(new ScriptTypeAccessor(new TypeNumber(typedChar), "typed_char"));
-                context1.put(new ScriptTypeAccessor(new TypeNumber(keyCode), "key_code"));
-                executeAction(context1);
+                executeAction(contextProvider.call());
             } catch (Exception e) {
                 e.printStackTrace();
             }
