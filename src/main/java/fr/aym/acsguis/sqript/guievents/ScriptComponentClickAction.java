@@ -1,20 +1,11 @@
-package fr.aym.acsguis.sqript.guiactions;
+package fr.aym.acsguis.sqript.guievents;
 
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.sqript.ComponentUtils;
-import fr.aym.acsguis.sqript.block.ParseableComponent;
-import fr.aym.acsguis.sqript.expressions.TypeComponent;
-import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.*;
-import fr.nico.sqript.types.TypeArray;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 @Loop(name = "gui_component_on_click",
         pattern = "on component click:",

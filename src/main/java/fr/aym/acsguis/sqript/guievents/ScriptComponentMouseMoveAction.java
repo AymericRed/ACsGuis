@@ -1,7 +1,6 @@
-package fr.aym.acsguis.sqript.guiactions;
+package fr.aym.acsguis.sqript.guievents;
 
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.ScriptContext;

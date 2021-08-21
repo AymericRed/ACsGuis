@@ -2,8 +2,8 @@ package fr.aym.acsguis.sqript.actions;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.textarea.TextComponent;
-import fr.aym.acsguis.sqript.block.ComponentProperties;
-import fr.aym.acsguis.sqript.block.ParseableComponent;
+import fr.aym.acsguis.sqript.component.ComponentProperties;
+import fr.aym.acsguis.sqript.component.ParseableComponent;
 import fr.nico.sqript.actions.ScriptAction;
 import fr.nico.sqript.compiling.ScriptException;
 import fr.nico.sqript.meta.Action;
@@ -12,32 +12,32 @@ import fr.nico.sqript.structures.ScriptContext;
 import fr.nico.sqript.types.ScriptType;
 
 @Action(name = "Modify a gui component properties",
-        priority = 20,
+        priority = 20, //Override ActDefinition
         features = {
                 @Feature(
-                        name = "Set css code of a gui component",
-                        description = "",
-                        examples = "",
-                        pattern = "set css [code] of {gui_component} to {string}"),
+                        name = "Set style of a gui component",
+                        description = "The contained string should be a valid ACsGuis css code, see the specific doc",
+                        examples = "set style of this component to \"color: green; width: 240px; horizontal-position: center;\"",
+                        pattern = "set style of {gui_component} to {string}"),
                 @Feature(
                         name = "Set css id of a gui component",
-                        description = "",
-                        examples = "",
+                        description = "Sets the css id of this component, so you can refer to it in your .css file",
+                        examples = "set css id of this component to \"root\"",
                         pattern = "set [css] id of {gui_component} to {string}"),
                 @Feature(
                         name = "Set css class of a gui component",
-                        description = "",
-                        examples = "",
+                        description = "Sets the css class of this component, so you can refer to it in your .css file",
+                        examples = "set css class of this component to \"option_button\"",
                         pattern = "set [css] class of {gui_component} to {string}"),
                 @Feature(
                         name = "Set text of a gui component that can contain text",
-                        description = "",
-                        examples = "",
+                        description = "Sets the text of this component only if it can contain text",
+                        examples = "set text of this component to \"Hello World !\"",
                         pattern = "set text of {gui_component} to {string}"),
                 @Feature(
                         name = "Set other properties of gui components",
-                        description = "",
-                        examples = "",
+                        description = "Sets other properties of gui components, list in another file todo", //TODO
+                        examples = "set checked_state of this component to true",
                         pattern = "set {string} of {gui_component} to {string}")}
 )
 public class ActionSetCssCode extends ScriptAction {
@@ -68,15 +68,15 @@ public class ActionSetCssCode extends ScriptAction {
                 System.out.println("Try change " + optn + " : WIP");
                 boolean found = false;
                 ParseableComponent componentType = ParseableComponent.find(param.getObject());
-                for(ComponentProperties<?, ?> property : componentType.getProperties()) {
-                    if(property.getName().equals(optn)) {
+                for (ComponentProperties<?, ?> property : componentType.getProperties()) {
+                    if (property.getName().equals(optn)) {
                         ((ComponentProperties<?, Object>) property).setValueOnComponent(param.getObject(), getParameter(2).get(context).getObject());
-                        System.out.println("Success on "+property.getName());
+                        System.out.println("Success on " + property.getName());
                         found = true;
                         break;
                     }
                 }
-                if(!found)
+                if (!found)
                     throw new ScriptException.ScriptBadVariableNameException(getLine());
                 break;
         }

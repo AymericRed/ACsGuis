@@ -1,4 +1,4 @@
-package fr.aym.acsguis.sqript.guiactions;
+package fr.aym.acsguis.sqript.guievents;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.sqript.expressions.TypeComponent;
@@ -14,16 +14,15 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 public abstract class GuiActionScriptLoop extends ScriptLoop {
     @Override
     public void execute(ScriptContext context) throws ScriptException {
-        GuiComponent<?> component = ((TypeComponent) context.getAccessor("this_component").element).getObject();
+        GuiComponent<?> component = ((TypeComponent) context.getAccessor("this [component]").element).getObject();
         System.out.println("Action : component is " + component);
         appendListener(() -> {
             ScriptContext context1 = new ScriptContext(context);
-            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
+            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this [component]"));
             return context1;
         }, component);
     }

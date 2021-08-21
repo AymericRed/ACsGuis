@@ -1,23 +1,21 @@
-package fr.aym.acsguis.sqript.guiactions;
+package fr.aym.acsguis.sqript.guievents;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.nico.sqript.meta.Loop;
 import fr.nico.sqript.structures.ScriptContext;
-import fr.nico.sqript.structures.ScriptTypeAccessor;
 import fr.nico.sqript.structures.Side;
-import fr.nico.sqript.types.primitive.TypeNumber;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
-@Loop(name = "gui_component_on_tick",
-        pattern = "on component tick:",
+@Loop(name = "gui_component_close",
+        pattern = "on component close:",
         side = Side.CLIENT
 )
-public class ScriptComponentTickAction extends GuiActionScriptLoop {
+public class ScriptComponentCloseAction extends GuiActionScriptLoop {
     @Override
     public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
-        component.addTickListener(() -> {
+        component.addCloseListener(() -> {
+            System.out.println("Running button action !!");
             try {
                 executeAction(contextProvider.call());
             } catch (Exception e) {

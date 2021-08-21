@@ -3,7 +3,8 @@ package fr.aym.acsguis.sqript.block;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
-import fr.aym.acsguis.sqript.ComponentUtils;
+import fr.aym.acsguis.sqript.component.ComponentUtils;
+import fr.aym.acsguis.sqript.component.ComponentProperties;
 import fr.nico.sqript.ScriptManager;
 import fr.nico.sqript.blocks.ScriptBlock;
 import fr.nico.sqript.compiling.ScriptCompileGroup;
@@ -21,8 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Block(name = "gui_frame",
-        description = "gui frame block",
+@Block(name = "Define gui frame block",
+        description = "Defines a new gui frame",
         examples = "define gui frame my_frame:",
         regex = "^define gui frame .*:",
         side = Side.CLIENT,
@@ -56,7 +57,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
         String text = head.getText().trim().replaceFirst("(^|\\s+)define gui frame\\s+", ""); //Extracting the event parameters
         text = text.substring(0, text.length()-1); //Removing the last ":"
         this.name = text.trim();
-        System.out.println("My name is "+name);
+        //System.out.println("My name is "+name);
     }
 
     public String getName() {
@@ -70,9 +71,9 @@ public class ScriptBlockGuiFrame extends ScriptBlock
         if(!fieldDefined("css_sheets"))
             throw new ScriptException.ScriptMissingFieldException(this.getLine(),"define gui frame","css_sheets");
 
-        System.out.println("Loading sub blocks");
+        //System.out.println("Loading sub blocks");
         ScriptCompileGroup group = new ScriptCompileGroup();
-        group.add("this_component");
+        group.add("this [component]");
         for(ComponentProperties<?, ?> property : ComponentProperties.getProperties()) {
             group.add(property.getName());
         }
@@ -80,8 +81,8 @@ public class ScriptBlockGuiFrame extends ScriptBlock
         setRoot(script);
 
         getScriptInstance().registerBlock(this);
-        System.out.println("RG "+getScriptInstance());
-        System.out.println("RG0 "+getScriptInstance().getBlocksOfClass(ScriptBlockGuiFrame.class));
+        //System.out.println("RG "+getScriptInstance());
+        //System.out.println("RG0 "+getScriptInstance().getBlocksOfClass(ScriptBlockGuiFrame.class));
     }
 
     @Override

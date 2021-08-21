@@ -31,22 +31,24 @@ public class ActionShowGui extends ScriptAction {
     public void execute(ScriptContext context) throws ScriptException {
         String scriptName;
         if (getMatchedIndex() == 0) {
-            System.out.println("Line is " + getLine());
-            System.out.println("In script : " + getLine().getScriptInstance().getName());
+            //System.out.println("Line is " + getLine());
+            //System.out.println("In script : " + getLine().getScriptInstance().getName());
             scriptName = getLine().getScriptInstance().getName();
         } else {
-            System.out.println("Line is " + getLine());
-            System.out.println("In script over : " + getParameter(2));
+            //System.out.println("Line is " + getLine());
+            //System.out.println("In script over : " + getParameter(2));
             scriptName = getParameter(2).get(context).toString();
         }
         showGui(scriptName, context);
     }
 
     private void showGui(String scriptName, ScriptContext context) {
-        System.out.println("SC " + ScriptManager.getScriptFromName(scriptName));
+        /*System.out.println("SC " + ScriptManager.getScriptFromName(scriptName));
         System.out.println("SC2 " + ScriptManager.getScriptFromName(scriptName).getBlocksOfClass(ScriptBlockGuiFrame.class));
         System.out.println(ScriptManager.getScriptFromName(scriptName).getBlocksOfClass(ScriptBlock.class));
-        System.out.println(getParameters());
+        System.out.println(getParameters());*/
+
+        //TODO DIRECT REFERENCE TO THE GUI FRAME WITH A CUSTOM PARSER IN ScriptDecoder
         ScriptBlockGuiFrame f = (ScriptBlockGuiFrame) ScriptManager.getScriptFromName(scriptName).getBlocksOfClass(ScriptBlockGuiFrame.class).stream().filter(g -> {
             try {
                 return ((ScriptBlockGuiFrame) g).getName().equalsIgnoreCase(getParameter(1).get(context).toString());

@@ -1,9 +1,6 @@
-package fr.aym.acsguis.sqript;
+package fr.aym.acsguis.sqript.component;
 
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.sqript.block.ComponentProperties;
-import fr.aym.acsguis.sqript.block.ParseableComponent;
 import fr.aym.acsguis.sqript.expressions.TypeComponent;
 import fr.nico.sqript.structures.ScriptContext;
 import fr.nico.sqript.structures.ScriptTypeAccessor;
@@ -22,7 +19,7 @@ public class ComponentUtils {
     }
 
     public static void setComponentContext(GuiComponent<?> component, ScriptContext context) {
-        context.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
+        context.put(new ScriptTypeAccessor(new TypeComponent(component), "this [component]"));
 
         ParseableComponent type = ParseableComponent.find(component);
         type.setupContext(context, component);

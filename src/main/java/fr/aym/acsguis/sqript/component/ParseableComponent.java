@@ -1,4 +1,4 @@
-package fr.aym.acsguis.sqript.block;
+package fr.aym.acsguis.sqript.component;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.button.GuiButton;

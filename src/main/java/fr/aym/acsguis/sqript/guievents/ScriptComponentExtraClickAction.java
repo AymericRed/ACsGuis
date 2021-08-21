@@ -1,4 +1,4 @@
-package fr.aym.acsguis.sqript.guiactions;
+package fr.aym.acsguis.sqript.guievents;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;

@@ -1,4 +1,4 @@
-package fr.aym.acsguis.sqript.guiactions;
+package fr.aym.acsguis.sqript.guievents;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.nico.sqript.meta.Loop;
@@ -8,7 +8,6 @@ import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.types.primitive.TypeNumber;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 @Loop(name = "gui_component_on_key",
         pattern = "on component key input:",

@@ -3,7 +3,8 @@ package fr.aym.acsguis.sqript.block;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.TextComponent;
-import fr.aym.acsguis.sqript.ComponentUtils;
+import fr.aym.acsguis.sqript.component.ComponentUtils;
+import fr.aym.acsguis.sqript.component.ParseableComponent;
 import fr.aym.acsguis.sqript.expressions.TypeComponent;
 import fr.nico.sqript.compiling.ScriptDecoder;
 import fr.nico.sqript.compiling.ScriptException;
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
         side = Side.CLIENT,
         fields = {"css_class", "css_id", "css_code", "text", "onclick", "max_text_length", "checked", "entity_to_render", "choices", "min_value", "max_value", "hint_text", "regex"}
 )*/
-@Loop(name = "gui_component",
+@Loop(name = "Add gui component block",
         pattern = "^add css component .*:",
         side = Side.CLIENT
 )
@@ -87,10 +88,10 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
 
         //System.out.println("3" + context.printVariables());
         //System.out.println("Context "+context);
-        //System.out.println("Accessor : "+context.getAccessor("this_component"));
-        //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this_component").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
-        System.out.println("HUAWEI To: "+((TypeComponent) context.getVariable("this_component")).getObject()+" adding: "+component);
-        ((GuiPanel) ((TypeComponent) context.getAccessor("this_component").element).getObject()).add(component);
+        //System.out.println("Accessor : "+context.getAccessor("this [component]"));
+        //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this [component]").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
+        System.out.println("HUAWEI To: "+((TypeComponent) context.getVariable("this [component]")).getObject()+" adding: "+component);
+        ((GuiPanel) ((TypeComponent) context.getAccessor("this [component]").element).getObject()).add(component);
         if (getWrapped() == null) {
             System.out.println("WTF no wrapped for "+getLine());
         } else {
@@ -124,7 +125,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
             return getParent().getNext(context);
         } else if (getParent() != null && getParent() instanceof ScriptBlockGuiComponent) {
             //if(((ScriptBlockGuiComponent) getParent()).component instanceof GuiPanel)
-            //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this_component"));
+            //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this [component]"));
             System.out.println("Mais wtf le next de mon papa c'est " + getParent().getNext(context));
             return getParent().getNext(context);
         } else

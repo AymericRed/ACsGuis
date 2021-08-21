@@ -8,12 +8,12 @@ import fr.nico.sqript.structures.ScriptContext;
 import fr.nico.sqript.structures.Side;
 import net.minecraft.client.Minecraft;
 
-@Action(name = "Add component to panel",
+@Action(name = "Close a gui",
         features = @Feature(
-                name = "Close a css gui",
-                description = "",
-                examples = "",
-                pattern = "close css gui",
+                name = "Close the displayed gui",
+                description = "Closes the current displayed gui",
+                examples = "close current gui",
+                pattern = "close current [css] gui",
                 side = Side.CLIENT)
 )
 public class ActionCloseGui extends ScriptAction {

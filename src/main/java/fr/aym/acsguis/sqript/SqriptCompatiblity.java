@@ -1,6 +1,5 @@
 package fr.aym.acsguis.sqript;
 
-import fr.aym.acsguis.sqript.block.ComponentProperties;
 import fr.aym.acsguis.sqript.events.EventOnCssInit;
 import fr.nico.sqript.ScriptManager;
 

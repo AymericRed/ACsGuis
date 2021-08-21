@@ -1,4 +1,4 @@
-package fr.aym.acsguis.sqript.block;
+package fr.aym.acsguis.sqript.component;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.button.GuiCheckBox;
@@ -6,7 +6,6 @@ import fr.aym.acsguis.component.entity.GuiEntityRender;
 import fr.aym.acsguis.component.layout.PanelLayout;
 import fr.aym.acsguis.component.panel.GuiComboBox;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.panel.GuiTabbedPane;
 import fr.aym.acsguis.component.textarea.GuiProgressBar;
 import fr.aym.acsguis.component.textarea.GuiTextArea;
 import fr.aym.acsguis.component.textarea.NumericComponent;
@@ -44,11 +43,11 @@ public class ComponentProperties<A, B> {
     public static final ComponentProperties<NumericComponent, Double> MIN_VALUE = new ComponentProperties<>("min_value", c -> new TypeNumber(c.getMin()), (c, s) -> c.setMin(s.intValue()));
     public static final ComponentProperties<NumericComponent, Double> MAX_VALUE = new ComponentProperties<>("max_value", c -> new TypeNumber(c.getMax()), (c, s) -> c.setMax(s.intValue()));
 
-    public static final ComponentProperties<GuiCheckBox, Boolean> CHECKED = new ComponentProperties<>("checked", c -> new TypeBoolean(c.isChecked()), GuiCheckBox::setChecked);
+    public static final ComponentProperties<GuiCheckBox, Boolean> CHECKED = new ComponentProperties<>("checked_state", c -> new TypeBoolean(c.isChecked()), GuiCheckBox::setChecked);
 
-    public static final ComponentProperties<GuiEntityRender, Entity> ENTITY_TO_RENDER = new ComponentProperties<>("checked", c -> new TypeEntity(c.getEntity()), (c, s) -> c.setEntity((EntityLivingBase) s));
+    public static final ComponentProperties<GuiEntityRender, Entity> ENTITY_TO_RENDER = new ComponentProperties<>("entity_to_render", c -> new TypeEntity(c.getEntity()), (c, s) -> c.setEntity((EntityLivingBase) s));
 
-    public static final ComponentProperties<GuiComboBox, ArrayList<ScriptType>> COMBO_CHOICES = new ComponentProperties<>("checked", c -> new TypeArray((ArrayList<?>) c.getEntries()), (c, s) -> {
+    public static final ComponentProperties<GuiComboBox, ArrayList<ScriptType>> COMBO_CHOICES = new ComponentProperties<>("combo_choices", c -> new TypeArray((ArrayList<?>) c.getEntries()), (c, s) -> {
         List<String> entries = new ArrayList<>();
         for (ScriptType<String> t : s) {
             entries.add(t.getObject());

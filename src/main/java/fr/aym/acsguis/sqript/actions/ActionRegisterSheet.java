@@ -13,17 +13,16 @@ import net.minecraft.util.ResourceLocation;
 @Action(name = "Register css sheet",
         features = @Feature(
                 name = "Register a css sheet",
-                description = "Registers a css sheet for your css guis",
-                examples = "register sheet \"dynamx:css/lol.css\"",
-                pattern = "register css sheet {resource}")
+                description = "Registers a css sheet for your css guis. You it in the \"on css load event\".",
+                examples = "register sheet \"dynamx:css/test.css\"",
+                pattern = "register css sheet {resource location}")
 )
 public class ActionRegisterSheet extends ScriptAction {
     @Override
     public void execute(ScriptContext context) throws ScriptException {
         ScriptExpression firstParameter = getParameters().get(0);
-        //On peut accéder aux éléments du contexte depuis le code java également.
-        ScriptManager.log.info(context.getVariable("script file") + " : " + firstParameter.get(context));
-        System.out.println(firstParameter.get(context).getClass());
+        //ScriptManager.log.info(context.getVariable("script file") + " : " + firstParameter.get(context));
+        //System.out.println(firstParameter.get(context).getClass());
         ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(firstParameter.get(context).toString()));
     }
 }
