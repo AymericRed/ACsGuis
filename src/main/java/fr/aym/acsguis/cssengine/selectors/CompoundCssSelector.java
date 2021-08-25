@@ -1,11 +1,7 @@
 package fr.aym.acsguis.cssengine.selectors;
 
-import com.helger.css.decl.CSSSelectorAttribute;
-import com.helger.css.decl.CSSSelectorMemberNot;
-import com.helger.css.decl.CSSSelectorSimpleMember;
-import com.helger.css.decl.ECSSSelectorCombinator;
-import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.cssengine.parsing.core.objects.CssSelectorCombinator;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -154,13 +150,16 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
     {
         private CssSelector<?> target;
         private Map<CssSelector<?>, Boolean> parents;
-        private ECSSSelectorCombinator nextCombinator;
+        private CssSelectorCombinator nextCombinator;
 
         /**
          * @return A new {@link CompoundCssSelector} matching with previous inputs
          */
         public CompoundCssSelector build()
         {
+            if(target == null) {
+                throw new IllegalStateException("Target not set");
+            }
             if(parents == null)
                 return new CompoundCssSelector(target, null, null);
             else
@@ -170,31 +169,22 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
         /**
          * Sets the target of this selector, parsing the input {@link CSSSelectorSimpleMember}
          */
-        private void setTarget(CSSSelectorSimpleMember member)
+        private void setTarget(CssSelector<?> selector)
         {
-            if(member.isClass()) //Class
-            {
-                target = new CssSelector<>(CssSelector.EnumSelectorType.CLASS, member.getValue().substring(1));
+            target = selector;
+        }
+
+        public void withPseudo(String pseudo) { //Context, see EnumSelectorContext
+            if(target == null) {
+                throw new NullPointerException("Target not set before setting context (aka pseudo)");
             }
-            else if(member.isHash()) //Id
-            {
-                target = new CssSelector<>(CssSelector.EnumSelectorType.ID, member.getValue().substring(1));
-            }
-            else if(member.isElementName()) //Component type
-            {
-                EnumComponentType componentType = EnumComponentType.fromString(member.getValue());
-                if(componentType == null)
-                    throw new IllegalArgumentException("Component type not supported "+member.getValue()+" at "+member.getSourceLocation());
-                target = new CssSelector<>(CssSelector.EnumSelectorType.COMPONENT_TYPE, componentType);
-            }
-            else //Wait...what ?
-                throw new IllegalStateException("Unknown selector "+member+" at "+member.getSourceLocation());
+            target.setContext(EnumSelectorContext.fromString(pseudo));
         }
 
         /**
          * Parses a {@link CSSSelectorSimpleMember}, and adds its settings
          */
-        public void withChild(CSSSelectorSimpleMember member)
+        public void withChild(String sourceLocation, CssSelector<?> member)
         {
             if(target == null) //No target is defined
             {
@@ -203,12 +193,7 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
             }
             else
             {
-                if(member.isPseudo()) //Context, see EnumSelectorContext
-                {
-                    //System.out.println("Set ctx "+member.getValue()+" to "+target);
-                    target.setContext(EnumSelectorContext.fromString(member.getValue().substring(1)));
-                }
-                else if(nextCombinator != null) //Combine the last target with member
+                if(nextCombinator != null) //Combine the last target with member
                 {
                     //System.out.println("Combine "+member.getValue()+" with "+target+" "+nextCombinator.getName());
                     switch (nextCombinator)
@@ -226,13 +211,13 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
                             setTarget(member);
                             break;
                         default: //We don't support all css combinators
-                            throw new IllegalArgumentException(nextCombinator.getName()+" combinator not supported, at "+member.getSourceLocation());
+                            throw new IllegalArgumentException(nextCombinator.name()+" combinator not supported, at "+sourceLocation);
                     }
                     nextCombinator = null;
                 }
                 else //Bad css code
                 {
-                    throw new IllegalArgumentException("AND selector not supported, at "+member.getSourceLocation());
+                    throw new IllegalArgumentException("AND selector not supported, at "+sourceLocation);
                 }
             }
         }
@@ -240,22 +225,22 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
         /**
          * Parses a css combinators, only BLANK and GREATER are supported
          */
-        public void withCombinator(ECSSSelectorCombinator combinator) {
+        public void withCombinator(CssSelectorCombinator combinator) {
             nextCombinator = combinator;
         }
 
         /**
          * Unsupported
          */
-        public void withAttribute(CSSSelectorAttribute attribute) {
+       /* public void withAttribute(CSSSelectorAttribute attribute) {
             throw new UnsupportedOperationException("CSS selector attribute");
-        }
+        }*/
 
         /**
          * Unsupported
          */
-        public void withMemberNot(CSSSelectorMemberNot attribute) {
+        /*public void withMemberNot(CSSSelectorMemberNot attribute) {
             throw new UnsupportedOperationException("CSS selector :not()");
-        }
+        }*/
     }
 }

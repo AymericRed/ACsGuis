@@ -73,7 +73,7 @@ public class ScriptBlockGuiFrame extends ScriptBlock
 
         //System.out.println("Loading sub blocks");
         ScriptCompileGroup group = new ScriptCompileGroup();
-        group.add("this [component]");
+        group.add("this_component");
         for(ComponentProperties<?, ?> property : ComponentProperties.getProperties()) {
             group.add(property.getName());
         }

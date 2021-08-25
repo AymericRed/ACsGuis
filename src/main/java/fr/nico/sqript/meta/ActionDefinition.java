@@ -6,6 +6,7 @@ import fr.nico.sqript.structures.Side;
 import fr.nico.sqript.structures.TransformedPattern;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 
 public class ActionDefinition {
@@ -23,12 +24,10 @@ public class ActionDefinition {
     //[1] : marks
     public int[] getMatchedPatternIndexAndMarks(String line){
         for (int i = 0; i < transformedPatterns.length ; i++) {
-            //System.out.println("Checking if "+line+" matches "+transformedPatterns[i].getPattern().pattern());
             Matcher m = transformedPatterns[i].getPattern().matcher(line);
             if(m.matches()){
                 m.reset();
                 boolean found = m.find();
-                //System.out.println("Find = "+found);
                 return new int[]{i,found?transformedPatterns[i].getAllMarks(line):0};
             }
         }
@@ -51,9 +50,10 @@ public class ActionDefinition {
             for(int i = 0; i<this.features.length; i++){
                 try {
                     this.transformedPatterns[i]=ScriptDecoder.transformPattern(this.features[i].pattern());
-                    //System.out.println("Regex for "+patterns[i]+" is : "+transformedPatterns[i].getRegex());
+                    //System.out.println("Regex for "+transformedPatterns[i]+" is : "+transformedPatterns[i].getPattern());
                 } catch (Exception e) {
                     e.printStackTrace();
+                    throw new RuntimeException(e); //TODO NICO
                 }
             }
         }

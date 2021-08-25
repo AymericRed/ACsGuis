@@ -869,8 +869,9 @@ public class ScriptDecoder {
         String[] strings = extractStrings(line.getText());
         String lineWithoutStrings = removeStrings(line.getText(), strings);
         for (ActionDefinition actionDefinition : ScriptManager.actions) {
-            //System.out.println("Checking for action : "+actionDefinition.getActionClass().getSimpleName());
+            System.out.println("Checking for action : "+actionDefinition.getActionClass().getSimpleName());
             int[] indexAndMarks = actionDefinition.getMatchedPatternIndexAndMarks(lineWithoutStrings);
+            System.out.println("GOT "+ Arrays.toString(indexAndMarks));
             if (indexAndMarks.length > 0) {
                 int index = indexAndMarks[0];
                 int marks = indexAndMarks[1];

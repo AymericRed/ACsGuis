@@ -100,7 +100,7 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 		hasDebugInfo = true;
 		debugPane = new GuiScrollPane();
 		debugPane.setCssId("css_debug_pane");
-		//debugPane.setLayout(new GridLayout(-1, 10, 0, GridLayout.GridDirection.HORIZONTAL, 1));
+		debugPane.setLayout(new GridLayout(-1, 10, 0, GridLayout.GridDirection.HORIZONTAL, 1));
 	}
 
 	/**

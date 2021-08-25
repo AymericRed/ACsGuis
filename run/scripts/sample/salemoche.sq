@@ -2,9 +2,9 @@ on script load:
 	print "testloaded tabbed"
 	#set {var2} to false
 
-function closeTheGui({test}):
-    print {test}
-	close css gui
+function closeTheGui():
+    #print {test}
+	close current css gui
 
 define gui frame monGui:
 	css_class: "home"
@@ -34,12 +34,12 @@ define gui frame monGui:
 							print [player's hunger]
 							if {btn_on}:
 								set {btn_on} to false
-								set css class of this [component] to "switch-button-off"
-								set text of this [component] to "Off"
+								set css class of this_component to "switch-button-off"
+								set text of this_component to "Off"
 							else:
 								set {btn_on} to true
-								set class of this [component] to "switch-button-on"
-								set text of this [component] to "On"
+								set class of this_component to "switch-button-on"
+								set text of this_component to "On"
 				add css component panel with class "option-desc":
 					add css component label with id "t2" and text "Profilage : n/a"
 					add css component button with id "mochebu" and class "switch-button-off" and text "":

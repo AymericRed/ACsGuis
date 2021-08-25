@@ -38,7 +38,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
     private GuiComponent component;
 
     protected void parseProperties() throws Exception {
-        System.out.println("PARSING "+name);
+        //System.out.println("PARSING "+name);
         Pattern pattern = Pattern.compile("^([a-z_]*)?( with)?( id \"([a-z0-9_-]*)?\")?( and)?( class \"([a-z0-9_-]*)?\")?( and)?( text \"([a-zA-Z0-9 :/_-]*)?\")?$");
         String name = this.name.trim();
         Matcher matcher = pattern.matcher(name);
@@ -88,10 +88,10 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
 
         //System.out.println("3" + context.printVariables());
         //System.out.println("Context "+context);
-        //System.out.println("Accessor : "+context.getAccessor("this [component]"));
-        //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this [component]").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
-        System.out.println("HUAWEI To: "+((TypeComponent) context.getVariable("this [component]")).getObject()+" adding: "+component);
-        ((GuiPanel) ((TypeComponent) context.getAccessor("this [component]").element).getObject()).add(component);
+        //System.out.println("Accessor : "+context.getAccessor("this_component"));
+        //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this_component").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
+        //System.out.println("HUAWEI To: "+((TypeComponent) context.getVariable("this_component")).getObject()+" adding: "+component);
+        ((GuiPanel) ((TypeComponent) context.getAccessor("this_component").element).getObject()).add(component);
         if (getWrapped() == null) {
             System.out.println("WTF no wrapped for "+getLine());
         } else {
@@ -105,8 +105,8 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
     public IScript run(ScriptContext context) throws ScriptException {
         //System.out.println("OWW I DOING DONE " + getWrapped() + " " + getParent() + " " + this);
         IScript toDo = getWrapped() == null ? getNext(context) : getWrapped();
-        System.out.println("-------------> Return " + toDo + " " + this.next);
-        System.out.println("Last runt is "+lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
+        //System.out.println("-------------> Return " + toDo + " " + this.next);
+        //System.out.println("Last runt is "+lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
         while (lastRuntTab >= this.tabLevel) {
             lastRuntTab--;
             ComponentUtils.popComponentVariables(context);
@@ -125,7 +125,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
             return getParent().getNext(context);
         } else if (getParent() != null && getParent() instanceof ScriptBlockGuiComponent) {
             //if(((ScriptBlockGuiComponent) getParent()).component instanceof GuiPanel)
-            //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this [component]"));
+            //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this_component"));
             System.out.println("Mais wtf le next de mon papa c'est " + getParent().getNext(context));
             return getParent().getNext(context);
         } else
@@ -146,7 +146,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
         this.name = text;
         int tabLevel = ScriptDecoder.getTabLevel(getLine().getText());
         this.tabLevel = tabLevel;
-        System.out.println("FILL "+text+" WITH TAB "+tabLevel);
+        //System.out.println("FILL "+text+" WITH TAB "+tabLevel);
         //System.out.println("Long name is " + name);
         super.wrap(wrapped);
     }

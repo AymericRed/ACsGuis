@@ -1,21 +1,17 @@
 package fr.aym.acsguis.cssengine.parsing;
 
-import com.helger.commons.io.IHasInputStream;
-import com.helger.css.ECSSVersion;
-import com.helger.css.decl.CascadingStyleSheet;
-import com.helger.css.decl.visit.CSSVisitor;
-import com.helger.css.decl.visit.ICSSVisitor;
-import com.helger.css.reader.CSSReader;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
+import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.cssengine.font.CssFontStyle;
 import fr.aym.acsguis.cssengine.font.ICssFont;
 import fr.aym.acsguis.cssengine.font.McFontRenderer;
 import fr.aym.acsguis.cssengine.font.TtfFontRenderer;
+import fr.aym.acsguis.cssengine.parsing.core.CssFileReader;
+import fr.aym.acsguis.cssengine.parsing.core.CssFileVisitor;
 import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.cssengine.selectors.CssStackElement;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.cssengine.style.CssStyleProperty;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
 import net.minecraft.client.Minecraft;
@@ -27,6 +23,7 @@ import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.annotation.Nullable;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,29 +109,19 @@ public class ACsGuisCssParser
      * Read a CSS 3.0 declaration from a file using UTF-8 encoding.
      */
     public static void parseCssSheet(ResourceLocation location) {
-        // UTF-8 is the fallback if neither a BOM nor @charset rule is present
-        final CascadingStyleSheet aCSS = CSSReader.readFromStream(new IHasInputStream() {
-            @Override
-            public InputStream getInputStream() {
-                try {
-                    return getResource(location);
-                } catch (Exception e) {
-                    throw new RuntimeException("Cannot load css resource "+location, e);
-                }
-            }
-            @Override
-            public boolean isReadMultiple() {
-                return false;
-            }
-        }, StandardCharsets.UTF_8, ECSSVersion.CSS30);
-        if (aCSS == null)
-        {
-            // Most probably a syntax error
-            throw new IllegalStateException("[CSS] Failed to read CSS file "+location+" - please see previous logging entries !");
+        InputStream inputStream;
+        try {
+            inputStream = getResource(location);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot load css resource "+location, e);
         }
         cssStyleSheets.put(location, new HashMap<>());
-        ICSSVisitor visitor = new ACsGuisCssVisitor(location, cssStyleSheets.get(location));
-        CSSVisitor.visitCSS(aCSS, visitor);
+        CssFileVisitor visitor = new ACsGuisCssVisitor(location, cssStyleSheets.get(location));
+        try {
+            CssFileReader.readCssFile(location.toString(), inputStream, visitor);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot load css resource "+location, e);
+        }
         ACsGuiApi.log.info("[CSS] Loaded css style sheet "+location);
         //System.out.println("Got style : "+cssStyleSheets);
     }
@@ -143,17 +130,16 @@ public class ACsGuisCssParser
      * Read a CSS 3.0 declaration from a string using UTF-8 encoding.
      */
     public static Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> parseRawCss(GuiComponent<?> component, String css) {
-        // UTF-8 is the fallback if neither a BOM nor @charset rule is present
-        final CascadingStyleSheet aCSS = CSSReader.readFromString("#"+component.getCssId()+"{"+css+"}", StandardCharsets.UTF_8, ECSSVersion.CSS30);
-        if (aCSS == null)
-        {
-            // Most probably a syntax error
-            throw new IllegalStateException("[CSS] Failed to read CSS "+css+" - please see previous logging entries !");
-        }
+        css = "#"+component.getCssId()+"{ \n "+css+"\n }";
         Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> data = new HashMap<>();
-        ICSSVisitor visitor = new ACsGuisStringCssVisitor(component, data);
-        CSSVisitor.visitCSS(aCSS, visitor);
-        ACsGuiApi.log.info("[CSS] Parsed style "+css);
+        CssFileVisitor visitor = new ACsGuisStringCssVisitor(component, data);
+        try {
+            CssFileReader.readCssFile("Css of component "+component, new ByteArrayInputStream(css.getBytes(StandardCharsets.UTF_8)), visitor);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot load css code "+css, e);
+        }
+
+        ACsGuiApi.log.debug("[CSS] Parsed style "+css);
         //System.out.println("Got style : "+cssStyleSheets);
         return data;
     }

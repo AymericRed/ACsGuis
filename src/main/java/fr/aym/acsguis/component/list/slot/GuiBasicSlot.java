@@ -1,11 +1,10 @@
 package fr.aym.acsguis.component.list.slot;
 
-import com.helger.css.ECSSUnit;
-import com.helger.css.propertyvalue.CSSSimpleValueWithUnit;
-import fr.aym.acsguis.utils.GuiConstants;
-import fr.aym.acsguis.component.textarea.GuiLabel;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.component.list.GuiList;
+import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.textarea.GuiLabel;
+import fr.aym.acsguis.cssengine.parsing.core.objects.CssIntValue;
+import fr.aym.acsguis.utils.GuiConstants;
 
 import java.awt.*;
 
@@ -20,7 +19,7 @@ public class GuiBasicSlot extends GuiSlot
 		style.getXPos().setRelative(0.25f);
 
 		style.setBackgroundColor(new Color(0,0,0,0.3f).getRGB());
-		style.setBorderSize(new CSSSimpleValueWithUnit(1, ECSSUnit.PX));
+		style.setBorderSize(new CssIntValue(1));
 		style.setBorderPosition(ComponentStyleManager.BORDER_POSITION.INTERNAL);
 		style.setBorderColor(new Color(206, 206, 206,255).getRGB());
 		

@@ -239,6 +239,6 @@ public class GuiDnxDebug extends GuiFrame
 
     @Override
     public boolean needsCssReload() {
-        return false;
+        return true;
     }
 }

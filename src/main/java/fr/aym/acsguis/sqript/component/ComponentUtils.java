@@ -19,7 +19,7 @@ public class ComponentUtils {
     }
 
     public static void setComponentContext(GuiComponent<?> component, ScriptContext context) {
-        context.put(new ScriptTypeAccessor(new TypeComponent(component), "this [component]"));
+        context.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
 
         ParseableComponent type = ParseableComponent.find(component);
         type.setupContext(context, component);

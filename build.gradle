@@ -29,7 +29,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 apply plugin: "com.jfrog.artifactory"
 
-version = "1.0.4-e"
+version = "1.1.0-5"
 group = "fr.aym.acsguis" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ACsGuis"
 
@@ -52,10 +52,10 @@ minecraft {
 
 dependencies {
     compile "fr.aym:ACsLib:1.0.0"
-    compile 'com.helger:ph-css:6.2.3'
+    //not anymore :) compile 'com.helger:ph-css:6.2.3'
 
     shadow "fr.aym:ACsLib:1.0.0"
-    shadow 'com.helger:ph-css:6.2.3'
+    //shadow 'com.helger:ph-css:6.2.3'
     shadow files('libs/slick.jar')
 }
 

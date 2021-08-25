@@ -1,20 +1,19 @@
 package fr.aym.acsguis.cssengine.style;
 
-import com.helger.css.ECSSUnit;
-import com.helger.css.propertyvalue.CSSSimpleValueWithUnit;
-import fr.aym.acsguis.component.textarea.IChildSizeUpdateListener;
-import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
-import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.style.AutoStyleHandler;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.textarea.IChildSizeUpdateListener;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
-import fr.aym.acsguis.cssengine.selectors.CssStackElement;
-import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
+import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.cssengine.positionning.Position;
 import fr.aym.acsguis.cssengine.positionning.Size;
+import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
+import fr.aym.acsguis.cssengine.selectors.CssStackElement;
+import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
+import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.utils.IGuiTexture;
 import net.minecraft.util.math.MathHelper;
 
@@ -186,14 +185,14 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setBorderRadius(CSSSimpleValueWithUnit radius) {
-        if(radius.getUnit() == ECSSUnit.PERCENTAGE) {
-            this.relBorderRadius = (float) radius.getAsIntValue() / 100;
+    public ComponentStyleManager setBorderRadius(CssValue radius) {
+        if(radius.getUnit() == CssValue.Unit.RELATIVE_INT) {
+            this.relBorderRadius = (float) radius.intValue() / 100;
             this.borderRadius = (int) (relBorderRadius * getRenderWidth());
         }
         else {
             this.relBorderRadius = -1;
-            this.borderRadius = radius.getAsIntValue();
+            this.borderRadius = radius.intValue();
         }
         return this;
     }
@@ -479,14 +478,14 @@ public class CssComponentStyleManager implements ComponentStyleManager
         return borderSize;
     }
     @Override
-    public ComponentStyleManager setBorderSize(CSSSimpleValueWithUnit borderSize) {
-        if(borderSize.getUnit() == ECSSUnit.PERCENTAGE) {
-            this.relBorderSize = (float) borderSize.getAsIntValue() / 100;
+    public ComponentStyleManager setBorderSize(CssValue borderSize) {
+        if(borderSize.getUnit() == CssValue.Unit.RELATIVE_INT) {
+            this.relBorderSize = (float) borderSize.intValue() / 100;
             this.borderSize = (int) (relBorderSize * getRenderWidth());
         }
         else {
             this.relBorderSize = -1;
-            this.borderSize = borderSize.getAsIntValue();
+            this.borderSize = borderSize.intValue();
         }
         return this;
     }

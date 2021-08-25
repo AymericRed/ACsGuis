@@ -92,10 +92,10 @@ public class ActionGuiComponent extends ScriptAction {
 
         //System.out.println("3" + context.printVariables());
         //System.out.println("Context "+context);
-        //System.out.println("Accessor : "+context.getAccessor("this [component]"));
-        //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this [component]").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
-        //System.out.println("HUAWEI To: " + ((TypeComponent) context.getVariable("this [component]")).getObject() + " adding: " + component);
-        ((GuiPanel) ((TypeComponent) context.getAccessor("this [component]").element).getObject()).add(component);
+        //System.out.println("Accessor : "+context.getAccessor("this_component"));
+        //System.out.println("========== GROS PD DE FDP " + ((TypeComponent) context.getAccessor("this_component").element).getObject() + " ADDING " + component + " " + getNext(context) + " " + getWrapped());
+        //System.out.println("HUAWEI To: " + ((TypeComponent) context.getVariable("this_component")).getObject() + " adding: " + component);
+        ((GuiPanel) ((TypeComponent) context.getAccessor("this_component").element).getObject()).add(component);
         ComponentUtils.pushComponentVariables(component, context);
     }
 
@@ -124,7 +124,7 @@ public class ActionGuiComponent extends ScriptAction {
             return getParent().getNext(context);
         } else if (getParent() != null && getParent() instanceof ActionGuiComponent) {
             //if(((ScriptBlockGuiComponent) getParent()).component instanceof GuiPanel)
-            //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this [component]"));
+            //+  context.put(new ScriptAccessor(new TypeComponent(((ScriptBlockGuiComponent) getParent()).component), "this_component"));
             //System.out.println("Mais wtf le next de mon papa c'est " + getParent().getNext(context));
             return getParent().getNext(context);
         } else

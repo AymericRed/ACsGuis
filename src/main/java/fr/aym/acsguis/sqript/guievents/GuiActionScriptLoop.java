@@ -18,11 +18,11 @@ import java.util.concurrent.Callable;
 public abstract class GuiActionScriptLoop extends ScriptLoop {
     @Override
     public void execute(ScriptContext context) throws ScriptException {
-        GuiComponent<?> component = ((TypeComponent) context.getAccessor("this [component]").element).getObject();
-        System.out.println("Action : component is " + component);
+        GuiComponent<?> component = ((TypeComponent) context.getAccessor("this_component").element).getObject();
+        //System.out.println("Action : component is " + component);
         appendListener(() -> {
             ScriptContext context1 = new ScriptContext(context);
-            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this [component]"));
+            context1.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
             return context1;
         }, component);
     }
@@ -37,11 +37,11 @@ public abstract class GuiActionScriptLoop extends ScriptLoop {
 
     public void executeAction(ScriptContext context) {
         try {
-            System.out.println("Wrapped is " + getWrapped());
-            System.out.println("Wrapped next is " + getWrapped().next + " " + getWrapped().getNext(context));
+            //System.out.println("Wrapped is " + getWrapped());
+            //System.out.println("Wrapped next is " + getWrapped().next + " " + getWrapped().getNext(context));
             IScript next = getWrapped();
             int tab = ScriptDecoder.getTabLevel(this.getLine().getText());
-            System.out.println("Running " + tab + " deep !");
+            //System.out.println("Running " + tab + " deep !");
             do {
                 try {
                     //System.out.println(">> Executing : "+next.getClass().getSimpleName()+" with "+l(context.hashCode())+(next.line!=null?" at n°"+next.line.number:""));

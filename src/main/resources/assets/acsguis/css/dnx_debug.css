@@ -1,13 +1,12 @@
 @font-face {
-  font-family: "dnx:test_font";
-  /*font-style: italic;*/
-  src: url("acsguis:css/font2.ttf");
-    font-size: 52;
+    font-family: "dnx:test_font";
+    /*font-style: italic;*/
+    src: url("acsguis:css/font2.ttf");
+    font-size: 52px;
 }
 
-.home
-{
-    background-color: rgba(0,0,0,100);
+.home {
+    background-color: rgba(0, 0, 0, 100);
     width: 80%;
     height: 80%;
     top: 50%;
@@ -17,13 +16,12 @@
     border-radius: 18px;
     border: 2px rgba(0, 0, 0, 0);
 }
-.home:hover
-{
-    border-color: rgba(0,0,0,200);
+
+.home:hover {
+    border-color: rgba(0, 0, 0, 200);
 }
 
-.title
-{
+.title {
     top: 10px;
     left: 0px;
     text-align: center;
@@ -32,16 +30,15 @@
     text-align-vertical: center;
     padding-left: 10px;
 }
-.title:hover
-{
+
+.title:hover {
     text-shadow: disable;
     border: 2px orange;
     height: 25px;
-    font-size: 13;
+    font-size: 13px;
 }
 
-.switch-button-off
-{
+.switch-button-off {
     width: 20px;
     height: 20px;
     left: 10px;
@@ -51,60 +48,58 @@
     background-image: none;
     top: auto;
 }
-.switch-button-off:hover
-{
+
+.switch-button-off:hover {
     background-color: red;
 }
-.switch-button-on
-{
+
+.switch-button-on {
     width: 20px;
     height: 20px;
     left: 10px;
     border: 1px gray;
     border-radius: 10px;
-    background-color: rgb(40,200,40);
+    background-color: rgb(40, 200, 40);
     background-image: none;
 }
-.switch-button-on:hover
-{
+
+.switch-button-on:hover {
     background-color: green;
 }
-.option-desc
-{
+
+.option-desc {
     top: auto;
 }
-.option-desc>label
-{
+
+.option-desc > label {
     left: 40px;
     font-family: "dnx:test_font";
     text-shadow: disable;
-    font-size: 2;
+    font-size: 2px;
     width: 80%;
     padding: 0px;
 }
 
-tabbed_pane
-{
+tabbed_pane {
     background-color: translucent;
 }
-tabbed_pane>button
-{
-    border: 1px rgba(100,100,100,100);
+
+tabbed_pane > button {
+    border: 1px rgba(100, 100, 100, 100);
     border-radius: 10px;
     background-image: none;
     border-position: internal;
 }
-tabbed_pane>button:hover,tabbed_pane>button:active
-{
-    border-color: rgba(200,200,200,100);
+
+tabbed_pane > button:hover, tabbed_pane > button:active {
+    border-color: rgba(200, 200, 200, 100);
     border-position: external;
-    font-size: 12;
+    font-size: 12px;
 }
 
-#credits
-{
+#credits {
     width: auto;
-    font-size: 15;
+    font-size: 15px;
     top: 90%;
     height: 10%;
     left: 50%;
@@ -113,15 +108,14 @@ tabbed_pane>button:hover,tabbed_pane>button:active
     background-color: translucent;
     font-style: italic;
 }
-#credits:hover
-{
+
+#credits:hover {
     color: cyan;
     text-shadow: disable;
     font-style: normal;
 }
 
-.reload_button
-{
+.reload_button {
     width: 35%;
     min-width: 160px;
     left: 10px;
@@ -132,17 +126,16 @@ tabbed_pane>button:hover,tabbed_pane>button:active
 
     top: auto;
 }
-.reload_button:hover
-{
+
+.reload_button:hover {
     border-color: dimgray;
 }
-.reload_button:disabled
-{
+
+.reload_button:disabled {
     border-color: darkgreen;
 }
 
-#general>scroll_pane
-{
+#general > scroll_pane {
     top: 40px;
     height: 60%;
 }

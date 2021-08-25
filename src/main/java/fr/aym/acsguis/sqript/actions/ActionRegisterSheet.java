@@ -15,7 +15,7 @@ import net.minecraft.util.ResourceLocation;
                 name = "Register a css sheet",
                 description = "Registers a css sheet for your css guis. You it in the \"on css load event\".",
                 examples = "register sheet \"dynamx:css/test.css\"",
-                pattern = "register css sheet {resource location}")
+                pattern = "register css sheet {resource}")
 )
 public class ActionRegisterSheet extends ScriptAction {
     @Override

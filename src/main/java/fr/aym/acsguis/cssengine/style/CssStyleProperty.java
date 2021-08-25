@@ -2,6 +2,7 @@ package fr.aym.acsguis.cssengine.style;
 
 import fr.aym.acsguis.component.style.AutoStyleHandler;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 
 import javax.annotation.Nullable;
@@ -20,16 +21,20 @@ public class CssStyleProperty<T>
      * @param value Raw string value, automatically parsed
      * @throws IllegalArgumentException if it cannot be parsed
      */
-    public CssStyleProperty(EnumCssStyleProperties property, String value) {
+    public CssStyleProperty(EnumCssStyleProperties property, CssValue value) {
         this.property = property;
-        this.type = EnumStylePropertyType.getTypeIfSpecial(value);
-        if(type.isNormal()) {
-            this.value = (T) property.parser.getValue(value);
-            if (this.value == null)
-                throw new IllegalArgumentException("Cannot parse " + value + " for property " + property);
+        if(value.getUnit() == CssValue.Unit.STRING) {
+            this.type = EnumStylePropertyType.getTypeIfSpecial(value.stringValue());
+            if (type.isNormal()) {
+                this.value = (T) property.parser.getValue(value.stringValue());
+                if (this.value == null)
+                    throw new IllegalArgumentException("Cannot parse " + value + " for property " + property);
+            } else
+                this.value = null;
+        } else {
+            this.type = EnumStylePropertyType.NORMAL;
+            this.value = (T) value;
         }
-        else
-            this.value = null;
     }
 
     /**

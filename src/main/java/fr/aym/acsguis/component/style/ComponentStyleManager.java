@@ -1,6 +1,6 @@
 package fr.aym.acsguis.component.style;
 
-import com.helger.css.propertyvalue.CSSSimpleValueWithUnit;
+import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.cssengine.style.CssStyleProperty;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
@@ -62,7 +62,7 @@ public interface ComponentStyleManager
      */
     ComponentStyleManager removeAutoStyleHandler(AutoStyleHandler<?> handler);
     /**
-     * @return The auto styles applied to this [component]
+     * @return The auto styles applied to this_component
      */
     Collection<AutoStyleHandler<?>> getAutoStyleHandlers();
 
@@ -109,7 +109,7 @@ public interface ComponentStyleManager
     ComponentStyleManager setForegroundColor(int color);
     int getForegroundColor();
 
-    ComponentStyleManager setBorderRadius(CSSSimpleValueWithUnit radius);
+    ComponentStyleManager setBorderRadius(CssValue radius);
     int getBorderRadius();
 
     enum BORDER_POSITION {INTERNAL, EXTERNAL }
@@ -141,7 +141,7 @@ public interface ComponentStyleManager
     ComponentStyleManager setBorderPosition(BORDER_POSITION borderPosition);
     BORDER_POSITION getBorderPosition();
 
-    ComponentStyleManager setBorderSize(CSSSimpleValueWithUnit borderSize);
+    ComponentStyleManager setBorderSize(CssValue borderSize);
     int getBorderSize();
 
     ComponentStyleManager setBorderColor(int borderColor);

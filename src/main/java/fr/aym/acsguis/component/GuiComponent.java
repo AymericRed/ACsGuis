@@ -47,22 +47,22 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     protected static final Minecraft mc = Minecraft.getMinecraft();
 
     /**
-     * The parent of this [component]
+     * The parent of this_component
      */
     protected GuiPanel parent;
 
     /**
-     * The {@link ComponentStyleManager} of this [component]
+     * The {@link ComponentStyleManager} of this_component
      */
     protected T style;
 
     /**
-     * The css id of this [component]
+     * The css id of this_component
      */
     protected String cssId;
 
     /**
-     * The css class of this [component]
+     * The css class of this_component
      */
     protected String cssClass;
 
@@ -113,7 +113,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * Sets the css class of this [component], use <code>.cssId</code> in your css code to refer to this element
+     * Sets the css class of this_component, use <code>.cssId</code> in your css code to refer to this element
      */
     public GuiComponent<T> setCssClass(@Nullable String cssClass) {
         this.cssClass = cssClass;
@@ -122,7 +122,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * @return The css class of this [component]
+     * @return The css class of this_component
      */
     @Nullable
     public String getCssClass() {
@@ -130,7 +130,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * Sets the css id of this [component], use <code>#cssId</code> in your css code to refer to this element <br>
+     * Sets the css id of this_component, use <code>#cssId</code> in your css code to refer to this element <br>
      *     It's a convention to make it unique for each component in your gui
      */
     public GuiComponent<T> setCssId(@Nullable String cssId) {
@@ -140,7 +140,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * @return The css id of this [component]
+     * @return The css id of this_component
      */
     @Nullable
     public String getCssId() {
@@ -200,7 +200,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * Draws this [component] <br>
+     * Draws this_component <br>
      *     You can override drawBackground and drawForeground
      */
     public final void render(int mouseX, int mouseY, float partialTicks)
@@ -276,7 +276,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * Computes and displays debug info of this [component]
+     * Computes and displays debug info of this_component
      */
     public void displayComponentOnDebugPane() {
         List<String> debug = new ArrayList<>();
@@ -293,7 +293,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * Bind the scissor test to render only the child component's part in this [component] boundaries.
+     * Bind the scissor test to render only the child component's part in this_component boundaries.
      */
     protected void bindLayerBounds() {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -335,7 +335,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * @return Return the state of this [component]
+     * @return Return the state of this_component
      */
     public EnumSelectorContext getState()
     {
@@ -888,7 +888,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * @return The {@link ComponentStyleManager} of this [component]
+     * @return The {@link ComponentStyleManager} of this_component
      */
     public T getStyle() {
         return style;
