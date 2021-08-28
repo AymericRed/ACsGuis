@@ -290,12 +290,12 @@ public enum EnumCssStyleProperties {
         if(p.getValue().equals("center")) {
             c.getXPos().setRelative(0, GuiConstants.ENUM_RELATIVE_POS.CENTER);
         }
-    }, "horizontal_position"),
+    }, "horizontal-position"),
     VERTICAL_POSITION(CssHelper.STRING, (ctx, p, c) -> {
         if(p.getValue().equals("center")) {
             c.getYPos().setRelative(0, GuiConstants.ENUM_RELATIVE_POS.CENTER);
         }
-    }, "vertical_position"),
+    }, "vertical-position"),
     PROGRESS_FULL(CssHelper.TEXTURE_SPRITE, (ctx, p, c) -> {
         if (c instanceof GuiProgressBar.ProgressBarStyleManager) {
             ((GuiProgressBar.ProgressBarStyleManager) c).setFullTexture(p.getValue());

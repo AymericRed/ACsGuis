@@ -114,7 +114,7 @@ public class CssHelper {
                 throw new IllegalArgumentException("Invalid texture(...) definition " + from + "\n Must be texture(path, u, v, uWidth, vHeight)");
         } else if (from.startsWith("url(")) {
             from = from.replaceAll(" ", "");
-            Pattern p = Pattern.compile("^\\s*url\\((.*)\\)$");
+            Pattern p = Pattern.compile("^\\s*url\\(\"(.*)\"\\)$");
             Matcher m = p.matcher(from);
             if (m.matches()) {
                 return new GuiTextureSprite(new ResourceLocation(m.group(1)));
