@@ -5,14 +5,29 @@ import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An abstract css object with selectors and properties
+ */
 public interface CssObject
 {
+    /**
+     * @return All properties of this object
+     */
     List<CssProperty> getAllDeclarations();
 
+    /**
+     * @return The line where the object is declared
+     */
     String getSourceLocation();
 
+    /**
+     * @return The selectors of this object
+     */
     Iterable<? extends CompoundCssSelector> getSelectors();
 
+    /**
+     * A basic css object with selectors and properties
+     */
     class BasicCssObject implements CssObject
     {
         private final String sourceLocation;
@@ -40,6 +55,9 @@ public interface CssObject
         }
     }
 
+    /**
+     * An annotation object, with properties but no selector (except the annotation)
+     */
     class AnnotationObject implements CssObject
     {
         private final String sourceLocation;

@@ -1,5 +1,8 @@
 package fr.aym.acsguis.cssengine.parsing.core.objects;
 
+/**
+ * A css property
+ */
 public class CssProperty
 {
     private final String key;
@@ -13,18 +16,30 @@ public class CssProperty
         this.value = value;
     }
 
+    /**
+     * @return The name of the property, should match one in {@link fr.aym.acsguis.cssengine.style.EnumCssStyleProperties}
+     */
     public String getKey() {
         return key;
     }
 
+    /**
+     * @return The value of the property
+     */
     public CssValue getValue() {
         return value;
     }
 
+    /**
+     * @return The line where this property is declared
+     */
     public String getSourceLocation() {
         return sourceLocation;
     }
 
+    /**
+     * Sets the line where this property is declared
+     */
     public void setSourceLocation(String sourceLocation) {
         this.sourceLocation = sourceLocation;
     }

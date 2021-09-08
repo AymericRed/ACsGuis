@@ -18,6 +18,10 @@ progress_bar
 {
     background-color: darkgray;
     color: gray;
+    progress-bar-full-color: green;
+    progress-bar-text-color: white;
+    text-alignement: center;
+    vertical-text-alignement: center;
 }
 
 text_area,text_field
@@ -202,3 +206,4 @@ button_with_icon
     height: 40px;
     background-color: translucent;
 }
+

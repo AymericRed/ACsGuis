@@ -11,21 +11,35 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class CssFileReader { //TODO OMG SO MUCH DOC
+/**
+ * The ACsGuis css parser <br>
+ * Respects the CSS standards but a LOT of things are missing, this is just a basic parser
+ *
+ * @see fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser
+ */
+public class CssFileReader {
+    /**
+     * Registered annotations
+     */
     private static final List<CssAnnotation> annotations = Arrays.asList(new CssAnnotation("@font-face"));
 
-    static CssObject currentObject = null;
-    static boolean hadBeginObject = false;
-    static boolean inComment = false;
-
+    /**
+     * Reads the given css input stream and fills the {@link CssFileVisitor}
+     *
+     * @param sheetName The sheet name, for error messages
+     * @param inputStream The css input stream, in UTF-8
+     * @param visitor The css visitor
+     *
+     * @throws CssException If an error occurs while reading the css
+     */
     public static void readCssFile(String sheetName, InputStream inputStream, CssFileVisitor visitor) throws CssException {
         //System.out.println("===========");
         //System.out.println("Parsing "+sheetName);
         Scanner sc = new Scanner(inputStream);
         int lineNumber = 0;
-        currentObject = null;
-        hadBeginObject = false;
-        inComment = false;
+        CssObject currentObject = null;
+        boolean hadBeginObject = false;
+        boolean inComment = false;
         while (sc.hasNextLine()) {
             lineNumber++;
             try {
@@ -108,7 +122,15 @@ public class CssFileReader { //TODO OMG SO MUCH DOC
         }
     }
 
-    public static CssProperty parseProperty(String location, String line) throws CssException {
+    /**
+     * Parses the given line as a css property
+     *
+     * @param sourceLocation The location of the line, for error messages
+     * @param line The line to parse
+     * @return The parsed property
+     * @throws CssException If it isn't a property or if an error occurs
+     */
+    private static CssProperty parseProperty(String sourceLocation, String line) throws CssException {
         //System.out.println("Parsing " + line);
         if (line.contains(":")) {
             String[] data = line.split(":", 2);
@@ -129,13 +151,21 @@ public class CssFileReader { //TODO OMG SO MUCH DOC
                 //System.out.println("SET VALUE OF "+data[0]+" to "+value);
                 cssValue = new CssStringValue(value);
             }
-            return new CssProperty(location, data[0].trim(), cssValue);
+            return new CssProperty(sourceLocation, data[0].trim(), cssValue);
         } else {
-            throw new CssException("Found a text that isn't a property or a comment at "+location);
+            throw new CssException("Found a text that isn't a property or a comment at "+sourceLocation);
         }
     }
 
-    public static CssObject findObject(String sourceLocation, String name) throws CssException {
+    /**
+     * Creates a {@link CssObject} from the given line
+     *
+     * @param sourceLocation The location of the line, for error messages
+     * @param name The line to parse
+     * @return The parsed object with its selectors
+     * @throws CssException If an error occurs
+     */
+    private static CssObject findObject(String sourceLocation, String name) throws CssException {
         for(CssAnnotation annotation : annotations) {
             if(annotation.getName().equals(name)) {
                 return new CssObject.AnnotationObject(sourceLocation, annotation);
@@ -148,28 +178,37 @@ public class CssFileReader { //TODO OMG SO MUCH DOC
         throw new CssException("No css selector found at "+sourceLocation);
     }
 
-    public static List<CompoundCssSelector> buildSelectors(String sourceLocation, String name) throws CssException {
+    /**
+     * Parses the css selectors of the given string
+     *
+     * @param sourceLocation The location of the line, for error messages
+     * @param name The string to parse
+     * @return The list of css selectors in this string
+     * @throws CssException If an error occurs
+     */
+    private static List<CompoundCssSelector> buildSelectors(String sourceLocation, String name) throws CssException {
         List<CompoundCssSelector> selectors = new ArrayList<>();
         CompoundCssSelector.Builder bu = new CompoundCssSelector.Builder();
         StringBuilder currentSelector = new StringBuilder();
 
         CssSelectorCombinator prevCombinator = null;
 
+        //For each char in name
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            boolean b = c == ':' || i == name.length()-1;
+            boolean isCombinator = c == ':' || i == name.length()-1;
             CssSelectorCombinator combinator = null;
-            if(!b) {
+            if(!isCombinator) {
                 for (CssSelectorCombinator combine : CssSelectorCombinator.values()) {
                     if(combine.getLetter() == c) {
-                        b = true;
+                        isCombinator = true;
                         combinator = combine;
                         break;
                     }
                 }
             }
             //System.out.println("Found "+b+" "+combinator+" and trying "+c+" for "+ currentSelector);
-            if(b) {
+            if(isCombinator) {
                 if(i == name.length()-1)
                     currentSelector.append(c);
                 String str = currentSelector.toString();
@@ -186,6 +225,7 @@ public class CssFileReader { //TODO OMG SO MUCH DOC
                         throw new CssException("Only one modifier is permitted between each css selector. At "+sourceLocation);
                     }
                 }
+                //Other selectors than BLANK have priority
                 if(combinator != null && (prevCombinator == null || combinator != CssSelectorCombinator.BLANK)) {
                     prevCombinator = combinator;
                 }
@@ -218,7 +258,14 @@ public class CssFileReader { //TODO OMG SO MUCH DOC
         return selectors;
     }
 
-    public static CssSelector<?> getSelector(String sourceLocation, String rawSelector) {
+    /**
+     * Parses the css selector of the given string
+     *
+     * @param sourceLocation The location of the line, for error messages
+     * @param rawSelector The string to parse
+     * @return The css selector contained in the given string
+     */
+    private static CssSelector<?> getSelector(String sourceLocation, String rawSelector) {
         if (rawSelector.startsWith(".")) //Class
         {
             return new CssSelector<>(CssSelector.EnumSelectorType.CLASS, rawSelector.substring(1));

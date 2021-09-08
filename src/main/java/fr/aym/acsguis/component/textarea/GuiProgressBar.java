@@ -111,18 +111,18 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
         this.maxProgress = max;
     }
 
-    public class ProgressBarStyleManager extends CssComponentStyleManager
+    public static class ProgressBarStyleManager extends CssComponentStyleManager
     {
         protected GuiTextureSprite fullTexture;
         
-        protected int fullProgressBarColor = Color.GRAY.getRGB();
-//TODO DEFAULTS
-        /** Text horizontal alignment, relative to the GuiLabel {@link GuiConstants.HORIZONTAL_TEXT_ALIGNMENT} **/
-        protected GuiConstants.HORIZONTAL_TEXT_ALIGNMENT horizontalTextAlignment = GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.CENTER;
-        /** Text horizontal alingment, relative to the GuiLabel {@link GuiConstants.VERTICAL_TEXT_ALIGNMENT} **/
-        protected GuiConstants.VERTICAL_TEXT_ALIGNMENT verticalTextAlignment = GuiConstants.VERTICAL_TEXT_ALIGNMENT.CENTER;
+        protected int fullProgressBarColor;
 
-        protected int progressTextColor = Color.WHITE.getRGB();
+        /** Text horizontal alignment, relative to the GuiLabel {@link GuiConstants.HORIZONTAL_TEXT_ALIGNMENT} **/
+        protected GuiConstants.HORIZONTAL_TEXT_ALIGNMENT horizontalTextAlignment;
+        /** Text horizontal alingment, relative to the GuiLabel {@link GuiConstants.VERTICAL_TEXT_ALIGNMENT} **/
+        protected GuiConstants.VERTICAL_TEXT_ALIGNMENT verticalTextAlignment;
+
+        protected int progressTextColor;
 
         public ProgressBarStyleManager(GuiProgressBar component) {
             super(component);
