@@ -105,7 +105,7 @@ public class ScriptBlockGuiComponent extends ScriptLoop {
     public IScript run(ScriptContext context) throws ScriptException {
         //System.out.println("OWW I DOING DONE " + getWrapped() + " " + getParent() + " " + this);
         IScript toDo = getWrapped() == null ? getNext(context) : getWrapped();
-        //System.out.println("-------------> Return " + toDo + " " + this.next);
+        //System.out.println("-------------> Return " + totDo + " " + this.next);
         //System.out.println("Last runt is "+lastRuntTab+" and tabs "+tabLevel+" and this "+getLine());
         while (lastRuntTab >= this.tabLevel) {
             lastRuntTab--;

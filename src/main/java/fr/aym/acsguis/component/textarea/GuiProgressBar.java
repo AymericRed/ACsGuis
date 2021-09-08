@@ -116,7 +116,7 @@ public class GuiProgressBar extends GuiComponent<GuiProgressBar.ProgressBarStyle
         protected GuiTextureSprite fullTexture;
         
         protected int fullProgressBarColor = Color.GRAY.getRGB();
-//TODO DEFAULTS
+//FIXME DEFAULTS
         /** Text horizontal alignment, relative to the GuiLabel {@link GuiConstants.HORIZONTAL_TEXT_ALIGNMENT} **/
         protected GuiConstants.HORIZONTAL_TEXT_ALIGNMENT horizontalTextAlignment = GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.CENTER;
         /** Text horizontal alingment, relative to the GuiLabel {@link GuiConstants.VERTICAL_TEXT_ALIGNMENT} **/

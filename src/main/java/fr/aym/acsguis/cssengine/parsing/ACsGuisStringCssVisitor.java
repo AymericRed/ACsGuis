@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The css sheet parser
+ * The css string parser
  */
-public class ACsGuisStringCssVisitor implements CssFileVisitor //TODO THIS BAD BOY
+public class ACsGuisStringCssVisitor implements CssFileVisitor
 {
     private final GuiComponent<?> component;
     private final Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> styleSheet;
