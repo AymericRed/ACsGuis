@@ -44,7 +44,7 @@ public class CSSShortHandDescriptorWithAlignment extends CSSShortHandDescriptor 
         final int nSize = aExpressionMembers.size();
         if (nSize != 2) {
             // 4px -> 4px 4px 4px 4px
-            final String aMember = aExpressionMembers.get(0).replace("px", ""); //TODO IMPROVE
+            final String aMember = aExpressionMembers.get(0).replace("px", ""); //FIXME IMPROVE
             for (int i = 0; i < 4; ++i)
                 newMembers.add(new CssIntValue(Integer.parseInt(aMember)));
         } else {

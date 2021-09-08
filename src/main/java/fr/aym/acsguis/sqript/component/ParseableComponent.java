@@ -28,7 +28,7 @@ public enum ParseableComponent
     PROGRESS_BAR(GuiProgressBar.class, "progress_bar", GuiProgressBar::new, ComponentProperties.SET_STYLE, ComponentProperties.TEXT),
     PROGRESS_BAR_VERTICAL(GuiProgressBar.class, "progress_bar_vertical", () -> new GuiProgressBar(false), ComponentProperties.SET_STYLE, ComponentProperties.TEXT, ComponentProperties.PROGRESS);
 
-    //TODO NOT SUPPORTED : GuiResizableButton, GuiSlider, GuiCameraView, GuiList, GuiKeyLabel, GuiSearchField, tabs of GuiTabbedPane
+    //FIXME NOT SUPPORTED : GuiResizableButton, GuiSlider, GuiCameraView, GuiList, GuiKeyLabel, GuiSearchField, tabs of GuiTabbedPane
     //TODO SLOTS
 
     private final Class<?> clazz;

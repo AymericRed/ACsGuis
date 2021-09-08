@@ -36,7 +36,7 @@ import fr.nico.sqript.types.ScriptType;
                         pattern = "set text of {gui_component} to {string}"),
                 @Feature(
                         name = "Set other properties of gui components",
-                        description = "Sets other properties of gui components, list in another file todo", //TODO
+                        description = "Sets other properties of gui components, list in the doc", //FIXME LIST IN DOC
                         examples = "set checked_state of this component to true",
                         pattern = "set {string} of {gui_component} to {string}")}
 )

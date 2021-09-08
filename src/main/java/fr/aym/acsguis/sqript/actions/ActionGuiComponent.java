@@ -103,7 +103,7 @@ public class ActionGuiComponent extends ScriptAction {
     public IScript run(ScriptContext context) throws ScriptException {
         //System.out.println("OWW I DOING DONE " + getWrapped() + " " + getParent() + " " + this);
         IScript toDo = getNext(context);
-        //System.out.println("-------------> Return " + toDo + " " + this.next);
+        //System.out.println("-------------> Return " + totDo + " " + this.next);
         //System.out.println("Last runt is " + ScriptBlockGuiComponent.lastRuntTab + " and tabs " + tabLevel + " and this " + getLine());
         while (ScriptBlockGuiComponent.lastRuntTab >= this.tabLevel) {
             ScriptBlockGuiComponent.lastRuntTab--;

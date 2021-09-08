@@ -118,7 +118,7 @@ public enum EnumCssStyleProperties {
         if (c instanceof TextComponentStyleManager) {
             if (p.getValue().getUnit() == RELATIVE_INT) {
                 ((TextComponentStyleManager) c).setPaddingTop((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
-            } else { //TODO IMPROVE RELATIVE SHIT
+            } else { //FIXME IMPROVE RELATIVE THINGS
                 ((TextComponentStyleManager) c).setPaddingTop(p.getValue().intValue());
             }
         }

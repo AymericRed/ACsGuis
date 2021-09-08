@@ -128,8 +128,8 @@ public class CSSShortHandDescriptor {
                             aSB.append(sValue);
                         }*/
 
-                       // An error will be thown after :) if (aProperty.isValidValue(aSB.toString())) {
-                        //TODO THIS IS A VERY VERY VERY BAD IDEA
+                       // An error will be thrown after :) if (aProperty.isValidValue(aSB.toString())) {
+                        //FIXME THIS IS A VERY VERY VERY BAD IDEA
                             // We found a match
                             final StringBuilder aExpr = new StringBuilder();
                             for (int k = 0; k < nMinArgs; ++k)
