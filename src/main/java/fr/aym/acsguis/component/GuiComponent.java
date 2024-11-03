@@ -21,6 +21,7 @@ import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
 import fr.aym.acsguis.utils.CircleBackground;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import fr.aym.acsguis.utils.IGuiTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -209,32 +210,27 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * Draws this_component <br>
      * You can override drawBackground and drawForeground
      */
-    public void render(int mouseX, int mouseY, float partialTicks, boolean enableScissor) {
+    public void render(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
         if (isVisible() && !MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderAllEvent(this))) {
-            if(enableScissor)
+            if (renderContext.enableScissors())
                 bindLayerBounds();
 
             GlStateManager.translate(0, 0, getStyle().getZLevel());
             if (!MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderBackgroundEvent(this))) {
-                drawBackground(mouseX, mouseY, partialTicks, enableScissor);
-                /*GlStateManager.enableBlend();
-                GlStateManager.disableTexture2D();
-                GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-                GlStateManager.enableTexture2D();
-                GlStateManager.disableBlend();
-                GlStateManager.color(1, 1, 1, 1);*/
-
+                drawBackground(mouseX, mouseY, partialTicks, renderContext);
                 renderListeners.forEach(IRenderListener::onRenderBackground);
             }
             if (!MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderForegroundEvent(this))) {
-                GlStateManager.translate(0, 0, -0.02);
-                drawForeground(mouseX, mouseY, partialTicks, enableScissor);
+                if (renderContext.getGuiType() == GuiFrame.GuiType.IN_WORLD)
+                    GlStateManager.translate(0, 0, -0.02);
+                drawForeground(mouseX, mouseY, partialTicks, renderContext);
                 renderListeners.forEach(IRenderListener::onRenderForeground);
-                GlStateManager.translate(0, 0, 0.02);
+                if (renderContext.getGuiType() == GuiFrame.GuiType.IN_WORLD)
+                    GlStateManager.translate(0, 0, 0.02);
             }
             GlStateManager.translate(0, 0, -getStyle().getZLevel());
 
-            if(enableScissor)
+            if (renderContext.enableScissors())
                 unbindLayerBounds();
         }
     }
@@ -242,10 +238,10 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     /**
      * Draws the component background (texture, color and borders)
      */
-    public void drawBackground(int mouseX, int mouseY, float partialTicks, boolean enableScissor) {
+    public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
         if (getScaledBorderSize() > 0) {
             if (style.getBorderPosition() == ComponentStyleManager.BORDER_POSITION.EXTERNAL) {
-                if(enableScissor)
+                if (renderContext.enableScissors())
                     GuiAPIClientHelper.glScissor(getRenderMinX() - getScaledBorderSize(), getRenderMinY() - getScaledBorderSize(), getRenderMaxX() - getRenderMinX() + getScaledBorderSize() * 2, getRenderMaxY() - getRenderMinY() + getScaledBorderSize() * 2);
                 GuiAPIClientHelper.drawBorderedRectangle(getScreenX() - getScaledBorderSize(), getScreenY() - getScaledBorderSize(), getScreenX() + getWidth() + getScaledBorderSize(),
                         getScreenY() + getHeight() + getScaledBorderSize(), getScaledBorderSize(), style.getBackgroundColor(), style.getBorderColor(), style.getBorderRadius());
@@ -278,7 +274,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     /**
      * Draws the component foreground (child elements, text, ...)
      */
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor) {
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
         if (isHovered() && !hoveringText.isEmpty()) {
             GuiFrame.hoveringText = hoveringText;
         }
@@ -491,7 +487,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
             }
             if (isHovered() && canBePressed) {
                 setFocused(true);
-                setPressed(!(this instanceof GuiPanel) || !clickListeners.isEmpty() || !extraClickListeners.isEmpty());
+                setPressed(isInput());
 
                 for (IFocusListener focusListener : focusListeners) {
                     focusListener.onFocus();
@@ -525,6 +521,10 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
             }
             setPressed(false);
         }
+    }
+
+    public boolean isInput() {
+        return !clickListeners.isEmpty() || !extraClickListeners.isEmpty();
     }
 
     public final void mouseReleased(int mouseX, int mouseY, int mouseButton) {

@@ -3,6 +3,7 @@ package fr.aym.acsguis.component.button;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.event.listeners.IResizableButtonListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -52,7 +53,7 @@ public class GuiResizableButton extends GuiButton implements IMouseMoveListener 
 	}
 	
 	@Override
-	public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor) {
+	public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor) {
 		super.drawForeground(mouseX, mouseY, partialTicks, enableScissor);
 		
 		if(isLeftHovered()) {

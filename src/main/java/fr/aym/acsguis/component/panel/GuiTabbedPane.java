@@ -15,6 +15,7 @@ import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
 import fr.aym.acsguis.sqript.SqriptCompatiblity;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class GuiTabbedPane extends GuiPanel implements IGuiOpenListener, IGuiClo
 	}
 
 	@Override
-	public void drawBackground(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+	public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
 	{
 		super.drawBackground(mouseX, mouseY, partialTicks, enableScissor);
 		

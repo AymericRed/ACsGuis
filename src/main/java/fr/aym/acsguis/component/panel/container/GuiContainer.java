@@ -10,6 +10,7 @@ import fr.aym.acsguis.event.listeners.mouse.IMouseClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.component.layout.GuiScaler;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -102,7 +103,7 @@ public abstract class GuiContainer extends GuiFrame implements IMouseClickListen
     }
 
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor) {
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor) {
 
         super.drawForeground(mouseX, mouseY, partialTicks, enableScissor);
 

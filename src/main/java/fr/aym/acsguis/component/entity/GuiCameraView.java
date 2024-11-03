@@ -2,6 +2,7 @@ package fr.aym.acsguis.component.entity;
 
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 
 public class GuiCameraView extends GuiComponent {
 	
@@ -15,7 +16,7 @@ public class GuiCameraView extends GuiComponent {
 	}
 
 	@Override
-	public void drawBackground(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+	public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
 	{
 		super.drawBackground(mouseX, mouseY, partialTicks, enableScissor);
 		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, GuiFrame.worldRenderBuffer.framebufferTexture);

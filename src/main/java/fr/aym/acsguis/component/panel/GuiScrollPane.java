@@ -6,6 +6,7 @@ import fr.aym.acsguis.component.button.GuiSlider;
 import fr.aym.acsguis.component.textarea.IChildSizeUpdateListener;
 import fr.aym.acsguis.event.listeners.IResizeListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 
 public class GuiScrollPane extends GuiPanel implements IMouseWheelListener, IResizeListener, IChildSizeUpdateListener
 {
@@ -61,7 +62,7 @@ public class GuiScrollPane extends GuiPanel implements IMouseWheelListener, IRes
 	}
 	
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
     {
         if(-xSlider.getValue() != lastScrollAmountX || -ySlider.getValue() != lastScrollAmountY) {
 

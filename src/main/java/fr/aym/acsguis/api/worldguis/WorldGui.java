@@ -4,6 +4,7 @@ import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiTextArea;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -88,6 +89,7 @@ public class WorldGui {
         this.guiHeight = guiHeight;
         this.bounds = new AxisAlignedBB(-width / 2, -height / 2, 0, width / 2, height / 2, 0.1);
         this.canInteract = canInteract;
+        gui.setGuiType(GuiFrame.GuiType.IN_WORLD);
         gui.getGuiScreen().setWorldAndResolution(mc, guiWidth, guiHeight);
         renderTicksRemaining = 2;
     }
@@ -244,9 +246,9 @@ public class WorldGui {
             if (rayTraceResult != null) {
                 double mouseX = getMouseX();
                 double mouseY = getMouseY();
-                gui.getGui().drawScreen((int) mouseX, (int) mouseY, 0, false);
+                gui.getGui().drawScreen((int) mouseX, (int) mouseY, 0, new ComponentRenderContext(getGui(), false, GuiFrame.GuiType.IN_WORLD));
             } else {
-                gui.getGui().drawScreen(-100, -100, 0, false);
+                gui.getGui().drawScreen(-100, -100, 0, new ComponentRenderContext(getGui(), false, GuiFrame.GuiType.IN_WORLD));
             }
 
             if (Keyboard.isKeyDown(Keyboard.KEY_L) && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {

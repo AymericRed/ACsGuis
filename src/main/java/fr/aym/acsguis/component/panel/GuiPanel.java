@@ -9,6 +9,7 @@ import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.cssengine.style.CssPanelStyleManager;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 import fr.aym.acsguis.component.layout.PanelLayout;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 
 import java.util.*;
 
@@ -197,7 +198,7 @@ public class GuiPanel extends GuiComponent<PanelStyleManager> implements AutoSty
 	}
 	
 	@Override
-	public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+	public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
 	{
 		for (GuiComponent<?> component : getChildComponents()) {
 			component.render(mouseX, mouseY, partialTicks, enableScissor);

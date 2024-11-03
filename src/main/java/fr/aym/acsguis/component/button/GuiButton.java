@@ -4,6 +4,7 @@ import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.textarea.TextComponent;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.cssengine.font.CssFontHelper;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
@@ -158,7 +159,7 @@ public class GuiButton extends GuiComponent<TextComponentStyleManager> implement
     }
 
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
     {
         if(getText() != null && !getText().isEmpty()) {
             float scale = (float)(getStyle().getFontSize())/mc.fontRenderer.FONT_HEIGHT;

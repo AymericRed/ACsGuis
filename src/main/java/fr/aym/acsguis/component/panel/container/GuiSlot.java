@@ -4,6 +4,7 @@ import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.button.GuiResizableButton;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -39,7 +40,7 @@ public class GuiSlot extends GuiComponent
     }
 
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor) {
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor) {
 
         super.drawForeground(mouseX, mouseY, partialTicks, enableScissor);
 

@@ -4,6 +4,7 @@ import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -33,7 +34,7 @@ public class GuiEntityRender extends GuiComponent<ComponentStyleManager> impleme
 	}
 	
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
     {
         if(entity != null) {
             float scale = (getHeight() - (paddingBottom + paddingTop)) / entity.height;

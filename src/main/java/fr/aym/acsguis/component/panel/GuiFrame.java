@@ -15,6 +15,7 @@ import fr.aym.acsguis.event.listeners.IKeyboardListener;
 import fr.aym.acsguis.component.layout.GridLayout;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.utils.ACsScaledResolution;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -43,6 +44,8 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 	 * You can disable Minecraft vanilla guiScale scaling here
 	 */
 	protected boolean applyMcScale = true;
+
+	protected GuiType guiType = GuiType.ON_SCREEN;
 
 	/**
 	 * Either to reload all css sheets when the gui is loaded, only for creating/debugging the gui
@@ -299,10 +302,10 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 		@Override
 		public void drawScreen(int mouseX, int mouseY, float partialTicks)
 		{
-			drawScreen(mouseX, mouseY, partialTicks, true);
+			drawScreen(mouseX, mouseY, partialTicks, new ComponentRenderContext(getFrame(), true, guiType));
 		}
 
-		public void drawScreen(int mouseX, int mouseY, float partialTicks, boolean enableScissor)
+		public void drawScreen(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext)
 		{
 			//updateWorldRenderBuffer();
 			hoveringText = null;
@@ -325,7 +328,7 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 			GlStateManager.scale(scaleX, scaleY, 1);
 			GuiAPIClientHelper.setCurrentScissorScaling(scaleX, scaleY);
 			frame.scale.onApplyScale(scaleX, scaleY);
-			frame.render(mouseX, mouseY, partialTicks, enableScissor);
+			frame.render(mouseX, mouseY, partialTicks, renderContext);
 			frame.scale.onRemoveScale(scaleX, scaleY);
 			GuiAPIClientHelper.resetScissorScaling();
 			GL11.glScalef(1/scaleX, 1/scaleY, 1);
@@ -337,7 +340,7 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 				GuiAPIClientHelper.drawHoveringText(hoveringText, mouseX, mouseY);
 
 			if(debugPane.getChildComponents().size() > 2)
-				debugPane.render(mouseX, mouseY, partialTicks, enableScissor);
+				debugPane.render(mouseX, mouseY, partialTicks, renderContext);
 			//if(hoveringDebugText != null && !hoveringDebugText.isEmpty())
 			//	GuiAPIClientHelper.drawHoveringText(hoveringDebugText, mouseX, mouseY);
 		}
@@ -430,6 +433,14 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 		return this;
 	}
 
+	public GuiType getGuiType() {
+		return guiType;
+	}
+
+	public void setGuiType(GuiType type) {
+		this.guiType = type;
+	}
+
 	public APIGuiScreen getGuiScreen() {
 		return guiScreen;
 	}
@@ -437,5 +448,11 @@ public abstract class GuiFrame extends GuiPanel implements IKeyboardListener {
 	@Override
 	public APIGuiScreen getGui() {
 		return getGuiScreen();
+	}
+
+	public enum GuiType {
+		ON_SCREEN,
+		OVERLAY,
+		IN_WORLD
 	}
 }
