@@ -51,7 +51,7 @@ public class GuiScrollPane extends GuiPanel implements IMouseWheelListener, IRes
 	@Override
 	public void onMouseWheel(int dWheel) {
 		if(isHovered()) {
-			GuiSlider slider = xSlider.isHovered() ? xSlider : ySlider;
+			GuiSlider slider = xSlider.isVisible() && (xSlider.isHovered() || !ySlider.isVisible()) ? xSlider : ySlider;
 			slider.setValue(slider.getValue() + (dWheel / -120.0D * slider.getWheelStep()) * (slider.getMax() - slider.getMin()));
 		}
 	}
