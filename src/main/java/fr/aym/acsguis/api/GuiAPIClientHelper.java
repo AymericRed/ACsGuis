@@ -108,8 +108,8 @@ public class GuiAPIClientHelper {
     /**
      * Trim the text to the given width, without cutting words unless the word is larger than a line.
      *
-     * @param text     The text to trim.
-     * @param maxWidth The maximum line's width (int pixels)
+     * @param text          The text to trim.
+     * @param maxWidth      The maximum line's width (int pixels)
      * @param maxTextHeight The maximum height of the text. -1 for no limit
      * @return Return the list of the lines trimmed to the given width.
      */
@@ -204,61 +204,18 @@ public class GuiAPIClientHelper {
      */
     public static void glScissor(float x, float y, float width, float height) {
         int f = GuiFrame.resolution.getScaleFactor();
-        GL11.glScissor((int) (x * f * currentScaleX), (int) (mc.displayHeight - (y + height) * f * currentScaleY), (int) MathHelper.clamp(width * f * currentScaleX, 0, Integer.MAX_VALUE), (int) MathHelper.clamp(height * f * currentScaleY, 0, Integer.MAX_VALUE));
+        GL11.glScissor(MathHelper.floor(x * f * currentScaleX), MathHelper.ceil(mc.displayHeight - (y + height) * f * currentScaleY),
+                MathHelper.clamp(MathHelper.ceil(width * f * currentScaleX), 0, Integer.MAX_VALUE), MathHelper.clamp(MathHelper.ceil(height * f * currentScaleY), 0, Integer.MAX_VALUE));
     }
 
     public static void drawBorderedRectangle(float left, float top, float right, float bottom, float borderSize, int backgroundColor, int borderColor, float borderRadius) {
         CircleBackground.renderBorder(borderRadius, left, top, right, bottom, borderSize, borderColor);
-        CircleBackground.renderBackground(borderRadius, (int) (left + borderSize), (int) (top + borderSize),
-                (int) (right - borderSize), (int) (bottom - borderSize), backgroundColor);
+        CircleBackground.renderBackground(borderRadius, left + borderSize, top + borderSize,
+                right - borderSize, bottom - borderSize, backgroundColor);
     }
-	
-	/*
-	 * Old 1.7.10 functions, not used so disabled
-	 * 
-	public static void drawLine(int x1, int y1, int x2, int y2, int lineWidth, int color)
-	{
-		GL11.glLineWidth(lineWidth);
-		
-		int r = color & 255;
-		int g = color >> 8 & 255;
-		int b = color >> 16 & 255;
-		
-		GlStateManager.color(r / 255F, g / 255F, b / 255F);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		Tessellator tessellator = Tessellator.getInstance();
-		tessellator.startDrawing(GL11.GL_LINE_STRIP);
-		tessellator.addVertex(x1, y1, 0);
-		tessellator.addVertex(x2, y2, 0);
-		tessellator.draw();
-		
-		GlStateManager.color(1,1,1,1);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
-	
-	public static void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int color)
-	{
-		int r = color & 255;
-		int g = color >> 8 & 255;
-		int b = color >> 16 & 255;
-		
-		GL11.glColor3f(r / 255F, g / 255F, b / 255F);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		Tessellator tessellator = Tessellator.getInstance();
-		tessellator.startDrawing(GL11.GL_TRIANGLE_STRIP);
-		tessellator.addVertex(x1, y1, 0);
-		tessellator.addVertex(x2, y2, 0);
-		tessellator.addVertex(x3, y3, 0);
-		tessellator.draw();
-		
-		GL11.glColor3f(1, 1, 1);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}*/
 
     /**
-     * Basically just a copy of the vanilla method {@link net.minecraft.client.gui.GuiScreen#drawHoveringText(List, int, int, FontRenderer)}
+     * Basically just a copy of the vanilla method {@link net.minecraft.client.gui.GuiScreen#drawHoveringText(String, int, int)} 
      */
     public static void drawHoveringText(List<String> textLines, int x, int y) {
         if (!textLines.isEmpty()) {
