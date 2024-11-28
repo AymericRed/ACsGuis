@@ -136,69 +136,63 @@ public class TtfFontRenderer implements ICssFont {
         Color defaultColor = new Color(colorint);
         Color color = defaultColor;
         int line = 0;
-        int u = 0;//text.split("%%").length*(uniFont.getHeight(text)+2);
         text = text.replace("\t", "   ");
+        text = text.trim();
         GL11.glPushMatrix();
         for (String s : text.split("\n")) {
             if (s.contains("§")) {
                 int xOffset = 0;
+                boolean beginsWithFormatting = s.startsWith("§");
                 for (String part : s.split("§")) {
                     if (part.trim().isEmpty())
                         continue;
                     //Mc formatting
-                    int i1 = "0123456789abcdefklmnor".indexOf(part.substring(0, 1).toLowerCase(Locale.ROOT).charAt(0));
-                    if (i1 < 16) {
-                        //this.randomStyle = false;
-                        //this.boldStyle = false;
-                        this.strikethroughStyle = false;
-                        this.underlineStyle = false;
-                        //this.italicStyle = false;
+                    if (beginsWithFormatting) {
+                        int i1 = "0123456789abcdefklmnor".indexOf(part.substring(0, 1).toLowerCase(Locale.ROOT).charAt(0));
+                        if (i1 < 16) {
+                            //this.randomStyle = false;
+                            //this.boldStyle = false;
+                            this.strikethroughStyle = false;
+                            this.underlineStyle = false;
+                            //this.italicStyle = false;
 
-                        if (i1 < 0 || i1 > 15) {
-                            i1 = 15;
-                        }
+                            if (i1 < 0 || i1 > 15) {
+                                i1 = 15;
+                            }
 
                         /*if (shadow)
                         {
                             i1 += 16;
                         }*/ //TODO FIX
 
-                        int j1 = this.colorCode[i1];
-                        color = new Color(j1);
-                    } else if (i1 == 16) {
-                        // just ignore this.randomStyle = true;
-                    } else if (i1 == 17) {
-                        // ignored : use proper css definition this.boldStyle = true;
-                    } else if (i1 == 18) {
-                        this.strikethroughStyle = true;
-                    } else if (i1 == 19) {
-                        this.underlineStyle = true;
-                    } else if (i1 == 20) {
-                        // ignored : use proper css definition this.italicStyle = true;
-                    } else if (i1 == 21) {
-                        //this.randomStyle = false;
-                        //this.boldStyle = false;
-                        this.strikethroughStyle = false;
-                        this.underlineStyle = false;
-                        //this.italicStyle = false;
-                        color = defaultColor;
+                            int j1 = this.colorCode[i1];
+                            color = new Color(j1);
+                        } else if (i1 == 16) {
+                            // just ignore this.randomStyle = true;
+                        } else if (i1 == 17) {
+                            // ignored : use proper css definition this.boldStyle = true;
+                        } else if (i1 == 18) {
+                            this.strikethroughStyle = true;
+                        } else if (i1 == 19) {
+                            this.underlineStyle = true;
+                        } else if (i1 == 20) {
+                            // ignored : use proper css definition this.italicStyle = true;
+                        } else if (i1 == 21) {
+                            //this.randomStyle = false;
+                            //this.boldStyle = false;
+                            this.strikethroughStyle = false;
+                            this.underlineStyle = false;
+                            //this.italicStyle = false;
+                            color = defaultColor;
+                        }
+                        part = part.substring(1);
                     }
-                    part = part.substring(1);
-                    if (!appliedEffects.isEmpty()) {
-                        stylizedUniFont.drawString(x + xOffset, y - u + (uniFont.getHeight(s) + 2) * line, part); //x, y, string to draw, color
-                        uniFont.drawString(x + xOffset, y - u + (uniFont.getHeight(s) + 2) * line, part, color); //x, y, string to draw, color
-                    } else
-                        uniFont.drawString(x + xOffset, y - u + (uniFont.getHeight(s) + 2) * line, part, color); //x, y, string to draw, color
-                    drawAdditionnalEffects(x + xOffset, y - u + (uniFont.getHeight(s) + 2) * line, getWidth(part), getHeight(s));
+                    drawString(x + xOffset, y, line, part, color);
                     xOffset += getWidth(part);
+                    beginsWithFormatting = true;
                 }
             } else {
-                if (!appliedEffects.isEmpty()) {
-                    //stylizedUniFont.drawString(x, y - u + (uniFont.getHeight(s) + 2) * line, s); //x, y, string to draw, color
-                    uniFont.drawString(x, y - u + (uniFont.getHeight(s) + 2) * line, s, color); //x, y, string to draw, color
-                } else
-                    uniFont.drawString(x, y - u + (uniFont.getHeight(s) + 2) * line, s, color); //x, y, string to draw, color
-                drawAdditionnalEffects(x, y - u + (uniFont.getHeight(s) + 2) * line, getWidth(s), getHeight(s));
+                drawString(x, y, line, s, color);
             }
             line++;
         }
@@ -207,16 +201,42 @@ public class TtfFontRenderer implements ICssFont {
         GlStateManager.bindTexture(0); //Make mc think another texture is bind (which is true)
     }
 
-    protected void drawAdditionnalEffects(float posX, float posY, float length, float height) {
+    /**
+     * Draws the following string, applying styles if enabled
+     *
+     * @param x      Render x pos
+     * @param y      Render y pos of the text block
+     * @param line   Line index (adds a y pos offset)
+     * @param string The string to draw
+     * @param color  The text color to apply
+     */
+    private void drawString(float x, float y, int line, String string, Color color) {
+        float renderY = y + (uniFont.getHeight(string) + 2) * line;
+        if (!appliedEffects.isEmpty()) {
+            stylizedUniFont.drawString(x, renderY, string);
+        }
+        uniFont.drawString(x, renderY, string, color);
+        drawAdditionalEffects(x, renderY, getWidth(string), getHeight(string));
+    }
+
+    /**
+     * Draw strikethrough and underline effects if enabled
+     *
+     * @param posX   Render x pos
+     * @param posY   Render y pos
+     * @param length Text length
+     * @param height Text height
+     */
+    protected void drawAdditionalEffects(float posX, float posY, float length, float height) {
         if (this.strikethroughStyle) {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
             GlStateManager.disableTexture2D();
             bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-            bufferbuilder.pos(posX, posY + (height / 2), 0.0D).endVertex();
-            bufferbuilder.pos(posX + length, posY + (height / 2), 0.0D).endVertex();
-            bufferbuilder.pos(posX + length, posY + (height / 2) - 1.0F, 0.0D).endVertex();
-            bufferbuilder.pos(posX, posY + (height / 2) - 1.0F, 0.0D).endVertex();
+            bufferbuilder.pos(posX, posY + (height / 2), 2.0D).endVertex();
+            bufferbuilder.pos(posX + length, posY + (height / 2), 2.0D).endVertex();
+            bufferbuilder.pos(posX + length, posY + (height / 2) - 1.0F, 2.0D).endVertex();
+            bufferbuilder.pos(posX, posY + (height / 2) - 1.0F, 2.0D).endVertex();
             tessellator.draw();
             GlStateManager.enableTexture2D();
         }
@@ -227,10 +247,10 @@ public class TtfFontRenderer implements ICssFont {
             GlStateManager.disableTexture2D();
             bufferbuilder1.begin(7, DefaultVertexFormats.POSITION);
             int l = this.underlineStyle ? -1 : 0;
-            bufferbuilder1.pos(posX + (float) l, posY + height, 0.0D).endVertex();
-            bufferbuilder1.pos(posX + length, posY + height, 0.0D).endVertex();
-            bufferbuilder1.pos(posX + length, posY + height - 1.0F, 0.0D).endVertex();
-            bufferbuilder1.pos(posX + (float) l, posY + height - 1.0F, 0.0D).endVertex();
+            bufferbuilder1.pos(posX + (float) l, posY + height, 2.0D).endVertex();
+            bufferbuilder1.pos(posX + length, posY + height, 2.0D).endVertex();
+            bufferbuilder1.pos(posX + length, posY + height - 1.0F, 2.0D).endVertex();
+            bufferbuilder1.pos(posX + (float) l, posY + height - 1.0F, 2.0D).endVertex();
             tessellator1.draw();
             GlStateManager.enableTexture2D();
         }
