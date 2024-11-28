@@ -2,6 +2,7 @@ package fr.aym.acsguis.api;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.font.ICssFont;
+import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
 import fr.aym.acsguis.utils.CircleBackground;
 import fr.aym.acsguis.utils.GuiConstants;
 import net.minecraft.client.Minecraft;
@@ -108,12 +109,14 @@ public class GuiAPIClientHelper {
      * Trim the text to the given width, without cutting words unless the word is larger than a line.
      *
      * @param text     The text to trim.
-     * @param maxWidth The maximum line's width.
+     * @param maxWidth The maximum line's width (int pixels)
+     * @param maxTextHeight The maximum height of the text. -1 for no limit
      * @return Return the list of the lines trimmed to the given width.
      */
-    public static List<String> trimTextToWidth(String text, int maxWidth) {
-
-        List<String> lines = new ArrayList<String>();
+    public static List<String> trimTextToWidth(String text, int maxWidth, int maxTextHeight) {
+        List<String> renderedLines = new ArrayList<String>();
+        int totalHeight = 0; // Total height of the rendered text (in pixels)
+        int fontHeight = Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT;
 
         while (!text.isEmpty()) {
             String rawTrim = Minecraft.getMinecraft().fontRenderer.trimStringToWidth(text, maxWidth);
@@ -127,10 +130,8 @@ public class GuiAPIClientHelper {
             boolean flag = lastChar == null || lastChar == ' ' || nextChar == null || nextChar == ' ' || lastSpace == 0 || lastSpace == -1;
 
             String line;
-
             if (rawTrim.contains("\n") && (rawTrim.indexOf("\n") == 0 || rawTrim.charAt(rawTrim.indexOf("\n") - 1) != '\\')) {
                 line = rawTrim.substring(0, rawTrim.indexOf("\n") + 1);
-                //text = text.replaceFirst("\n", "");
             } else {
                 if (flag) {
                     line = rawTrim;
@@ -142,15 +143,19 @@ public class GuiAPIClientHelper {
             if (line.isEmpty()) {
                 break;
             }
+            // Check if we've reached the maximum allowed height
+            if (addEllipsisToLastLine(ACsGuisCssParser.DEFAULT_FONT, maxWidth, maxTextHeight, renderedLines, totalHeight, line)) {
+                return renderedLines;
+            }
 
             text = text.substring(line.length());
-            lines.add(line);
+            renderedLines.add(line);
+            totalHeight += fontHeight;
         }
-
-        if (lines.isEmpty())
-            lines.add(text);
-
-        return lines;
+        if (renderedLines.isEmpty()) {
+            renderedLines.add(text);
+        }
+        return renderedLines;
     }
 
     /**
@@ -352,5 +357,31 @@ public class GuiAPIClientHelper {
         GlStateManager.disableBlend();
         GlStateManager.enableAlpha();
         GlStateManager.enableTexture2D();
+    }
+
+    /**
+     * Tests if adding one more line would exceed the maxTextHeight.
+     * If so, it adds an ellipsis to the current line and returns true.
+     *
+     * @param font          The font
+     * @param maxWidth      The max line width (in pixels)
+     * @param maxTextHeight The max text height. -1 for no limit.
+     * @param lines         The text lines
+     * @param totalHeight   The current height of the text (in pixels)
+     * @param word          The word to add on a new line
+     * @return True if the word can't be added within maxTextHeight, and a ellipsis was added
+     */
+    public static boolean addEllipsisToLastLine(ICssFont font, int maxWidth, int maxTextHeight, List<String> lines, int totalHeight, String word) {
+        if (maxTextHeight > 0 && totalHeight + font.getHeight(word) > maxTextHeight) {
+            String lastLine = lines.get(lines.size() - 1);
+            if (lastLine.length() > 3 && font.getWidth(lastLine + "...") > maxWidth) {
+                lastLine = lastLine.substring(0, lastLine.length() - 3) + "...";
+            } else {
+                lastLine += "...";
+            }
+            lines.set(lines.size() - 1, lastLine);
+            return true;
+        }
+        return false;
     }
 }

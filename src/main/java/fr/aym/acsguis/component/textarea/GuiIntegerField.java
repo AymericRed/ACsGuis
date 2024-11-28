@@ -37,16 +37,16 @@ public class GuiIntegerField extends GuiTextField implements NumericComponent
             try {
                 int color = Integer.parseInt(text.equals("-") ? text+"0" : text);
                 if (color > getMax()) {
-                    this.text = ""+getMax();
+                    super.setText(""+getMax());
                 } else if (color < getMin()) {
-                    this.text = ""+getMin();
+                    super.setText(""+getMin());
                 } else {
-                    this.text = text;
+                    super.setText(text);
                 }
                 value = Integer.parseInt(text);
             } catch (NumberFormatException ignored) {}
         } else {
-            this.text = text;
+            super.setText(text);
             value = 0;
         }
         return this;

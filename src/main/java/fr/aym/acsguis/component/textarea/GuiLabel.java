@@ -10,6 +10,7 @@ import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 import fr.aym.acsguis.utils.GuiConstants;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -110,15 +111,15 @@ public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextCompon
     }
 
     @Override
-    public int getMaxLineLength() {
-        return super.getMaxLineLength();
-    }
-
-    @Override
     public GuiTextArea setText(String text) {
         super.setText(text);
         getStyle().refreshCss(getGui(), false); //Refresh style, for auto width and height
         return this;
+    }
+
+    @Override
+    public int getMaxTextHeight() {
+        return (int) MathHelper.clamp((getHeight() - getPaddingTop() - getPaddingBottom()) / textScale, 0, Integer.MAX_VALUE);
     }
 
     @Override

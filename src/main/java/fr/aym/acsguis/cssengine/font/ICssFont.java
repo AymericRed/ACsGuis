@@ -5,6 +5,7 @@ import net.minecraft.util.ResourceLocation;
 import org.newdawn.slick.font.effects.Effect;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A css font, supporting special effects
@@ -46,6 +47,16 @@ public interface ICssFont {
      * @return The width of the given text with this font
      */
     int getWidth(String text);
+
+    /**
+     * Trim the text to the given width, without cutting words unless the word is larger than a line.
+     *
+     * @param text          The text to trim.
+     * @param maxWidth      The maximum line's width.
+     * @param maxTextHeight The maximum height of the text. -1 for no limit
+     * @return Return the list of the lines trimmed to the given width.
+     */
+    List<String> trimTextToWidth(String text, int maxWidth, int maxTextHeight);
 
     /**
      * Listener of font loading errors

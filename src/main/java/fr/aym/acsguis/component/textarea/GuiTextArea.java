@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class GuiTextArea extends GuiComponent<TextComponentStyleManager> implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener, TextComponent {
-    protected String text = "";
-    protected String hintText = "";
+    private String text = "";
+    private String hintText = "";
+
+    private List<String> cachedTextLines;
 
     /**
      * Used to allow only a certain type of character or pattern
@@ -73,7 +75,13 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
 
     @Override
     protected TextComponentStyleManager createStyleManager() {
-        return new CssTextComponentStyleManager(this);
+        return new CssTextComponentStyleManager(this) {
+            @Override
+            public void updateComponentSize(int screenWidth, int screenHeight) {
+                super.updateComponentSize(screenWidth, screenHeight);
+                clearCachedTextLines();
+            }
+        };
     }
 
     public boolean allowLineBreak() {
@@ -98,7 +106,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         GlStateManager.scale(textScale, textScale, 1);
         CssFontHelper.pushDrawing(getStyle().getFontFamily(), getStyle().getEffects());
         if (!getText().isEmpty())
-            drawTextLines(getRenderedTextLines(), textScale);
+            drawTextLines(getCachedTextLines(), textScale);
 
         GuiAPIClientHelper.glScissor(getRenderMinX() + getScaledBorderSize(), getRenderMinY() + getScaledBorderSize(), getRenderMaxX() - getRenderMinX() - getScaledBorderSize(), getRenderMaxY() - getRenderMinY() - getScaledBorderSize());
         drawHintLines(textScale);
@@ -138,8 +146,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     protected void drawHintLines(float scale) {
         if (!isFocused() && text.isEmpty()) {
             GlStateManager.enableTexture2D();
-            List<String> hintTextLines = getHintTextLines();
-
+            List<String> hintTextLines = getCachedTextLines();
             if (hintTextLines != null) {
                 for (int i = 0; i < hintTextLines.size(); i++) {
                     float height = scale * getStyle().getFontHeight(hintTextLines.get(i));
@@ -161,30 +168,32 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     }
 
     protected void drawCursor(float scale) {
+        List<String> lines = getCachedTextLines();
         if (cursorCounter / 20 % 2 == 0 && isFocused()) {
-            String line = getRenderedTextLines().get(getLine(cursorIndex));
-            float height = scale * 9; // does not supports custom fonts
+            String line = lines.get(getLine(lines, cursorIndex));
+            float height = scale * 9; // todo does not supports custom fonts
             float cursorPosX = mc.fontRenderer.getStringWidth(line.substring(0, getPosition(cursorIndex))) * scale - lineScrollOffsetX;
-            float cursorPosY = GuiAPIClientHelper.getRelativeTextY(getLine(cursorIndex), getRenderedTextLines().size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY();//(int) (getLine(cursorIndex) * 9 - lineScrollOffsetY);//+ GuiAPIClientHelper.getRelativeTextY(getLine(cursorIndex), getRenderedTextLines().size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), 9)); //todo put line height + optimize
+            float cursorPosY = GuiAPIClientHelper.getRelativeTextY(getLine(lines, cursorIndex), lines.size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY();//(int) (getLine(cursorIndex) * 9 - lineScrollOffsetY);//+ GuiAPIClientHelper.getRelativeTextY(getLine(cursorIndex), getRenderedTextLines().size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), 9)); //todo put line height + optimize
             drawRect((int) ((getScreenX() + getPaddingLeft() + cursorPosX) / scale), (int) ((getScreenY() + getPaddingTop() + cursorPosY) / scale), (int) ((getScreenX() + getPaddingLeft() + cursorPosX) / scale + 1), (int) ((getScreenY() + getPaddingTop() + cursorPosY) / scale + 9), Color.WHITE.getRGB());
         }
     }
 
     protected void drawSelectedRegion(float scale) {
+        List<String> lines = getCachedTextLines();
         GlStateManager.color(0.0F, 0.0F, 255.0F, 255.0F);
         GlStateManager.disableTexture2D();
         GlStateManager.enableColorLogic();
         GlStateManager.colorLogicOp(5387);
 
-        int cursorLine = getLine(cursorIndex);
-        int selectionEndLine = getLine(selectionEndIndex);
+        int cursorLine = getLine(lines, cursorIndex);
+        int selectionEndLine = getLine(lines, selectionEndIndex);
 
         int cursorPosition = getPosition(cursorIndex);
         int selectionEndPosition = getPosition(selectionEndIndex);
 
         for (int i = Math.min(cursorLine, selectionEndLine); i <= Math.max(cursorLine, selectionEndLine); i++) {
 
-            String line = getRenderedTextLines().get(i);
+            String line = lines.get(i);
 
             int x1 = 0;
             int x2 = mc.fontRenderer.getStringWidth(line);
@@ -210,8 +219,8 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
                 }
 
             }
-            float height = scale * 9; // does not supports custom fonts
-            float cursorPosY = GuiAPIClientHelper.getRelativeTextY(i, getRenderedTextLines().size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY();
+            float height = scale * 9; // todo does not supports custom fonts
+            float cursorPosY = GuiAPIClientHelper.getRelativeTextY(i, lines.size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY();
             drawRect((int) ((getScreenX() + getPaddingLeft() - lineScrollOffsetX) / scale + x1), (int) ((getScreenY() + getPaddingTop() + cursorPosY) / scale), (int) ((getScreenX() + getPaddingLeft() - lineScrollOffsetX) / scale + x2), (int) ((getScreenY() + getPaddingTop() + cursorPosY) / scale + 9), Color.BLUE.getRGB());
         }
 
@@ -235,6 +244,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     public GuiTextArea setText(String text) {
         if (text.isEmpty() || regexPattern.matcher(text).matches()) {
             this.text = text.substring(0, Math.min(text.length(), maxTextLength));
+            clearCachedTextLines();
         } else {
             throw new IllegalStateException(String.format("The text %s doesn't match with the regex %s", text, regexPattern.toString()));
         }
@@ -275,9 +285,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
      * @param index The absolute index
      * @return Return the line, k [0; getRenderedTextLines().size()-1]
      */
-    protected int getLine(int index) {
-        List<String> lines = getRenderedTextLines();
-
+    protected int getLine(List<String> lines, int index) {
         int k = 0;
         int l = lines.get(k).length();
 
@@ -294,8 +302,8 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
      * @return Return the relative position, k [0; line.length()]
      */
     protected int getPosition(int index) {
-        List<String> lines = getRenderedTextLines();
-        int lineIndex = getLine(index);
+        List<String> lines = getCachedTextLines();
+        int lineIndex = getLine(lines, index);
 
         int k = index;
 
@@ -312,9 +320,8 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
      * @return Return the new absolute position at actualLine+i
      */
     protected int getIndexAtRelativeLine(int index, int i) {
-
-        List<String> lines = getRenderedTextLines();
-        int lineIndex = getLine(index);
+        List<String> lines = getCachedTextLines();
+        int lineIndex = getLine(lines, index);
 
         if (lineIndex + i >= 0 && lineIndex + i < lines.size()) {
             int relPosition = getPosition(index);
@@ -333,7 +340,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
                 newRelPosition = str0.length();
             }
 
-            return getIndexAt(lineIndex + i, newRelPosition);
+            return getIndexAt(lines, lineIndex + i, newRelPosition);
         }
 
         return index;
@@ -349,10 +356,11 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     }
 
     public void updateTextOffset() {
-        int selectionEndLine = getLine(this.selectionEndIndex);
+        List<String> lines = getCachedTextLines();
+        int selectionEndLine = getLine(lines, this.selectionEndIndex);
         int selectionEndPosition = getPosition(this.selectionEndIndex);
 
-        String line = getRenderedTextLines().get(selectionEndLine).substring(0, selectionEndPosition);
+        String line = lines.get(selectionEndLine).substring(0, selectionEndPosition);
 
         int k = mc.fontRenderer.getStringWidth(line) - lineScrollOffsetX;
         int l = (int) (selectionEndLine * textScale * 9 - lineScrollOffsetY);
@@ -376,24 +384,6 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         }
     }
 
-    public int getMaxTextWidth() {
-        int max = 0;
-        List<String> lines = getRenderedTextLines();
-
-        for (String line : lines) {
-            int width = mc.fontRenderer.getStringWidth(line);
-            if (width > max) {
-                max = width;
-            }
-        }
-
-        return max;
-    }
-
-    public int getTextHeight() {
-        return getRenderedTextLines().size() * 9;
-    }
-
     protected void setSelectionEndIndex(int selectionEndIndex) {
         this.selectionEndIndex = selectionEndIndex;
         updateIndexes();
@@ -406,7 +396,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     }
 
     protected int getIndexFromMouse(int mouseX, int mouseY) {
-        List<String> lines = getRenderedTextLines();
+        List<String> lines = getCachedTextLines();
 
         int d0 = (int) (MathHelper.clamp(mouseX - (getScreenX() + getPaddingLeft()), 0, Integer.MAX_VALUE) + lineScrollOffsetX);
         float d1 = mouseY - (getScreenY() + getPaddingTop()) + lineScrollOffsetY;
@@ -424,11 +414,10 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
             position = str0.length();
         }
 
-        return getIndexAt(lineIndex, position);
+        return getIndexAt(lines, lineIndex, position);
     }
 
-    protected int getIndexAt(int line, int position) {
-        List<String> lines = getRenderedTextLines();
+    protected int getIndexAt(List<String> lines, int line, int position) {
         int index = 0;
 
         for (int i = 0; i < line; i++) {
@@ -489,19 +478,27 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
      * without modifying the actual text.
      */
     protected String getRenderedText() {
-        return getText();
+        return getText().isEmpty() ? getHintText() : getText();
     }
 
     public String getSelectedText() {
-        return text.substring(Math.min(cursorIndex, selectionEndIndex), Math.max(cursorIndex, selectionEndIndex));
+        return getText().substring(Math.min(cursorIndex, selectionEndIndex), Math.max(cursorIndex, selectionEndIndex));
     }
 
-    public List<String> getRenderedTextLines() {
-        return GuiAPIClientHelper.trimTextToWidth(getRenderedText(), getMaxLineLength());
+    public List<String> getCachedTextLines() {
+        if (cachedTextLines == null) {
+            boolean fontIsBound = CssFontHelper.getBoundFont() != null;
+            if (!fontIsBound)
+                CssFontHelper.pushDrawing(getStyle().getFontFamily(), getStyle().getEffects());
+            cachedTextLines = CssFontHelper.getBoundFont().trimTextToWidth(getRenderedText(), getMaxLineLength(), getMaxTextHeight());
+            if (!fontIsBound)
+                CssFontHelper.popDrawing();
+        }
+        return cachedTextLines;
     }
 
-    protected List<String> getHintTextLines() {
-        return GuiAPIClientHelper.trimTextToWidth(hintText, getMaxLineLength());
+    public void clearCachedTextLines() {
+        cachedTextLines = null;
     }
 
     public static boolean isKeyComboCtrlX(int keyID) {
@@ -700,7 +697,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     public void onMouseWheel(int dWheel) {
         if (isHovered() && isFocused() && isScrollable()) {
             lineScrollOffsetY -= dWheel / 20;
-            lineScrollOffsetY = (int) MathHelper.clamp(lineScrollOffsetY, 0, getRenderedTextLines().size() * textScale * 9 - getHeight());
+            lineScrollOffsetY = (int) MathHelper.clamp(lineScrollOffsetY, 0, getCachedTextLines().size() * textScale * mc.fontRenderer.FONT_HEIGHT - getHeight());
         }
     }
 
@@ -714,6 +711,9 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
 
     public GuiTextArea setHintText(String hintText) {
         this.hintText = hintText;
+        if (text.isEmpty()) {
+            clearCachedTextLines();
+        }
         return this;
     }
 
@@ -738,8 +738,14 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     }
 
     public int getMaxLineLength() {
-        float localScale = textScale * ((float) CssFontHelper.getFontHeight(getStyle().getFontFamily(), getText()) / mc.fontRenderer.FONT_HEIGHT);
-        return (int) MathHelper.clamp((getWidth() - (getPaddingLeft() + getPaddingRight())) / localScale, 0, Integer.MAX_VALUE);
+        return (int) MathHelper.clamp((getWidth() - (getPaddingLeft() + getPaddingRight())) / textScale, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     * @return The maximum height of the rendered text, -1 if there is no limit
+     */
+    public int getMaxTextHeight() {
+        return -1;
     }
 
     public int getPaddingTop() {
