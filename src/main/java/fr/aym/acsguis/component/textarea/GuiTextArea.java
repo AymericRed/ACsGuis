@@ -26,7 +26,7 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     private String text = "";
     private String hintText = "";
 
-    private List<String> cachedTextLines;
+    protected List<String> cachedTextLines;
 
     /**
      * Used to allow only a certain type of character or pattern
