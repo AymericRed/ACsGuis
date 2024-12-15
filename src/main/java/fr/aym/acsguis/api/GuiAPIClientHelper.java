@@ -149,10 +149,12 @@ public class GuiAPIClientHelper {
             }
 
             text = text.substring(line.length());
+            line = line.replaceAll("\n", "").replaceAll("\t", "    ");
             renderedLines.add(line);
             totalHeight += fontHeight;
         }
         if (renderedLines.isEmpty()) {
+            text = text.replaceAll("\n", "").replaceAll("\t", "    ");
             renderedLines.add(text);
         }
         return renderedLines;
@@ -330,13 +332,18 @@ public class GuiAPIClientHelper {
      */
     public static boolean addEllipsisToLastLine(ICssFont font, int maxWidth, int maxTextHeight, List<String> lines, int totalHeight, String word) {
         if (maxTextHeight > 0 && totalHeight + font.getHeight(word) > maxTextHeight) {
-            String lastLine = lines.get(lines.size() - 1);
+            String lastLine = lines.isEmpty() ? word : lines.get(lines.size() - 1);
             if (lastLine.length() > 3 && font.getWidth(lastLine + "...") > maxWidth) {
                 lastLine = lastLine.substring(0, lastLine.length() - 3) + "...";
             } else {
                 lastLine += "...";
             }
-            lines.set(lines.size() - 1, lastLine);
+            if(lines.isEmpty()) {
+                lastLine = lastLine.replaceAll("\n", "").replaceAll("\t", "    ");
+                lines.add(lastLine);
+            } else {
+                lines.set(lines.size() - 1, lastLine);
+            }
             return true;
         }
         return false;
