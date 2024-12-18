@@ -2,6 +2,7 @@ package fr.aym.acsguis.api;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.CssGuisManager;
+import fr.aym.acsguis.cssengine.CssHudHandler;
 import fr.aym.acsguis.cssengine.InWorldGuisManager;
 import fr.aym.acsguis.event.CssReloadEvent;
 import fr.aym.acsguis.sqript.NoSqriptSupport;
@@ -99,6 +100,18 @@ public class ACsGuiApi implements ACsGuiApiService {
     }
 
     /**
+     * Show the given GuiFrame on the screen <br>
+     * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowGui if you want to reload the css when displaying the gui.
+     *
+     * @param guiInstance The gui to display as interface
+     * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
+     * @see CssHudHandler
+     */
+    public static void showGui(GuiFrame guiInstance) {
+        manager.showGui(guiInstance);
+    }
+
+    /**
      * Loads a GuiFrame in another thread, then shows it on the HUD <br>
      * A hud gui is only a visual gui, you can't interact with it <br>
      * Note : the css fonts are loaded in the client thread (it needs open gl)
@@ -111,6 +124,18 @@ public class ACsGuiApi implements ACsGuiApiService {
     }
 
     /**
+     * Show the given GuiFrame on the HUD <br>
+     * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowHudGui if you want to reload the css when displaying the gui.
+     *
+     * @param guiInstance The gui to display on hud
+     * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
+     * @see CssHudHandler
+     */
+    public void showHudGui(GuiFrame guiInstance) {
+        manager.showHudGui(guiInstance);
+    }
+
+    /**
      * Loads a GuiFrame in another thread, then shows it on the HUD <br>
      * A hud gui is only a visual gui, you can't interact with it <br>
      * Note : the css fonts are loaded in the client thread (it needs open gl)
@@ -120,7 +145,20 @@ public class ACsGuiApi implements ACsGuiApiService {
      * @param guiInstance A function returning the gui, called by the external thread
      */
     public static void asyncLoadThenShowHudGui(int hudIndex, String guiName, Callable<GuiFrame> guiInstance) {
-        manager.asyncLoadThenShowHudGui(guiName, guiInstance);
+        manager.asyncLoadThenShowHudGui(hudIndex, guiName, guiInstance);
+    }
+
+    /**
+     * Show the given GuiFrame on the HUD <br>
+     * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowHudGui if you want to reload the css when displaying the gui.
+     *
+     * @param hudIndex    The index of the hud, used to change the display order of the huds
+     * @param guiInstance The gui to display on hud
+     * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
+     * @see CssHudHandler
+     */
+    public void showHudGui(int hudIndex, GuiFrame guiInstance) {
+        manager.showHudGui(hudIndex, guiInstance);
     }
 
     /**

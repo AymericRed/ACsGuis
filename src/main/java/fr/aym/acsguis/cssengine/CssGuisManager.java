@@ -139,6 +139,22 @@ public class CssGuisManager implements ISelectiveResourceReloadListener {
     }
 
     /**
+     * Show the given GuiFrame on the screen <br>
+     * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowGui if you want to reload the css when displaying the gui.
+     *
+     * @param guiInstance The gui to display as interface
+     * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
+     * @see CssHudHandler
+     */
+    public void showGui(GuiFrame guiInstance) {
+        guiInstance.setGuiType(GuiFrame.GuiType.ON_SCREEN);
+        if (guiInstance.needsCssReload()) {
+            throw new IllegalArgumentException("Disable the css reload in your gui, or use asyncLoadThenShowGui method if you want to reload the css styles when displaying your gui.");
+        }
+        Minecraft.getMinecraft().displayGuiScreen(guiInstance.getGuiScreen());
+    }
+
+    /**
      * Loads a GuiFrame in another thread, then shows it on the HUD <br>
      * Note : the css fonts are loaded in the client thread (needs open gl)
      *
@@ -163,6 +179,35 @@ public class CssGuisManager implements ISelectiveResourceReloadListener {
         Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Loading CSS hud " + guiName + "...", true);
         ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.NEVER, "css_load",
                 () -> loadGui(GuiFrame.GuiType.OVERLAY, "css hud " + guiName, guiInstance, gui -> getHud().showHudGui(hudIndex, gui)));
+    }
+
+    /**
+     * Show the given GuiFrame on the HUD <br>
+     * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowHudGui if you want to reload the css when displaying the gui.
+     *
+     * @param guiInstance The gui to display on hud
+     * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
+     * @see CssHudHandler
+     */
+    public void showHudGui(GuiFrame guiInstance) {
+        showHudGui(hud.getDisplayedHuds().size(), guiInstance);
+    }
+
+    /**
+     * Show the given GuiFrame on the HUD <br>
+     * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowHudGui if you want to reload the css when displaying the gui.
+     *
+     * @param hudIndex    The index of the hud, used to change the display order of the huds
+     * @param guiInstance The gui to display on hud
+     * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
+     * @see CssHudHandler
+     */
+    public void showHudGui(int hudIndex, GuiFrame guiInstance) {
+        guiInstance.setGuiType(GuiFrame.GuiType.OVERLAY);
+        if (guiInstance.needsCssReload()) {
+            throw new IllegalArgumentException("Disable the css reload in your gui, or use asyncLoadThenShowHudGui method if you want to reload the css styles when displaying your gui.");
+        }
+        getHud().showHudGui(hudIndex, guiInstance);
     }
 
     @Override
