@@ -61,7 +61,7 @@ public class CssSelector<T>
      *
      * @return True if this selector applies to the given css gui component
      */
-    public boolean applies(GuiComponent<?> to, EnumSelectorContext targetContext) {
+    public boolean applies(GuiComponent to, EnumSelectorContext targetContext) {
         if(targetContext != null && to.getStyle().getContext() != context && !(context.isParent(to.getStyle().getContext())))
         {
             //System.out.println("[FAIL] "+targetContext+" "+to+" "+to.getStyle().getContext()+" "+this);

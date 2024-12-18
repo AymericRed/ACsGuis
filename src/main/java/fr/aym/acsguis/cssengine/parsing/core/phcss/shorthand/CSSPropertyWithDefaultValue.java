@@ -16,7 +16,7 @@
  */
 package fr.aym.acsguis.cssengine.parsing.core.phcss.shorthand;
 
-import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
+import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 
 import javax.annotation.Nonnull;
 
@@ -32,7 +32,7 @@ public final class CSSPropertyWithDefaultValue
   private final int minArgs;
   private final String m_sDefaultValue;
 
-  public CSSPropertyWithDefaultValue(@Nonnull final EnumCssStyleProperties aProperty, @Nonnull final String sDefaultValue)
+  public CSSPropertyWithDefaultValue(@Nonnull final EnumCssStyleProperty aProperty, @Nonnull final String sDefaultValue)
   {
     m_aProperty = aProperty.key;
     this.minArgs = 1;

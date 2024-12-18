@@ -25,7 +25,7 @@ public class ScriptComponentKeyAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addKeyboardListener((typedChar, keyCode) -> {
             ScriptContext context1;
             try {

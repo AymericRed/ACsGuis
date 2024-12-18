@@ -18,7 +18,7 @@ package fr.aym.acsguis.cssengine.parsing.core.phcss.shorthand;
 
 import fr.aym.acsguis.cssengine.parsing.core.phcss.CCSSValue;
 import fr.aym.acsguis.cssengine.parsing.core.phcss.CssColors;
-import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
+import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,42 +39,42 @@ public final class CSSShortHandRegistry {
     static {
         // Register default short hands
         registerShortHandDescriptor(new CSSShortHandDescriptor("background",
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_COLOR,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_COLOR,
                         CCSSValue.TRANSPARENT),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.TEXTURE,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.TEXTURE,
                         CCSSValue.NONE),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_REPEAT,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_REPEAT,
                         CCSSValue.REPEAT),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_POSITION,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_POSITION,
                         "top left"),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_ATTACHMENT,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_ATTACHMENT,
                         CCSSValue.SCROLL),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_CLIP,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_CLIP,
                         CCSSValue.BORDER_BOX),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_ORIGIN,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_ORIGIN,
                         CCSSValue.PADDING_BOX),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BACKGROUND_SIZE,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BACKGROUND_SIZE,
                         "auto auto")));
         // Not supported by Firefox 28
         registerShortHandDescriptor(new CSSShortHandDescriptor("font",
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.FONT_STYLE,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.FONT_STYLE,
                         CCSSValue.NORMAL),
                                                              /*new CSSPropertyWithDefaultValue(EnumCssStyleProperties.FONT_VARIANT,
                                                                      CCSSValue.NORMAL),
                                                              new CSSPropertyWithDefaultValue(EnumCssStyleProperties.FONT_WEIGHT,
                                                                      CCSSValue.NORMAL),*/
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.FONT_SIZE,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.FONT_SIZE,
                         CCSSValue.INHERIT),
                                                              /*new CSSPropertyWithDefaultValue(EnumCssStyleProperties.LINE_HEIGHT,
                                                                      CCSSValue.NORMAL),*/
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.FONT_FAMILY,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.FONT_FAMILY,
                         CCSSValue.INHERIT)));
         registerShortHandDescriptor(new CSSShortHandDescriptor("border",
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BORDER_WIDTH,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BORDER_WIDTH,
                         "3px"),
                /* new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BORDER_STYLE,
                         CCSSValue.SOLID), Only solid in this api, so don't write*/
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BORDER_COLOR,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.BORDER_COLOR,
                         CssColors.BLACK.getName())));
     /*registerShortHandDescriptor (new CSSShortHandDescriptor("border-top",
                                                              new CSSPropertyWithDefaultValue(EnumCssStyleProperties.BORDER_TOP_WIDTH,
@@ -141,13 +141,13 @@ public final class CSSShortHandRegistry {
                                                                           new CSSPropertyWithDefaultValue(EnumCssStyleProperties.MARGIN_LEFT,
                                                                                   CCSSValue.AUTO)));*/
         registerShortHandDescriptor(new CSSShortHandDescriptorWithAlignment("padding",
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.PADDING_TOP,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.PADDING_TOP,
                         CCSSValue.AUTO),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.PADDING_RIGHT,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.PADDING_RIGHT,
                         CCSSValue.AUTO),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.PADDING_BOTTOM,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.PADDING_BOTTOM,
                         CCSSValue.AUTO),
-                new CSSPropertyWithDefaultValue(EnumCssStyleProperties.PADDING_LEFT,
+                new CSSPropertyWithDefaultValue(EnumCssStyleProperty.PADDING_LEFT,
                         CCSSValue.AUTO)));
     /*registerShortHandDescriptor (new CSSShortHandDescriptor("outline",
                                                              new CSSPropertyWithDefaultValue(EnumCssStyleProperties.OUTLINE_WIDTH,

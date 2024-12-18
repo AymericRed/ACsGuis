@@ -1,5 +1,6 @@
 package fr.aym.acsguis.cssengine.font;
 
+import fr.aym.acsguis.api.GuiAPIClientHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.resources.IResourceManager;
@@ -7,6 +8,7 @@ import org.newdawn.slick.font.effects.Effect;
 import org.newdawn.slick.font.effects.ShadowEffect;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Default Minecraft font renderer, only supports shadow effect
@@ -53,5 +55,10 @@ public class McFontRenderer implements ICssFont
     @Override
     public int getWidth(String text) {
         return renderer.getStringWidth(text);
+    }
+
+    @Override
+    public List<String> trimTextToWidth(String text, int maxWidth, int maxTextHeight) {
+        return GuiAPIClientHelper.trimTextToWidth(text, maxWidth, maxTextHeight);
     }
 }

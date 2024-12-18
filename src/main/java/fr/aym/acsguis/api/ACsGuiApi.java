@@ -2,6 +2,7 @@ package fr.aym.acsguis.api;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.CssGuisManager;
+import fr.aym.acsguis.cssengine.InWorldGuisManager;
 import fr.aym.acsguis.event.CssReloadEvent;
 import fr.aym.acsguis.sqript.NoSqriptSupport;
 import fr.aym.acsguis.sqript.SqriptCompatiblity;
@@ -29,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -42,7 +43,7 @@ import java.util.concurrent.Callable;
 @ACsRegisteredService(name = ACsGuiApi.RES_LOC_ID, version = ACsGuiApi.VERSION, sides = Side.CLIENT, interfaceClass = ACsGuiApiService.class, initOnStartup = true)
 public class ACsGuiApi implements ACsGuiApiService {
     public static final String RES_LOC_ID = ACsGuiApiService.RES_LOC_ID;
-    public static final String VERSION = "1.2.12";
+    public static final String VERSION = "1.3.0-wgui";
     public static final Logger log = LogManager.getLogger("ACsGuis");
 
     private static ErrorManagerService errorTracker;
@@ -78,7 +79,7 @@ public class ACsGuiApi implements ACsGuiApiService {
                 sqriptSupport = new SqriptCompatiblity();
             }
         } else if (event instanceof FMLInitializationEvent) {
-            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new CssGuisManager());
+            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(manager);
         }
     }
 
@@ -116,17 +117,43 @@ public class ACsGuiApi implements ACsGuiApiService {
     }
 
     /**
-     * @return the currently displayed hud gui
+     * Loads a GuiFrame in another thread, then shows it on the HUD <br>
+     * A hud gui is only a visual gui, you can't interact with it <br>
+     * Note : the css fonts are loaded in the client thread (it needs open gl)
+     *
+     * @param hudIndex    The index of the hud, used to change the display order of the huds
+     * @param guiName     The gui name, used for log messages
+     * @param guiInstance A function returning the gui, called by the external thread
      */
-    public static GuiFrame.APIGuiScreen getDisplayHudGui() {
-        return manager.getHud().getCurrentHUD();
+    public static void asyncLoadThenShowHudGui(int hudIndex, String guiName, Callable<GuiFrame> guiInstance) {
+        manager.asyncLoadThenShowHudGui(guiName, guiInstance);
     }
 
     /**
-     * Closes the currently displayed hud gui
+     * @return the list of currently displayed hud guis
      */
-    public static void closeHudGui() {
-        manager.getHud().setCurrentHUD(null);
+    public static List<GuiFrame.APIGuiScreen> getDisplayHudGuis() {
+        return manager.getHud().getDisplayedHuds();
+    }
+
+    /**
+     * Closes all the hud guis of the given class
+     *
+     * @return true if a gui was closed
+     */
+    public static boolean closeHudGui(Class<? extends GuiFrame> hudFrameClass) {
+        return manager.getHud().closeHudGui(hudFrameClass);
+    }
+
+    /**
+     * Closes all the currently displayed hud guis
+     */
+    public static void closeAllHudGuis() {
+        manager.getHud().closeAllHudGuis();
+    }
+
+    public static InWorldGuisManager getInWorldGuisManager() {
+        return manager.getInWorldGuisManager();
     }
 
     /**

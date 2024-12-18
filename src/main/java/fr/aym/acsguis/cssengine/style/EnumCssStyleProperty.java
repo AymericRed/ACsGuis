@@ -1,8 +1,8 @@
 package fr.aym.acsguis.cssengine.style;
 
-import fr.aym.acsguis.component.style.ComponentStyleManager;
-import fr.aym.acsguis.component.style.PanelStyleManager;
-import fr.aym.acsguis.component.style.TextComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
+import fr.aym.acsguis.component.style.PanelStyle;
+import fr.aym.acsguis.component.style.TextComponentStyle;
 import fr.aym.acsguis.component.textarea.GuiProgressBar;
 import fr.aym.acsguis.cssengine.CssHelper;
 import fr.aym.acsguis.cssengine.DefinitionType;
@@ -13,52 +13,52 @@ import org.newdawn.slick.font.effects.ShadowEffect;
 import java.awt.*;
 
 import static fr.aym.acsguis.cssengine.parsing.core.objects.CssValue.Unit.ABSOLUTE_INT;
-import static fr.aym.acsguis.cssengine.parsing.core.objects.CssValue.Unit.RELATIVE_INT;
+import static fr.aym.acsguis.cssengine.parsing.core.objects.CssValue.Unit.RELATIVE_TO_PARENT;
 
-public enum EnumCssStyleProperties {
-    BACKGROUND_COLOR(CssHelper.COLOR, (ctx, p, c) -> c.setBackgroundColor(p.getValue()), "background-color", false, false, true),
-    COLOR(CssHelper.COLOR, (ctx, p, c) -> c.setForegroundColor(p.getValue()), "color", false, false, true),
-    BORDER_COLOR(CssHelper.COLOR, (ctx, p, c) -> c.setBorderColor(p.getValue()), "border-color"),
-    TEXTURE(CssHelper.TEXTURE_SPRITE, (ctx, p, c) -> c.setTexture(p.getValue()), "background-image", false, true),
-    VISIBILITY(CssHelper.STRING, (ctx, p, c) -> c.setVisible(!p.getValue().equals("hidden")), "visibility"),
-    FONT_SIZE(CssHelper.CSS_INT, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
-            ((TextComponentStyleManager) c).setFontSize(p.getValue().intValue());
+public enum EnumCssStyleProperty {
+    BACKGROUND_COLOR(CssHelper.COLOR, (p, c) -> c.setBackgroundColor(p.getValue()), "background-color", false, false, true),
+    COLOR(CssHelper.COLOR, (p, c) -> c.setForegroundColor(p.getValue()), "color", false, false, true),
+    BORDER_COLOR(CssHelper.COLOR, (p, c) -> c.setBorderColor(p.getValue()), "border-color"),
+    TEXTURE(CssHelper.TEXTURE_SPRITE, (p, c) -> c.setTexture(p.getValue()), "background-image", false, true),
+    VISIBILITY(CssHelper.STRING, (p, c) -> c.setVisible(!p.getValue().equals("hidden")), "visibility"),
+    FONT_SIZE(CssHelper.CSS_INT, (p, c) -> {
+        if (c instanceof TextComponentStyle.InternalStyle) {
+            ((TextComponentStyle.InternalStyle) c).setFontSize(p.getValue().intValue());
         }
     }, "font-size"),
-    FONT_STYLE(CssHelper.STRING, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
+    FONT_STYLE(CssHelper.STRING, (p, c) -> {
+        if (c instanceof TextComponentStyle.InternalStyle) {
             switch (p.getValue()) {
                 case "italic":
-                    ((TextComponentStyleManager) c).setFontColor(TextFormatting.ITALIC);
+                    ((TextComponentStyle.InternalStyle) c).setFontStyle(TextFormatting.ITALIC);
                     break;
                 case "normal":
-                    ((TextComponentStyleManager) c).setFontColor(null);
+                    ((TextComponentStyle.InternalStyle) c).setFontStyle(null);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported font style " + p.getValue());
             }
         }
     }, "font-style"),
-    FONT_FAMILY(CssHelper.RESOURCE_LOCATION, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
-            ((TextComponentStyleManager) c).setFontFamily(p.getValue());
+    FONT_FAMILY(CssHelper.RESOURCE_LOCATION, (p, c) -> {
+        if (c instanceof TextComponentStyle.InternalStyle) {
+            ((TextComponentStyle.InternalStyle) c).setFontFamily(p.getValue());
         }
     }, "font-family", false, false, true),
-    BORDER_WIDTH(CssHelper.CSS_INT, (ctx, p, c) -> c.setBorderSize(p.getValue()), "border-width"),
-    BORDER_STYLE(CssHelper.STRING, (ctx, p, c) -> {
+    BORDER_WIDTH(CssHelper.CSS_INT, (p, c) -> c.setBorderSize(p.getValue()), "border-width"),
+    BORDER_STYLE(CssHelper.STRING, (p, c) -> {
         if (!p.getValue().equals("solid")) {
             throw new IllegalArgumentException("Border style " + p.getValue() + " is not supported !");
         }
     }, "border-style"),
-    BORDER_POSITION(CssHelper.STRING, (ctx, p, c) -> {
+    BORDER_POSITION(CssHelper.STRING, (p, c) -> {
         if (p.getValue().equals("internal")) {
-            c.setBorderPosition(ComponentStyleManager.BORDER_POSITION.INTERNAL);
+            c.setBorderPosition(ComponentStyle.BORDER_POSITION.INTERNAL);
         } else {
-            c.setBorderPosition(ComponentStyleManager.BORDER_POSITION.EXTERNAL);
+            c.setBorderPosition(ComponentStyle.BORDER_POSITION.EXTERNAL);
         }
     }, "border-position", false, false, true),
-    BACKGROUND_REPEAT(CssHelper.STRING, (ctx, p, c) -> {
+    BACKGROUND_REPEAT(CssHelper.STRING, (p, c) -> {
         switch (p.getValue()) {
             case "repeat":
                 c.setRepeatBackgroundX(true);
@@ -72,6 +72,7 @@ public enum EnumCssStyleProperties {
                 c.setRepeatBackgroundX(false);
                 c.setRepeatBackgroundY(true);
                 break;
+            case "no-repeat":
             case "none":
                 c.setRepeatBackgroundX(false);
                 c.setRepeatBackgroundY(false);
@@ -80,143 +81,135 @@ public enum EnumCssStyleProperties {
                 throw new IllegalArgumentException("Background repeat " + p.getValue() + " is not supported !");
         }
     }, "background-repeat"),
-    BACKGROUND_POSITION(CssHelper.STRING, (ctx, p, c) -> {
+    BACKGROUND_POSITION(CssHelper.STRING, (p, c) -> {
         if (!p.getValue().equals("top left")) {
             throw new IllegalArgumentException("Background position property is not supported ! It should be defined in the texture property");
         }
     }, "background-position"),
-    BACKGROUND_ATTACHMENT(CssHelper.STRING, (ctx, p, c) -> {/* ignore */}, "background-attachment"),
-    BACKGROUND_ORIGIN(CssHelper.STRING, (ctx, p, c) -> {/* ignore */}, "background-origin"),
-    BACKGROUND_SIZE(CssHelper.STRING, (ctx, p, c) -> {
+    BACKGROUND_ATTACHMENT(CssHelper.STRING, (p, c) -> {/* ignore */}, "background-attachment"),
+    BACKGROUND_ORIGIN(CssHelper.STRING, (p, c) -> {/* ignore */}, "background-origin"),
+    BACKGROUND_SIZE(CssHelper.STRING, (p, c) -> {
         if (!p.getValue().equals("auto auto")) {
             throw new IllegalArgumentException("Background size property is not supported ! It should be defined in the texture property");
         }
     }, "background-size"),
-    BACKGROUND_CLIP(CssHelper.STRING, (ctx, p, c) -> {/* ignore */}, "background-clip"),
-    BORDER_RADIUS(CssHelper.CSS_INT, (ctx, p, c) -> c.setBorderRadius(p.getValue()), "border-radius"),
-    TEXT_SHADOW(CssHelper.STRING, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
+    BACKGROUND_CLIP(CssHelper.STRING, (p, c) -> {/* ignore */}, "background-clip"),
+    BORDER_RADIUS(CssHelper.CSS_INT, (p, c) -> c.setBorderRadius(p.getValue()), "border-radius"),
+    TEXT_SHADOW(CssHelper.STRING, (p, c) -> {
+        if (c instanceof TextComponentStyle.InternalStyle) {
             if (p.getValue().equals("enable")) { //TODO IMPROVE SHADOWS
                 ShadowEffect effect = new ShadowEffect();
                 effect.setColor(Color.BLACK);
-                ((TextComponentStyleManager) c).addEffect(effect);
+                ((TextComponentStyle.InternalStyle) c).addEffect(effect);
             } else {
-                ((TextComponentStyleManager) c).removeEffect(ShadowEffect.class);
+                ((TextComponentStyle.InternalStyle) c).removeEffect(ShadowEffect.class);
             }
         }
     }, "text-shadow"),
-    Z_INDEX(CssHelper.INT, (ctx, p, c) -> c.setZLevel(p.getValue()), "z-index"),
-    PADDING_LEFT(CssHelper.CSS_INT, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
-            if (p.getValue().getUnit() != ABSOLUTE_INT) {
-                ((TextComponentStyleManager) c).setPaddingLeft((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
-            } else {
-                ((TextComponentStyleManager) c).setPaddingLeft(p.getValue().intValue());
-            }
+    Z_INDEX(CssHelper.INT, (p, c) -> c.setZLevel(p.getValue()), "z-index"),
+    PADDING_LEFT(CssHelper.CSS_INT, (p, c) -> {
+        if (p.getValue().getUnit() != ABSOLUTE_INT) {
+            c.setPaddingLeft((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
+        } else {
+            c.setPaddingLeft(p.getValue().intValue());
         }
     }, "padding-left"),
-    PADDING_TOP(CssHelper.CSS_INT, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
-            if (p.getValue().getUnit() != ABSOLUTE_INT) {
-                ((TextComponentStyleManager) c).setPaddingTop((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
-            } else { //FIXME IMPROVE RELATIVE THINGS
-                ((TextComponentStyleManager) c).setPaddingTop(p.getValue().intValue());
-            }
+    PADDING_TOP(CssHelper.CSS_INT, (p, c) -> {
+        if (p.getValue().getUnit() != ABSOLUTE_INT) {
+            c.setPaddingTop((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
+        } else { //FIXME IMPROVE RELATIVE THINGS
+            c.setPaddingTop(p.getValue().intValue());
         }
     }, "padding-top"),
-    PADDING_RIGHT(CssHelper.CSS_INT, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
-            if (p.getValue().getUnit() != ABSOLUTE_INT) {
-                ((TextComponentStyleManager) c).setPaddingRight((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
-            } else {
-                ((TextComponentStyleManager) c).setPaddingRight(p.getValue().intValue());
-            }
+    PADDING_RIGHT(CssHelper.CSS_INT, (p, c) -> {
+        if (p.getValue().getUnit() != ABSOLUTE_INT) {
+            c.setPaddingRight((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
+        } else {
+            c.setPaddingRight(p.getValue().intValue());
         }
     }, "padding-right"),
-    PADDING_BOTTOM(CssHelper.CSS_INT, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
-            if (p.getValue().getUnit() != ABSOLUTE_INT) {
-                ((TextComponentStyleManager) c).setPaddingBottom((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
-            } else {
-                ((TextComponentStyleManager) c).setPaddingBottom(p.getValue().intValue());
-            }
+    PADDING_BOTTOM(CssHelper.CSS_INT, (p, c) -> {
+        if (p.getValue().getUnit() != ABSOLUTE_INT) {
+            c.setPaddingBottom((int) (p.getValue().intValue() * c.getRenderWidth() / 100f));
+        } else {
+            c.setPaddingBottom(p.getValue().intValue());
         }
     }, "padding-bottom"),
-    TEXT_ALIGN_HORIZONTAL(CssHelper.STRING, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
+    TEXT_ALIGN_HORIZONTAL(CssHelper.STRING, (p, c) -> {
+        if (c instanceof TextComponentStyle.InternalStyle) {
             switch (p.getValue()) {
                 case "left":
-                    ((TextComponentStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.LEFT);
+                    ((TextComponentStyle.InternalStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.LEFT);
                     break;
                 case "right":
-                    ((TextComponentStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.RIGHT);
+                    ((TextComponentStyle.InternalStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.RIGHT);
                     break;
                 case "center":
-                    ((TextComponentStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.CENTER);
+                    ((TextComponentStyle.InternalStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.CENTER);
                     break;
                 case "justify":
-                    ((TextComponentStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.JUSTIFY);
+                    ((TextComponentStyle.InternalStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.JUSTIFY);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown (horizontal) text align : " + p.getValue());
             }
-        } else if (c instanceof GuiProgressBar.ProgressBarStyleManager) {
+        } else if (c instanceof GuiProgressBar.ProgressBarStyle) {
             switch (p.getValue()) {
                 case "left":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.LEFT);
+                    ((GuiProgressBar.ProgressBarStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.LEFT);
                     break;
                 case "right":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.RIGHT);
+                    ((GuiProgressBar.ProgressBarStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.RIGHT);
                     break;
                 case "center":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.CENTER);
+                    ((GuiProgressBar.ProgressBarStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.CENTER);
                     break;
                 case "justify":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.JUSTIFY);
+                    ((GuiProgressBar.ProgressBarStyle) c).setHorizontalTextAlignment(GuiConstants.HORIZONTAL_TEXT_ALIGNMENT.JUSTIFY);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown (horizontal) text align : " + p.getValue());
             }
         }
     }, "text-align"),
-    TEXT_ALIGN_VERTICAL(CssHelper.STRING, (ctx, p, c) -> {
-        if (c instanceof TextComponentStyleManager) {
+    TEXT_ALIGN_VERTICAL(CssHelper.STRING, (p, c) -> {
+        if (c instanceof TextComponentStyle.InternalStyle) {
             switch (p.getValue()) {
                 case "top":
-                    ((TextComponentStyleManager) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.TOP);
+                    ((TextComponentStyle.InternalStyle) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.TOP);
                     break;
                 case "bottom":
-                    ((TextComponentStyleManager) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.BOTTOM);
+                    ((TextComponentStyle.InternalStyle) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.BOTTOM);
                     break;
                 case "center":
-                    ((TextComponentStyleManager) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.CENTER);
+                    ((TextComponentStyle.InternalStyle) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.CENTER);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown vertical text align : " + p.getValue());
             }
-        } else if (c instanceof GuiProgressBar.ProgressBarStyleManager) {
+        } else if (c instanceof GuiProgressBar.ProgressBarStyle) {
             switch (p.getValue()) {
                 case "top":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.TOP);
+                    ((GuiProgressBar.ProgressBarStyle) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.TOP);
                     break;
                 case "bottom":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.BOTTOM);
+                    ((GuiProgressBar.ProgressBarStyle) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.BOTTOM);
                     break;
                 case "center":
-                    ((GuiProgressBar.ProgressBarStyleManager) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.CENTER);
+                    ((GuiProgressBar.ProgressBarStyle) c).setVerticalTextAlignment(GuiConstants.VERTICAL_TEXT_ALIGNMENT.CENTER);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown vertical text align : " + p.getValue());
             }
         }
     }, "text-align-vertical"),
-    PANEL_LAYOUT(CssHelper.PANEL_LAYOUT, (ctx, p, c) -> {
-        if (c instanceof PanelStyleManager) {
-            ((PanelStyleManager) c).setLayout(p.getValue());
+    PANEL_LAYOUT(CssHelper.PANEL_LAYOUT, (p, c) -> {
+        if (c instanceof PanelStyle) {
+            ((PanelStyle) c).setLayout(p.getValue());
         }
     }, "component-layout", false, true),
     //NOTE : for the positioning, the order is important ! And other properties as padding must have been set before for labels
-    WIDTH(CssHelper.CSS_INT, (ctx, p, c) -> {
+    WIDTH(CssHelper.CSS_INT, (p, c) -> {
         //System.out.println("Set width of "+c.getOwner()+" to "+p.getValue());
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getWidth().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit());
@@ -224,95 +217,95 @@ public enum EnumCssStyleProperties {
             c.getWidth().setAbsolute(p.getValue().intValue());
         }
     }, "width", true),
-    MAX_WIDTH(CssHelper.CSS_INT, (ctx, p, c) -> {
+    MAX_WIDTH(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getWidth().getMaxValue().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit());
         } else {
             c.getWidth().getMaxValue().setAbsolute(p.getValue().intValue());
         }
     }, "max-width"),
-    MIN_WIDTH(CssHelper.CSS_INT, (ctx, p, c) -> {
+    MIN_WIDTH(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getWidth().getMinValue().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit());
         } else {
             c.getWidth().getMinValue().setAbsolute(p.getValue().intValue());
         }
     }, "min-width"),
-    HEIGHT(CssHelper.CSS_INT, (ctx, p, c) -> {
+    HEIGHT(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getHeight().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit());
         } else {
             c.getHeight().setAbsolute(p.getValue().intValue());
         }
     }, "height", true),
-    MAX_HEIGHT(CssHelper.CSS_INT, (ctx, p, c) -> {
+    MAX_HEIGHT(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getHeight().getMaxValue().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit());
         } else {
             c.getHeight().getMaxValue().setAbsolute(p.getValue().intValue());
         }
     }, "max-height"),
-    MIN_HEIGHT(CssHelper.CSS_INT, (ctx, p, c) -> {
+    MIN_HEIGHT(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getHeight().getMinValue().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit());
         } else {
             c.getHeight().getMinValue().setAbsolute(p.getValue().intValue());
         }
     }, "min-height"),
-    LEFT(CssHelper.CSS_INT, (ctx, p, c) -> {
+    LEFT(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getXPos().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit(), GuiConstants.ENUM_RELATIVE_POS.START);
         } else {
             c.getXPos().setAbsolute(p.getValue().intValue(), GuiConstants.ENUM_RELATIVE_POS.START);
         }
     }, "left", true),
-    RIGHT(CssHelper.CSS_INT, (ctx, p, c) -> {
+    RIGHT(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getXPos().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit(), GuiConstants.ENUM_RELATIVE_POS.END);
         } else {
             c.getXPos().setAbsolute(p.getValue().intValue(), GuiConstants.ENUM_RELATIVE_POS.END);
         }
     }, "right", true),
-    TOP(CssHelper.CSS_INT, (ctx, p, c) -> {
+    TOP(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getYPos().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit(), GuiConstants.ENUM_RELATIVE_POS.START);
         } else {
             c.getYPos().setAbsolute(p.getValue().intValue(), GuiConstants.ENUM_RELATIVE_POS.START);
         }
     }, "top", true),
-    BOTTOM(CssHelper.CSS_INT, (ctx, p, c) -> {
+    BOTTOM(CssHelper.CSS_INT, (p, c) -> {
         if (p.getValue().getUnit() != ABSOLUTE_INT) {
             c.getYPos().setRelative(p.getValue().intValue() / 100f, p.getValue().getUnit(), GuiConstants.ENUM_RELATIVE_POS.END);
         } else {
             c.getYPos().setAbsolute(p.getValue().intValue(), GuiConstants.ENUM_RELATIVE_POS.END);
         }
     }, "bottom", true),
-    HORIZONTAL_POSITION(CssHelper.STRING, (ctx, p, c) -> {
+    HORIZONTAL_POSITION(CssHelper.STRING, (p, c) -> {
         if (p.getValue().equals("center")) {
-            c.getXPos().setRelative(0, RELATIVE_INT, GuiConstants.ENUM_RELATIVE_POS.CENTER);
+            c.getXPos().setRelative(0, RELATIVE_TO_PARENT, GuiConstants.ENUM_RELATIVE_POS.CENTER);
         }
     }, "horizontal-position"),
-    VERTICAL_POSITION(CssHelper.STRING, (ctx, p, c) -> {
+    VERTICAL_POSITION(CssHelper.STRING, (p, c) -> {
         if (p.getValue().equals("center")) {
-            c.getYPos().setRelative(0, RELATIVE_INT, GuiConstants.ENUM_RELATIVE_POS.CENTER);
+            c.getYPos().setRelative(0, RELATIVE_TO_PARENT, GuiConstants.ENUM_RELATIVE_POS.CENTER);
         }
     }, "vertical-position"),
-    PROGRESS_FULL(CssHelper.TEXTURE_SPRITE, (ctx, p, c) -> {
-        if (c instanceof GuiProgressBar.ProgressBarStyleManager) {
-            ((GuiProgressBar.ProgressBarStyleManager) c).setFullTexture(p.getValue());
+    PROGRESS_FULL(CssHelper.TEXTURE_SPRITE, (p, c) -> {
+        if (c instanceof GuiProgressBar.ProgressBarStyle) {
+            ((GuiProgressBar.ProgressBarStyle) c).setFullTexture(p.getValue());
         }
     }, "progress-bar-full-image"),
-    PROGRESS_FULL_COLOR(CssHelper.COLOR, (ctx, p, c) -> {
-        if (c instanceof GuiProgressBar.ProgressBarStyleManager) {
-            ((GuiProgressBar.ProgressBarStyleManager) c).setFullProgressBarColor(p.getValue());
+    PROGRESS_FULL_COLOR(CssHelper.COLOR, (p, c) -> {
+        if (c instanceof GuiProgressBar.ProgressBarStyle) {
+            ((GuiProgressBar.ProgressBarStyle) c).setFullProgressBarColor(p.getValue());
         }
     }, "progress-bar-full-color"),
-    PROGRESS_TEXT_COLOR(CssHelper.COLOR, (ctx, p, c) -> {
-        if (c instanceof GuiProgressBar.ProgressBarStyleManager) {
-            ((GuiProgressBar.ProgressBarStyleManager) c).setProgressTextColor(p.getValue());
+    PROGRESS_TEXT_COLOR(CssHelper.COLOR, (p, c) -> {
+        if (c instanceof GuiProgressBar.ProgressBarStyle) {
+            ((GuiProgressBar.ProgressBarStyle) c).setProgressTextColor(p.getValue());
         }
     }, "progress-bar-text-color"),
-    DISPLAY(CssHelper.STRING, (ctx, p, c) -> {
+    DISPLAY(CssHelper.STRING, (p, c) -> {
         if (p.getType().isNone() || p.getValue().equals("none")) {
             c.setDisplay(GuiConstants.COMPONENT_DISPLAY.NONE);
         } else if (p.getValue().equals("block")) {
@@ -335,19 +328,19 @@ public enum EnumCssStyleProperties {
     public final boolean acceptsNullValue;
     public final boolean inheritable;
 
-    <T> EnumCssStyleProperties(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key) {
-        this(parser, applyFunction, key, false);
+    <T> EnumCssStyleProperty(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key) {
+        this(parser, applyFunction, key, false, false);
     }
 
-    <T> EnumCssStyleProperties(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key, boolean isDefaultAuto) {
+    <T> EnumCssStyleProperty(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key, boolean isDefaultAuto) {
         this(parser, applyFunction, key, isDefaultAuto, isDefaultAuto, false);
     }
 
-    <T> EnumCssStyleProperties(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key, boolean isDefaultAuto, boolean acceptsNullValue) {
+    <T> EnumCssStyleProperty(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key, boolean isDefaultAuto, boolean acceptsNullValue) {
         this(parser, applyFunction, key, isDefaultAuto, acceptsNullValue, false);
     }
 
-    <T> EnumCssStyleProperties(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key, boolean isDefaultAuto, boolean acceptsNullValue, boolean inheritable) {
+    <T> EnumCssStyleProperty(DefinitionType<T> parser, CssStyleApplier<T> applyFunction, String key, boolean isDefaultAuto, boolean acceptsNullValue, boolean inheritable) {
         this.applyFunction = applyFunction;
         this.key = key;
         this.parser = parser;
@@ -356,8 +349,8 @@ public enum EnumCssStyleProperties {
         this.inheritable = inheritable;
     }
 
-    public static EnumCssStyleProperties fromKey(String property) {
-        for (EnumCssStyleProperties prop : values()) {
+    public static EnumCssStyleProperty fromKey(String property) {
+        for (EnumCssStyleProperty prop : values()) {
             if (prop.key.equals(property))
                 return prop;
         }

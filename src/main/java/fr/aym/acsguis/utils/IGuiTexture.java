@@ -25,7 +25,7 @@ public interface IGuiTexture
      * @param width The total width to draw on screen
      * @param height The total height to draw on screen
      */
-    default void drawSprite(int x, int y, int width, int height) {
+    default void drawSprite(float x, float y, float width, float height) {
         drawSprite(x, y, width, height, width, height);
     }
 
@@ -39,9 +39,9 @@ public interface IGuiTexture
      * @param width The total width to draw on screen
      * @param height The total height to draw on screen
      */
-    default void drawSprite(int x, int y, int spriteWidth, int spriteHeight, int width, int height) {
+    default void drawSprite(float x, float y, float spriteWidth, float spriteHeight, float width, float height) {
         drawSprite(x, y, spriteWidth, spriteHeight, 0, 0, getTextureWidth(), getTextureHeight(), width, height);
     }
 
-    void drawSprite(int screenX, int i, int borderSize, int borderSize1, int i1, int i2, int borderSize2, int borderSize3, int borderSize4, int borderSize5);
+    void drawSprite(float x, float y, float spriteWidth, float spriteHeight, int uOffset, int vOffset, int textureWidth, int textureHeight, float width, float height);
 }

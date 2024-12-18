@@ -16,7 +16,7 @@ public class CircleBackground {
      * If radius != 0 then then the whole background is rendered, ignoring borderSize <br>
      * If radius == 0, only the borders are rendered, respecting the borderSize
      */
-    public static void renderBorder(int radius, float left, float top, float right, float bottom, float borderSize, int borderColor) {
+    public static void renderBorder(float radius, float left, float top, float right, float bottom, float borderSize, int borderColor) {
         if (radius != 0) {
             //Draw disks
             renderBackground(radius, left, top, right, bottom, borderColor);
@@ -31,7 +31,7 @@ public class CircleBackground {
     /**
      * Renders a background with the given circle radius at each corner
      */
-    public static void renderBackground(int radius, float left, float top, float right, float bottom, int color) {
+    public static void renderBackground(float radius, float left, float top, float right, float bottom, int color) {
         if (radius != 0) {
             //Draw disks
             drawDisk(left + radius, top + radius, radius, color, 0, (float) (-Math.PI), (float) (-Math.PI / 2));

@@ -1,6 +1,7 @@
 package fr.aym.acsguis.cssengine;
 
 import fr.aym.acsguis.component.layout.BorderedGridLayout;
+import fr.aym.acsguis.component.layout.FlowLayout;
 import fr.aym.acsguis.component.layout.GridLayout;
 import fr.aym.acsguis.component.layout.PanelLayout;
 import fr.aym.acsguis.cssengine.parsing.core.objects.CssIntValue;
@@ -79,6 +80,8 @@ public class CssHelper {
         String[] data = s.split(" ");
         if (data.length > 2) {
             switch (data[0]) {
+                case "flow":
+                    return new FlowLayout();
                 case "row":
                     return new fr.aym.acsguis.component.layout.GridLayout(-1, Integer.parseInt(data[1]), Integer.parseInt(data[2]), fr.aym.acsguis.component.layout.GridLayout.GridDirection.HORIZONTAL, 1);
                 case "line":

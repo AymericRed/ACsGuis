@@ -65,12 +65,12 @@ public class ComponentProperties<A, B> {
 
     public static final ComponentProperties<GuiProgressBar, Double> PROGRESS = new ComponentProperties<>("bar_progress", c -> new TypeNumber(c.getProgress()), (c, s) -> c.setProgress(s.intValue()));
 
-    public static final ComponentProperties<GuiComponent<?>, String> SET_STYLE = new ComponentProperties<>("style", c -> new TypeString(""), (c, s) -> {
+    public static final ComponentProperties<GuiComponent, String> SET_STYLE = new ComponentProperties<>("style", c -> new TypeString(""), (c, s) -> {
         if (!s.isEmpty())
             c.setCssCode(s);
     });
 
-    public static final ComponentProperties<GuiComponent<?>, String> NEXT_TAB_PANE = new ComponentProperties<>("next_tab_pane_name", c -> new TypeString(SqriptCompatiblity.nextPannedTabName), (c, s) -> SqriptCompatiblity.nextPannedTabName = s);
+    public static final ComponentProperties<GuiComponent, String> NEXT_TAB_PANE = new ComponentProperties<>("next_tab_pane_name", c -> new TypeString(SqriptCompatiblity.nextPannedTabName), (c, s) -> SqriptCompatiblity.nextPannedTabName = s);
 
     private final String name;
     private final Function<A, ScriptType<B>> getter;
@@ -83,20 +83,20 @@ public class ComponentProperties<A, B> {
         properties.add(this);
     }
 
-    public void getValueFromScript(ScriptContext context, GuiComponent<?> into) {
+    public void getValueFromScript(ScriptContext context, GuiComponent into) {
         setValueOnComponent(into, ((ScriptType<B>) context.getVariable(name)).getObject());
     }
 
-    public void setValueOnComponent(GuiComponent<?> into, B value) {
+    public void setValueOnComponent(GuiComponent into, B value) {
         setter.accept((A) into, value);
     }
 
-    public Object getValueFromComponent(GuiComponent<?> from) {
+    public Object getValueFromComponent(GuiComponent from) {
         ScriptType<B> object = getter.apply((A) from);
         return object.getObject();
     }
 
-    public void getValueFromComponent(GuiComponent<?> from, ScriptContext context) {
+    public void getValueFromComponent(GuiComponent from, ScriptContext context) {
         ScriptType<B> object = getter.apply((A) from);
         if (object != null) {
             context.put(new ScriptTypeAccessor(object, name));

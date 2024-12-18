@@ -2,12 +2,13 @@ package fr.aym.acsguis.cssengine.style;
 
 import fr.aym.acsguis.component.layout.PanelLayout;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.PanelStyleManager;
+import fr.aym.acsguis.component.style.PanelStyle;
 
-public class CssPanelStyleManager extends CssComponentStyleManager implements PanelStyleManager {
+public class CssPanelStyle extends CssComponentStyle implements PanelStyle
+{
     private final GuiPanel panel;
 
-    public CssPanelStyleManager(GuiPanel component) {
+    public CssPanelStyle(GuiPanel component) {
         super(component);
         panel = component;
     }
@@ -18,7 +19,7 @@ public class CssPanelStyleManager extends CssComponentStyleManager implements Pa
     }
 
     @Override
-    public PanelStyleManager setLayout(PanelLayout<?> panelLayout) {
+    public PanelStyle setLayout(PanelLayout<?> panelLayout) {
         panel.setLayout(panelLayout);
         return this;
     }

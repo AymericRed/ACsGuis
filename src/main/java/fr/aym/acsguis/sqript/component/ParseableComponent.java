@@ -18,8 +18,8 @@ public enum ParseableComponent
 {
     PANEL(GuiPanel.class, "panel", GuiPanel::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT, ComponentProperties.NEXT_TAB_PANE),
     TABBED_PANE(GuiTabbedPane.class, "tabbed_pane", GuiTabbedPane::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT),
-    SCROL_PANE(GuiScrollPane.class, "scroll_pane", GuiScrollPane::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT, ComponentProperties.NEXT_TAB_PANE),
-    LABEL(GuiLabel.class, "label", () -> new GuiLabel("not set"), ComponentProperties.SET_STYLE, ComponentProperties.TEXT),
+    SCROLL_PANE(GuiScrollPane.class, "scroll_pane", GuiScrollPane::new, ComponentProperties.SET_STYLE, ComponentProperties.LAYOUT, ComponentProperties.NEXT_TAB_PANE),
+    LABEL(GuiLabel.class, "label", () -> new GuiLabel("not set"), ComponentProperties.SET_STYLE, ComponentProperties.TEXT, ComponentProperties.MAX_TEXT_LENGTH),
     TEXT_FIELD(GuiTextField.class, "text_field", GuiTextField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
     TEXT_AREA(GuiTextArea.class, "text_area", GuiTextArea::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
     PASSWORD_FIELD(GuiPasswordField.class, "password_field", GuiPasswordField::new, SqriptCompatiblity.TEXT_AREA_PROPERTIES_PARSER),
@@ -36,17 +36,17 @@ public enum ParseableComponent
 
     private final Class<?> clazz;
     private final String key;
-    private final Callable<GuiComponent<?>> componentCallable;
+    private final Callable<GuiComponent> componentCallable;
     private final ComponentProperties<?,?>[] properties;
 
-    ParseableComponent(Class<?> clazz, String key, Callable<GuiComponent<?>> componentCallable, ComponentProperties<?, ?>... properties) {
+    ParseableComponent(Class<?> clazz, String key, Callable<GuiComponent> componentCallable, ComponentProperties<?, ?>... properties) {
         this.clazz = clazz;
         this.key = key;
         this.componentCallable = componentCallable;
         this.properties = properties;
     }
     
-    public static ParseableComponent find(GuiComponent<?> component) {
+    public static ParseableComponent find(GuiComponent component) {
         if(component instanceof GuiFrame) {
             return PANEL;
         }
@@ -73,23 +73,23 @@ public enum ParseableComponent
         return properties;
     }
 
-    public void setupContext(ScriptContext context, GuiComponent<?> component) {
+    public void setupContext(ScriptContext context, GuiComponent component) {
         for(ComponentProperties<?, ?> property : properties) {
             property.getValueFromComponent(component, context);
         }
     }
 
-    public void fillComponent(ScriptContext context, GuiComponent<?> component) {
+    public void fillComponent(ScriptContext context, GuiComponent component) {
         for(ComponentProperties<?, ?> property : properties) {
             property.getValueFromScript(context, component);
         }
     }
 
-    public GuiComponent<?> create() throws Exception {
+    public GuiComponent create() throws Exception {
         return componentCallable.call();
     }
 
-    public static ParseableComponent injectComponentParser(String key, Callable<GuiComponent<?>> componentCallable, ComponentProperties<?, ?>... properties) {
+    public static ParseableComponent injectComponentParser(String key, Callable<GuiComponent> componentCallable, ComponentProperties<?, ?>... properties) {
         return EnumHelper.addEnum(ParseableComponent.class, key, new Class<?>[] {String.class, Callable.class, ComponentProperties[].class}, key, componentCallable, properties);
     }
 }

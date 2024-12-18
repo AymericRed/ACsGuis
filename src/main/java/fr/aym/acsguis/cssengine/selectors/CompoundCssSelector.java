@@ -1,6 +1,6 @@
 package fr.aym.acsguis.cssengine.selectors;
 
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
 import fr.aym.acsguis.cssengine.parsing.core.objects.CssSelectorCombinator;
 import net.minecraft.util.text.TextFormatting;
 
@@ -66,7 +66,7 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
      * @param targetContext If null, the context is not checked, else checks if it's equals to the context of this selector, or inherits from it (NORMAL is the base context)
      * @return
      */
-    public boolean applies(ComponentStyleManager to, @Nullable EnumSelectorContext targetContext) {
+    public boolean applies(ComponentStyle to, @Nullable EnumSelectorContext targetContext) {
         //Debug
         boolean out = false;//to.getOwner().getCssId() != null && to.getOwner().getCssId().equals("lolt");//to.getOwner() instanceof GuiButton && ((GuiButton)to.getOwner()).getText().equals("Vehicles");// to.getOwner() instanceof TestGui;
         if(out)
@@ -80,7 +80,7 @@ public class CompoundCssSelector implements Comparable<CompoundCssSelector>
         if(parents != null)
         {
             assert parentStrict != null;
-            ComponentStyleManager lastParent = to;
+            ComponentStyle lastParent = to;
             for(int i=0;i<parents.length;i++)
             {
                 if(lastParent.getParent() == null)

@@ -1,12 +1,12 @@
 package fr.aym.acsguis.cssengine.style;
 
 import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * A css style property
@@ -14,15 +14,14 @@ import java.util.Collection;
  * @param <T> The type of the value
  */
 public class CssStyleProperty<T> {
-    private final EnumCssStyleProperties property;
+    private final EnumCssStyleProperty property;
     private final T value;
     private final EnumStylePropertyType type;
 
     /**
-     * @param value Raw string value, automatically parsed
      * @throws IllegalArgumentException if it cannot be parsed
      */
-    public CssStyleProperty(EnumCssStyleProperties property, CssValue value) {
+    public CssStyleProperty(EnumCssStyleProperty property, CssValue value) {
         this.property = property;
         if (value.getUnit() == CssValue.Unit.STRING) {
             this.type = EnumStylePropertyType.getTypeIfSpecial(value.stringValue());
@@ -39,6 +38,12 @@ public class CssStyleProperty<T> {
         }
     }
 
+    protected CssStyleProperty(EnumCssStyleProperty property, T value) {
+        this.property = property;
+        this.value = value;
+        this.type = EnumStylePropertyType.NORMAL;
+    }
+
     /**
      * @return The value, null if the {@link EnumStylePropertyType} is not "normal"
      */
@@ -52,27 +57,33 @@ public class CssStyleProperty<T> {
      *
      * @return true is this property was applied and we should prevent the default behavior: inheriting
      */
-    public boolean apply(EnumSelectorContext context, ComponentStyleManager to) {
-        if (getType().isNormal()) {
-            ((CssStyleApplier<T>) property.applyFunction).apply(context, this, to);
-            return true;
-        } else if (getType().isNone()) {
-            if (property.acceptsNullValue) {
-                ((CssStyleApplier<T>) property.applyFunction).apply(context, this, to);
-            }
-            return true;
-        } else if (getType().isAuto()) {
-            Collection<AutoStyleHandler<?>> handlers = to.getAutoStyleHandlers();
-            for (AutoStyleHandler.Priority p : AutoStyleHandler.Priority.values()) {
-                for (AutoStyleHandler a : handlers) {
-                    if (a.getPriority(to) == p && a.getModifiedProperties(to).contains(property)) {
-                        if (a.handleProperty(property, context, to))
-                            return true;
+    public boolean apply(EnumSelectorContext context, InternalComponentStyle to) {
+        switch (getType()) {
+            case NONE:
+                if (!property.acceptsNullValue) {
+                    return true;
+                }
+            case NORMAL:
+                ((CssStyleApplier<T>) property.applyFunction).apply(this, to);
+                return true;
+            case AUTO:
+                List<AutoStyleHandler<?>> styleHandlers = to.getCustomizer().getAutoStyleHandlers(property);
+                if (styleHandlers != null) {
+                    for (AutoStyleHandler.Priority p : AutoStyleHandler.Priority.values()) {
+                        for (AutoStyleHandler a : styleHandlers) {
+                            if (a.getPriority(to) != p) {
+                                continue;
+                            }
+                            if (a.handleProperty(property, context, to)) {
+                                return true;
+                            }
+                        }
                     }
                 }
-            }
+            case INHERIT:
+            default:
+                return false;
         }
-        return false;
     }
 
     /**
@@ -85,7 +96,7 @@ public class CssStyleProperty<T> {
     /**
      * @return The target property
      */
-    public EnumCssStyleProperties getProperty() {
+    public EnumCssStyleProperty getProperty() {
         return property;
     }
 

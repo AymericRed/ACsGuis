@@ -9,7 +9,7 @@ import fr.aym.acsguis.cssengine.parsing.core.phcss.shorthand.CSSShortHandDescrip
 import fr.aym.acsguis.cssengine.parsing.core.phcss.shorthand.CSSShortHandRegistry;
 import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.cssengine.style.CssStyleProperty;
-import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
+import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -23,18 +23,18 @@ import java.util.regex.Pattern;
  */
 public class ACsGuisCssVisitor implements CssFileVisitor {
     private final ResourceLocation styleSheetName;
-    private final Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> styleSheet;
+    private final Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> styleSheet;
 
-    public ACsGuisCssVisitor(ResourceLocation styleSheetName, Map<CompoundCssSelector, Map<EnumCssStyleProperties, CssStyleProperty<?>>> styleSheet) {
+    public ACsGuisCssVisitor(ResourceLocation styleSheetName, Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> styleSheet) {
         this.styleSheetName = styleSheetName;
         this.styleSheet = styleSheet;
     }
 
     public void onEndStyleRule(@Nonnull CssObject aStyleRule) throws CssException {
-        Map<EnumCssStyleProperties, CssStyleProperty<?>> propertyMap = new HashMap<>();
+        Map<EnumCssStyleProperty, CssStyleProperty<?>> propertyMap = new HashMap<>();
         for (CssProperty d : aStyleRule.getAllDeclarations()) {
             try {
-                if (EnumCssStyleProperties.fromKey(d.getKey()) == null && CSSShortHandRegistry.isShortHandProperty(d.getKey())) {
+                if (EnumCssStyleProperty.fromKey(d.getKey()) == null && CSSShortHandRegistry.isShortHandProperty(d.getKey())) {
                     CSSShortHandDescriptor c = CSSShortHandRegistry.getShortHandDescriptor(d.getKey());
                     for (CssProperty d1 : c.getSplitIntoPieces(d)) {
                         //System.out.println("Sub-declaration : " + d1.getKey() + " " + d1.getValue());
@@ -55,8 +55,8 @@ public class ACsGuisCssVisitor implements CssFileVisitor {
         }
     }
 
-    private void mapProperty(CssProperty declaration, Map<EnumCssStyleProperties, CssStyleProperty<?>> propertyMap) {
-        EnumCssStyleProperties prop = EnumCssStyleProperties.fromKey(declaration.getKey());
+    private void mapProperty(CssProperty declaration, Map<EnumCssStyleProperty, CssStyleProperty<?>> propertyMap) {
+        EnumCssStyleProperty prop = EnumCssStyleProperty.fromKey(declaration.getKey());
         if (prop == null)
             throw new IllegalArgumentException("CSS property " + declaration.getKey() + " at " + declaration.getSourceLocation() + " is not supported !");
         propertyMap.put(prop, new CssStyleProperty<>(prop, declaration.getValue()));

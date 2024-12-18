@@ -2,8 +2,9 @@ package fr.aym.acsguis.component.entity;
 
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
 import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -11,12 +12,12 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
 
-public class GuiEntityRender extends GuiComponent<ComponentStyleManager> implements IMouseExtraClickListener
+public class GuiEntityRender extends GuiComponent implements IMouseExtraClickListener
 {
 	protected EntityLivingBase entity;
 	protected int paddingTop;
 	protected int paddingBottom;
-	protected int counter;
+	protected float counter;
 	private boolean kept;
 
     @Override
@@ -33,21 +34,21 @@ public class GuiEntityRender extends GuiComponent<ComponentStyleManager> impleme
 	}
 	
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks)
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
     {
         if(entity != null) {
             float scale = (getHeight() - (paddingBottom + paddingTop)) / entity.height;
-            int x = getScreenX() + getWidth() / 2;
-            int y = getScreenY() + getHeight() - paddingBottom;
-            int mX = kept ? getScreenX() + getWidth() / 2 - mouseX : counter%mc.currentScreen.width;
-            int mY = kept ? (int) (y - mouseY - entity.getEyeHeight() * scale) : 0;
+            float x = getScreenX() + getWidth() / 2;
+            float y = getScreenY() + getHeight() - paddingBottom;
+            float mX = kept ? getScreenX() + getWidth() / 2 - mouseX : counter%mc.currentScreen.width;
+            float mY = kept ? (y - mouseY - entity.getEyeHeight() * scale) : 0;
             drawEntityOnScreen(x, y, scale, mX, mY, entity);
         }
 
-        super.drawForeground(mouseX, mouseY, partialTicks);
+        super.drawForeground(mouseX, mouseY, partialTicks, enableScissor);
     }
 
-    public static void drawEntityOnScreen(int posX, int posY, float scale, float mouseX, float mouseY, EntityLivingBase ent)
+    public static void drawEntityOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, EntityLivingBase ent)
     {
         GlStateManager.enableColorMaterial();
         GlStateManager.pushMatrix();

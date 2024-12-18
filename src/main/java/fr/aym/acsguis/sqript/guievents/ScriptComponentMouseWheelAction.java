@@ -24,7 +24,7 @@ public class ScriptComponentMouseWheelAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addWheelListener((dWheel) -> {
             ScriptContext context1;
             try {

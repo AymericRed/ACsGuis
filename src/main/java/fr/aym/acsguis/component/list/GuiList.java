@@ -18,7 +18,6 @@ public class GuiList extends GuiScrollPane {
 		if(entries != null) {
 			this.entries.addAll(entries);
 		}
-		
 		slotList = new GuiSlotList(this);
 		slotList.updateSlotList();
 		add(slotList);

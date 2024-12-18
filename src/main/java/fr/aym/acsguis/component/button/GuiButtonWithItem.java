@@ -1,16 +1,11 @@
 package fr.aym.acsguis.component.button;
 
 import fr.aym.acsguis.component.EnumComponentType;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StringUtils;
 import org.lwjgl.opengl.GL11;
-
-import javax.annotation.Nullable;
-import java.awt.*;
 
 public class GuiButtonWithItem extends GuiButton
 {
@@ -48,9 +43,9 @@ public class GuiButtonWithItem extends GuiButton
     }
 
     @Override
-    public void drawBackground(int mouseX, int mouseY, float partialTicks) 
+    public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor)
     {
-        super.drawBackground(mouseX, mouseY, partialTicks);
+        super.drawBackground(mouseX, mouseY, partialTicks, enableScissor);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glTranslated(getWidth()/2f - itemSize/2, getHeight()/2f - itemSize/2, 0);
         FontRenderer fontrenderer = mc.fontRenderer;

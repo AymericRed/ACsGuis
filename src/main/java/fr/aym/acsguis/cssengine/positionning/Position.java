@@ -1,5 +1,7 @@
 package fr.aym.acsguis.cssengine.positionning;
 
+import fr.aym.acsguis.component.style.InternalComponentStyle;
+import fr.aym.acsguis.component.style.positionning.ReadablePosition;
 import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.utils.GuiConstants;
 import net.minecraft.util.math.MathHelper;
@@ -7,11 +9,13 @@ import net.minecraft.util.math.MathHelper;
 /**
  * A 1D position, absolute or relative to something
  */
-public class Position {
+public class Position implements ReadablePosition {
     private float value;
     private GuiConstants.ENUM_RELATIVE_POS relativePos;
     private GuiConstants.ENUM_POSITION type;
     private boolean dirty;
+
+    private PositionUpdateFunction positionFunction;
 
     /**
      * @param value       The value
@@ -27,21 +31,26 @@ public class Position {
     /**
      * Computes the value of this 1D position depending on the element and parent sizes
      *
-     * @param screenWidth  The screen width
-     * @param screenHeight The screen height
-     * @param parentSize   The size of the parent, in the same dimension (width or height)
-     * @param elementSize  The side of this element, in the same dimension (width or height)
+     * @param componentStyle The component style
+     * @param screenWidth    The screen width
+     * @param screenHeight   The screen height
+     * @param parentSize     The size of the parent, in the same dimension (width or height)
+     * @param elementSize    The side of this element, in the same dimension (width or height)
      * @return The real value
      */
-    public int computeValue(int screenWidth, int screenHeight, int parentSize, int elementSize) {
-        //System.out.println("Compute pos from "+parentSize+" "+elementSize+" "+value+" "+relativePos+" "+type);
-        int computed = (int) value;
+    @Override
+    public float computeValue(InternalComponentStyle componentStyle, int screenWidth, int screenHeight, float parentSize, float elementSize) {
+        if (positionFunction != null) {
+            positionFunction.apply(componentStyle, this);
+            positionFunction = null;
+        }
+        float computed = value;
         if (type == GuiConstants.ENUM_POSITION.RELATIVE)
-            computed = (int) (value * parentSize);
+            computed = (value * parentSize);
         else if (type == GuiConstants.ENUM_POSITION.RELATIVE_VW)
-            computed = (int) (value * screenWidth);
+            computed = (value * screenWidth);
         else if (type == GuiConstants.ENUM_POSITION.RELATIVE_VH)
-            computed = (int) (value * screenHeight);
+            computed = (value * screenHeight);
 
         if (relativePos == GuiConstants.ENUM_RELATIVE_POS.END) {
             computed = parentSize - computed - elementSize;
@@ -49,12 +58,14 @@ public class Position {
             computed = (parentSize - elementSize) / 2 - computed;
         }
         setDirty(false);
+        //System.out.println("Compute pos from "+parentSize+" "+elementSize+" "+value+" "+relativePos+" "+type +" == " + computed);
         return computed;
     }
 
     /**
      * @return The raw value (absolute or relative)
      */
+    @Override
     public float getRawValue() {
         return value;
     }
@@ -98,7 +109,7 @@ public class Position {
      * @param type The unit of the value. MUST be relative_something.
      */
     public void setRelative(float value, CssValue.Unit type, GuiConstants.ENUM_RELATIVE_POS pos) {
-        if (type == CssValue.Unit.RELATIVE_INT &&
+        if (type == CssValue.Unit.RELATIVE_TO_PARENT &&
                 type() == GuiConstants.ENUM_POSITION.RELATIVE &&
                 relativePos() != pos &&
                 relativePos() != GuiConstants.ENUM_RELATIVE_POS.CENTER &&
@@ -111,7 +122,7 @@ public class Position {
             //System.out.println("Rel x is "+this.relX+" "+getOwner());
         } else {
             switch (type) {
-                case RELATIVE_INT:
+                case RELATIVE_TO_PARENT:
                     setType(GuiConstants.ENUM_POSITION.RELATIVE);
                     break;
                 case RELATIVE_TO_WINDOW_WIDTH:
@@ -127,6 +138,7 @@ public class Position {
         }
     }
 
+    @Override
     public GuiConstants.ENUM_POSITION type() {
         return type;
     }
@@ -145,6 +157,7 @@ public class Position {
     /**
      * @return the local origin of this position
      */
+    @Override
     public GuiConstants.ENUM_RELATIVE_POS relativePos() {
         return relativePos;
     }
@@ -152,11 +165,24 @@ public class Position {
     /**
      * @return True if this position has changed since the last computeValue call
      */
+    @Override
     public boolean isDirty() {
         return dirty;
     }
 
     protected void setDirty(boolean dirty) {
         this.dirty = dirty;
+    }
+
+    public void setPositionFunction(PositionUpdateFunction positionFunction) {
+        this.positionFunction = positionFunction;
+    }
+
+    /**
+     * Called after the render width and height has been computed, so that the position can depend on them <br>
+     * Used by the {@link fr.aym.acsguis.component.layout.FlowLayout}
+     */
+    public interface PositionUpdateFunction {
+        void apply(InternalComponentStyle style, Position position);
     }
 }

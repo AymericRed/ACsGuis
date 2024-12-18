@@ -26,3 +26,20 @@
     width: 100%;
     height: 30%;
 }
+
+#content {
+}
+
+.inline_labels, .inline_buttons {
+    display: inline;
+    background-color: green;
+}
+
+.inline_labels2 {
+    display: inline;
+    background-color: blue;
+}
+
+.block_labels2 {
+    background-color: red;
+}

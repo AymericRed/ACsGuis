@@ -21,7 +21,7 @@ public class ScriptComponentCloseAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addCloseListener(() -> {
             try {
                 executeAction(contextProvider.call());

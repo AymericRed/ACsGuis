@@ -1,6 +1,6 @@
 package fr.aym.acsguis.component.layout;
 
-import net.minecraft.client.gui.ScaledResolution;
+import fr.aym.acsguis.utils.ACsScaledResolution;
 
 /**
  * Computes x and y scales to adjust guis size to screen size and minecraft's scale
@@ -11,7 +11,7 @@ import net.minecraft.client.gui.ScaledResolution;
 public interface GuiScaler
 {
     //TODO DOC
-    default float[] getScale(ScaledResolution res, int mcWidth, int scaledWidth, int guiWidth, int mcHeight, int scaledHeight, int guiHeight) {
+    default float[] getScale(ACsScaledResolution res, int mcWidth, int scaledWidth, float guiWidth, int mcHeight, int scaledHeight, float guiHeight) {
         return new float[] {getScaleX(res, mcWidth, scaledWidth, guiWidth), getScaleY(res, mcHeight, scaledHeight, guiHeight)};
     }
 
@@ -22,7 +22,7 @@ public interface GuiScaler
      * @param guiWidth The gui width, as computed from css data
      * @return The scale on X axis
      */
-    float getScaleX(ScaledResolution res, int mcWidth, int scaledWidth, int guiWidth);
+    float getScaleX(ACsScaledResolution res, int mcWidth, int scaledWidth, float guiWidth);
 
     /**
      * @param res Game resolution
@@ -31,7 +31,7 @@ public interface GuiScaler
      * @param guiHeight The gui height, as computed from css data
      * @return The scale on Y axis
      */
-    float getScaleY(ScaledResolution res, int mcHeight, int scaledHeight, int guiHeight);
+    float getScaleY(ACsScaledResolution res, int mcHeight, int scaledHeight, float guiHeight);
 
     default void onApplyScale(float scaleX, float scaleY) {
     }
@@ -45,12 +45,12 @@ public interface GuiScaler
     class Identity implements GuiScaler
     {
         @Override
-        public float getScaleX(ScaledResolution res, int mcWidth, int scaledWidth, int guiWidth) {
+        public float getScaleX(ACsScaledResolution res, int mcWidth, int scaledWidth, float guiWidth) {
             return 1;
         }
 
         @Override
-        public float getScaleY(ScaledResolution res, int mcHeight, int scaledHeight, int guiHeight) {
+        public float getScaleY(ACsScaledResolution res, int mcHeight, int scaledHeight, float guiHeight) {
             return 1;
         }
     }
@@ -61,12 +61,12 @@ public interface GuiScaler
     class AdjustFullScreen implements GuiScaler
     {
         @Override
-        public float getScaleX(ScaledResolution res, int mcWidth, int scaledWidth, int guiWidth) {
+        public float getScaleX(ACsScaledResolution res, int mcWidth, int scaledWidth, float guiWidth) {
             return ((float)scaledWidth)/guiWidth;
         }
 
         @Override
-        public float getScaleY(ScaledResolution res, int mcHeight, int scaledHeight, int guiHeight) {
+        public float getScaleY(ACsScaledResolution res, int mcHeight, int scaledHeight, float guiHeight) {
             return ((float)scaledHeight)/guiHeight;
         }
     }
@@ -86,7 +86,7 @@ public interface GuiScaler
         }
 
         @Override
-        public float[] getScale(ScaledResolution res, int mcWidth, int scaledWidth, int guiWidth, int mcHeight, int scaledHeight, int guiHeight) {
+        public float[] getScale(ACsScaledResolution res, int mcWidth, int scaledWidth, float guiWidth, int mcHeight, int scaledHeight, float guiHeight) {
             float[] scales = GuiScaler.super.getScale(res, mcWidth, scaledWidth, guiWidth, mcHeight, scaledHeight, guiHeight);
             if(keepProportions) {
                 if (scales[0] < scales[1]) {
@@ -99,14 +99,14 @@ public interface GuiScaler
         }
 
         @Override
-        public float getScaleX(ScaledResolution res, int mcWidth, int scaledWidth, int guiWidth) {
+        public float getScaleX(ACsScaledResolution res, int mcWidth, int scaledWidth, float guiWidth) {
             if(guiWidth > scaledWidth*maxScreenSizeWidth)
                 return ((float)scaledWidth * maxScreenSizeWidth)/guiWidth;
             return 1;
         }
 
         @Override
-        public float getScaleY(ScaledResolution res, int mcHeight, int scaledHeight, int guiHeight) {
+        public float getScaleY(ACsScaledResolution res, int mcHeight, int scaledHeight, float guiHeight) {
             if(guiHeight > scaledHeight*maxScreenSizeHeight)
                 return ((float)scaledHeight * maxScreenSizeHeight)/guiHeight;
             return 1;

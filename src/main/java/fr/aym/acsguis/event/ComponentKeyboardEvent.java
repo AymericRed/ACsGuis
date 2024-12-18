@@ -7,9 +7,9 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 @Cancelable
 public abstract class ComponentKeyboardEvent extends Event {
 
-    public final GuiComponent<?> component;
+    public final GuiComponent component;
 
-    public ComponentKeyboardEvent(GuiComponent<?> component) {
+    public ComponentKeyboardEvent(GuiComponent component) {
         this.component = component;
     }
 
@@ -23,7 +23,7 @@ public abstract class ComponentKeyboardEvent extends Event {
         public final char typedChar;
         public final int keyCode;
 
-        public ComponentKeyTypeEvent(GuiComponent<?> component, char typedChar, int keyCode) {
+        public ComponentKeyTypeEvent(GuiComponent component, char typedChar, int keyCode) {
             super(component);
             this.typedChar = typedChar;
             this.keyCode = keyCode;

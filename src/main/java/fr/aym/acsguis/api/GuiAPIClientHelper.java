@@ -2,10 +2,11 @@ package fr.aym.acsguis.api;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.font.ICssFont;
+import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
+import fr.aym.acsguis.utils.ACsScaledResolution;
 import fr.aym.acsguis.utils.CircleBackground;
 import fr.aym.acsguis.utils.GuiConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -74,7 +75,7 @@ public class GuiAPIClientHelper {
      * @param scale                   The render scale, used for different font sizes
      * @return Return the x value of the text depending on the horizontal alignment given. {@link GuiConstants.HORIZONTAL_TEXT_ALIGNMENT}
      */
-    public static float getRelativeTextX(String text, int parentWidth, GuiConstants.HORIZONTAL_TEXT_ALIGNMENT horizontalTextAlignment, ICssFont font, float scale) {
+    public static float getRelativeTextX(String text, float parentWidth, GuiConstants.HORIZONTAL_TEXT_ALIGNMENT horizontalTextAlignment, ICssFont font, float scale) {
         switch (horizontalTextAlignment) {
             case CENTER:
                 return (parentWidth - font.getWidth(text) * scale) / 2;
@@ -93,7 +94,7 @@ public class GuiAPIClientHelper {
      * @param fontSize              The font height
      * @return Return the x value of the text depending on the horizontal alignment given. {@link GuiConstants.VERTICAL_TEXT_ALIGNMENT}
      */
-    public static float getRelativeTextY(int lineIndex, int maxLines, int parentHeight, GuiConstants.VERTICAL_TEXT_ALIGNMENT verticalTextAlignment, float fontSize) {
+    public static float getRelativeTextY(int lineIndex, int maxLines, float parentHeight, GuiConstants.VERTICAL_TEXT_ALIGNMENT verticalTextAlignment, float fontSize) {
         switch (verticalTextAlignment) {
             case CENTER:
                 return (parentHeight - maxLines * fontSize) / 2 + lineIndex * fontSize;
@@ -107,13 +108,15 @@ public class GuiAPIClientHelper {
     /**
      * Trim the text to the given width, without cutting words unless the word is larger than a line.
      *
-     * @param text     The text to trim.
-     * @param maxWidth The maximum line's width.
+     * @param text          The text to trim.
+     * @param maxWidth      The maximum line's width (int pixels)
+     * @param maxTextHeight The maximum height of the text. -1 for no limit
      * @return Return the list of the lines trimmed to the given width.
      */
-    public static List<String> trimTextToWidth(String text, int maxWidth) {
-
-        List<String> lines = new ArrayList<String>();
+    public static List<String> trimTextToWidth(String text, int maxWidth, int maxTextHeight) {
+        List<String> renderedLines = new ArrayList<String>();
+        int totalHeight = 0; // Total height of the rendered text (in pixels)
+        int fontHeight = Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT;
 
         while (!text.isEmpty()) {
             String rawTrim = Minecraft.getMinecraft().fontRenderer.trimStringToWidth(text, maxWidth);
@@ -127,10 +130,10 @@ public class GuiAPIClientHelper {
             boolean flag = lastChar == null || lastChar == ' ' || nextChar == null || nextChar == ' ' || lastSpace == 0 || lastSpace == -1;
 
             String line;
-
+            int off = 0;
             if (rawTrim.contains("\n") && (rawTrim.indexOf("\n") == 0 || rawTrim.charAt(rawTrim.indexOf("\n") - 1) != '\\')) {
-                line = rawTrim.substring(0, rawTrim.indexOf("\n") + 1);
-                //text = text.replaceFirst("\n", "");
+                line = rawTrim.substring(0, rawTrim.indexOf("\n") + 0);
+                off = 1;
             } else {
                 if (flag) {
                     line = rawTrim;
@@ -142,15 +145,19 @@ public class GuiAPIClientHelper {
             if (line.isEmpty()) {
                 break;
             }
+            // Check if we've reached the maximum allowed height
+            if (addEllipsisToLastLine(ACsGuisCssParser.DEFAULT_FONT, maxWidth, maxTextHeight, renderedLines, totalHeight, line)) {
+                return renderedLines;
+            }
 
-            text = text.substring(line.length());
-            lines.add(line);
+            text = text.substring(line.length() + off);
+            renderedLines.add(line);
+            totalHeight += fontHeight;
         }
-
-        if (lines.isEmpty())
-            lines.add(text);
-
-        return lines;
+        if (renderedLines.isEmpty()) {
+            renderedLines.add(text);
+        }
+        return renderedLines;
     }
 
     /**
@@ -197,65 +204,21 @@ public class GuiAPIClientHelper {
     /**
      * Create rendering boundaries, the elements' parts outside of them will not be rendered.
      */
-    public static void glScissor(float x, float y, float width, float height) {
-        int f = GuiFrame.resolution.getScaleFactor();
-        GL11.glScissor((int) (x * f * currentScaleX), (int) (mc.displayHeight - (y + height) * f * currentScaleY), (int) MathHelper.clamp(width * f * currentScaleX, 0, Integer.MAX_VALUE), (int) MathHelper.clamp(height * f * currentScaleY, 0, Integer.MAX_VALUE));
+    public static void glScissor(int resolutionScaleFactor, float x, float y, float width, float height) {
+        GL11.glScissor(MathHelper.floor(x * resolutionScaleFactor * currentScaleX), MathHelper.ceil(mc.displayHeight - (y + height) * resolutionScaleFactor * currentScaleY),
+                MathHelper.clamp(MathHelper.ceil(width * resolutionScaleFactor * currentScaleX), 0, Integer.MAX_VALUE), MathHelper.clamp(MathHelper.ceil(height * resolutionScaleFactor * currentScaleY), 0, Integer.MAX_VALUE));
     }
 
-    public static void drawBorderedRectangle(float left, float top, float right, float bottom, float borderSize, int backgroundColor, int borderColor, int borderRadius) {
+    public static void drawBorderedRectangle(float left, float top, float right, float bottom, float borderSize, int backgroundColor, int borderColor, float borderRadius) {
         CircleBackground.renderBorder(borderRadius, left, top, right, bottom, borderSize, borderColor);
-        CircleBackground.renderBackground(borderRadius, (int) (left + borderSize), (int) (top + borderSize),
-                (int) (right - borderSize), (int) (bottom - borderSize), backgroundColor);
+        CircleBackground.renderBackground(borderRadius, left + borderSize, top + borderSize,
+                right - borderSize, bottom - borderSize, backgroundColor);
     }
-	
-	/*
-	 * Old 1.7.10 functions, not used so disabled
-	 * 
-	public static void drawLine(int x1, int y1, int x2, int y2, int lineWidth, int color)
-	{
-		GL11.glLineWidth(lineWidth);
-		
-		int r = color & 255;
-		int g = color >> 8 & 255;
-		int b = color >> 16 & 255;
-		
-		GlStateManager.color(r / 255F, g / 255F, b / 255F);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		Tessellator tessellator = Tessellator.getInstance();
-		tessellator.startDrawing(GL11.GL_LINE_STRIP);
-		tessellator.addVertex(x1, y1, 0);
-		tessellator.addVertex(x2, y2, 0);
-		tessellator.draw();
-		
-		GlStateManager.color(1,1,1,1);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
-	
-	public static void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int color)
-	{
-		int r = color & 255;
-		int g = color >> 8 & 255;
-		int b = color >> 16 & 255;
-		
-		GL11.glColor3f(r / 255F, g / 255F, b / 255F);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		Tessellator tessellator = Tessellator.getInstance();
-		tessellator.startDrawing(GL11.GL_TRIANGLE_STRIP);
-		tessellator.addVertex(x1, y1, 0);
-		tessellator.addVertex(x2, y2, 0);
-		tessellator.addVertex(x3, y3, 0);
-		tessellator.draw();
-		
-		GL11.glColor3f(1, 1, 1);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}*/
 
     /**
-     * Basically just a copy of the vanilla method {@link net.minecraft.client.gui.GuiScreen#drawHoveringText(List, int, int, FontRenderer)}
+     * Basically just a copy of the vanilla method {@link net.minecraft.client.gui.GuiScreen#drawHoveringText(String, int, int)}
      */
-    public static void drawHoveringText(List<String> textLines, int x, int y) {
+    public static void drawHoveringText(ACsScaledResolution resolution, List<String> textLines, int x, int y) {
         if (!textLines.isEmpty()) {
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
@@ -279,12 +242,12 @@ public class GuiAPIClientHelper {
                 k += 2 + (textLines.size() - 1) * 10;
             }
 
-            if (l1 + i > GuiFrame.resolution.getScaledWidth()) {
+            if (l1 + i > resolution.getScaledWidth()) {
                 l1 -= 28 + i;
             }
 
-            if (i2 + k + 6 > GuiFrame.resolution.getScaledHeight()) {
-                i2 = GuiFrame.resolution.getScaledHeight() - k - 6;
+            if (i2 + k + 6 > resolution.getScaledHeight()) {
+                i2 = resolution.getScaledHeight() - k - 6;
             }
 
             if (i2 - 4 < 0) {
@@ -352,5 +315,68 @@ public class GuiAPIClientHelper {
         GlStateManager.disableBlend();
         GlStateManager.enableAlpha();
         GlStateManager.enableTexture2D();
+    }
+
+    /**
+     * Tests if adding one more line would exceed the maxTextHeight.
+     * If so, it adds an ellipsis to the current line and returns true.
+     *
+     * @param font          The font
+     * @param maxWidth      The max line width (in pixels)
+     * @param maxTextHeight The max text height. -1 for no limit.
+     * @param lines         The text lines
+     * @param totalHeight   The current height of the text (in pixels)
+     * @param word          The word to add on a new line
+     * @return True if the word can't be added within maxTextHeight, and a ellipsis was added
+     */
+    public static boolean addEllipsisToLastLine(ICssFont font, int maxWidth, int maxTextHeight, List<String> lines, int totalHeight, String word) {
+        if (maxTextHeight > 0 && totalHeight + font.getHeight(word) > maxTextHeight) {
+            String lastLine = lines.isEmpty() ? word : lines.get(lines.size() - 1);
+            if (lastLine.length() > 3 && font.getWidth(lastLine + "...") > maxWidth) {
+                lastLine = lastLine.substring(0, lastLine.length() - 3) + "...";
+            } else {
+                lastLine += "...";
+            }
+            if (lines.isEmpty()) {
+                lines.add(lastLine);
+            } else {
+                lines.set(lines.size() - 1, lastLine);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static void drawRect(float left, float top, float right, float bottom, int color) {
+        if (left < right) {
+            float i = left;
+            left = right;
+            right = i;
+        }
+
+        if (top < bottom) {
+            float j = top;
+            top = bottom;
+            bottom = j;
+        }
+
+        float f3 = (float) (color >> 24 & 255) / 255.0F;
+        float f = (float) (color >> 16 & 255) / 255.0F;
+        float f1 = (float) (color >> 8 & 255) / 255.0F;
+        float f2 = (float) (color & 255) / 255.0F;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.color(f, f1, f2, f3);
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
+        bufferbuilder.pos((double) left, (double) bottom, 0.0D).endVertex();
+        bufferbuilder.pos((double) right, (double) bottom, 0.0D).endVertex();
+        bufferbuilder.pos((double) right, (double) top, 0.0D).endVertex();
+        bufferbuilder.pos((double) left, (double) top, 0.0D).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
     }
 }

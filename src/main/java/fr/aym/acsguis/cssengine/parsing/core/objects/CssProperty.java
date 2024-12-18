@@ -1,5 +1,7 @@
 package fr.aym.acsguis.cssengine.parsing.core.objects;
 
+import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
+
 /**
  * A css property
  */
@@ -17,7 +19,7 @@ public class CssProperty
     }
 
     /**
-     * @return The name of the property, should match one in {@link fr.aym.acsguis.cssengine.style.EnumCssStyleProperties}
+     * @return The name of the property, should match one in {@link EnumCssStyleProperty}
      */
     public String getKey() {
         return key;

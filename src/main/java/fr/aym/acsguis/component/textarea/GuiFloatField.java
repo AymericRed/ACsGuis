@@ -1,7 +1,6 @@
 package fr.aym.acsguis.component.textarea;
 
-public class GuiFloatField extends GuiTextField
-{
+public class GuiFloatField extends GuiTextField {
     private float value;
     private float min;
     private float max;
@@ -36,18 +35,19 @@ public class GuiFloatField extends GuiTextField
     public GuiTextArea setText(String text) {
         if (!text.isEmpty()) {
             try {
-                float color = Float.parseFloat(text.equals("-") ? text+"0" : text);
+                float color = Float.parseFloat(text.equals("-") ? text + "0" : text);
                 if (color > getMax()) {
-                    this.text = ""+getMax();
+                    super.setText("" + getMax());
                 } else if (color < getMin()) {
-                    this.text = ""+getMin();
+                    super.setText("" + getMin());
                 } else {
-                    this.text = text;
+                    super.setText(text);
                 }
                 value = Float.parseFloat(text);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         } else {
-            this.text = text;
+            super.setText(text);
             value = 0;
         }
         return this;
@@ -55,7 +55,7 @@ public class GuiFloatField extends GuiTextField
 
     public void setValue(float value) {
         this.value = value;
-        this.setText(""+value);
+        this.setText("" + value);
     }
 
     public float getValue() {

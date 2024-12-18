@@ -8,9 +8,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(net.minecraftforge.fml.relauncher.Side.CLIENT)
 public class ComponentUtils {
-    public static GuiComponent<?> lastAddedComponent;
+    public static GuiComponent lastAddedComponent;
 
-    public static void pushComponentVariables(GuiComponent<?> component, ScriptContext context) {
+    public static void pushComponentVariables(GuiComponent component, ScriptContext context) {
         if (component.getParent() != null) {
             fillProperties(component.getParent(), context, false);
         }
@@ -20,7 +20,7 @@ public class ComponentUtils {
         setComponentContext(component, context);
     }
 
-    public static void setComponentContext(GuiComponent<?> component, ScriptContext context) {
+    public static void setComponentContext(GuiComponent component, ScriptContext context) {
         context.put(new ScriptTypeAccessor(new TypeComponent(component), "this_component"));
 
         ParseableComponent type = ParseableComponent.find(component);
@@ -28,7 +28,7 @@ public class ComponentUtils {
     }
 
     public static void popComponentVariables(ScriptContext context) {
-        GuiComponent<?> lastComponent = ComponentUtils.lastAddedComponent;
+        GuiComponent lastComponent = ComponentUtils.lastAddedComponent;
 
         ParseableComponent component = ParseableComponent.find(lastComponent);
         ComponentUtils.lastAddedComponent = lastComponent.getParent();
@@ -43,7 +43,7 @@ public class ComponentUtils {
             setComponentContext(lastAddedComponent, context);
     }
 
-    public static void fillProperties(GuiComponent<?> lastComponent, ScriptContext context, boolean popping) {
+    public static void fillProperties(GuiComponent lastComponent, ScriptContext context, boolean popping) {
         //System.out.println("FILLING " + lastComponent);
         ParseableComponent type = ParseableComponent.find(lastComponent);
         type.fillComponent(context, lastComponent);

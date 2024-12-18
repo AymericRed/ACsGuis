@@ -2,6 +2,9 @@ package fr.aym.acsguis.utils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
@@ -19,6 +22,39 @@ public class GuiTextureSprite implements IGuiTexture {
     private final GuiTextureLoader loader;
 
     /**
+     * <strong>Note: </strong> If atlasWidth and height are 0, this method loads the texture with a custom texture loader! Dynamic textures not supported with this mechanism. <br>
+     *
+     * @param atlasTexture  The texture location
+     * @param textureU      Sprite U
+     * @param textureV      Sprite V
+     * @param textureWidth  Sprite width
+     * @param textureHeight Sprite height
+     * @param atlasWidth    The width of the texture file (0 to load the texture with a custom loader and fill it automatically)
+     * @param atlasHeight   The height of the texture file (0 to load the texture with a custom loader and fill it automatically)
+     */
+    public GuiTextureSprite(ResourceLocation atlasTexture, int textureU, int textureV, int textureWidth, int textureHeight, int atlasWidth, int atlasHeight) {
+        this.atlasTexture = atlasTexture;
+        this.textureU = textureU;
+        this.textureV = textureV;
+        this.textureWidth = textureWidth;
+        this.textureHeight = textureHeight;
+        this.atlasWidth = atlasWidth;
+        this.atlasHeight = atlasHeight;
+        if (atlasWidth == 0 && atlasHeight == 0) {
+            if (atlasTexture.getNamespace().startsWith("http")) {
+                loader = new HttpGuiTextureLoader(atlasTexture);
+            } else {
+                loader = new GuiTextureLoader(atlasTexture);
+            }
+        } else {
+            loader = null;
+        }
+    }
+
+    /**
+     * <strong>Note: </strong> This method loads the texture with a custom texture loader! Dynamic textures not supported here <br>
+     * The atlasWidth and atlasHeight are automatically read from the loaded texture file
+     *
      * @param atlasTexture  The texture location
      * @param textureU      Sprite U
      * @param textureV      Sprite V
@@ -26,22 +62,13 @@ public class GuiTextureSprite implements IGuiTexture {
      * @param textureHeight Sprite height
      */
     public GuiTextureSprite(ResourceLocation atlasTexture, int textureU, int textureV, int textureWidth, int textureHeight) {
-        this.atlasTexture = atlasTexture;
-        this.textureU = textureU;
-        this.textureV = textureV;
-        this.textureWidth = textureWidth;
-        this.textureHeight = textureHeight;
-
-        //System.out.println("Texture is " + atlasTexture + " " + atlasTexture.getNamespace());
-        if (atlasTexture.getNamespace().startsWith("http")) {
-            loader = new HttpGuiTextureLoader(atlasTexture);
-        } else {
-            loader = new GuiTextureLoader(atlasTexture);
-        }
+        this(atlasTexture, textureU, textureV, textureWidth, textureHeight, 0, 0);
     }
 
     /**
-     * Sets u and v to 0, sets width and height to the entire texture
+     * <strong>Note: </strong> This method loads the texture with a custom texture loader! Dynamic textures not supported here <br>
+     * The atlasWidth and atlasHeight are automatically read from the loaded texture file <br>
+     * Sets u and v to 0, sets width and height to the entire texture (atlas width and height)
      *
      * @param location The texture location
      */
@@ -63,8 +90,9 @@ public class GuiTextureSprite implements IGuiTexture {
      * @param width         The total width to draw on screen
      * @param height        The total height to draw on screen
      */
-    public void drawSprite(int x, int y, int spriteWidth, int spriteHeight, int uOffset, int vOffset, int textureWidth, int textureHeight, int width, int height) {
-        if (atlasWidth == 0 && atlasHeight == 0) {//Not loaded
+    @Override
+    public void drawSprite(float x, float y, float spriteWidth, float spriteHeight, int uOffset, int vOffset, int textureWidth, int textureHeight, float width, float height) {
+        if (atlasWidth == 0 && atlasHeight == 0 && loader != null) {//Not loaded
             Minecraft.getMinecraft().renderEngine.loadTexture(atlasTexture, loader);
             atlasWidth = loader.atlasWidth;
             atlasHeight = loader.atlasHeight;
@@ -87,7 +115,7 @@ public class GuiTextureSprite implements IGuiTexture {
 
                 do {
                     double xSize = MathHelper.clamp(nRepeatX, 0, 1);
-                    drawTexturedModalRect(x + i * spriteWidth, y + j * spriteHeight, (int) Math.ceil(spriteWidth * xSize), (int) Math.ceil(spriteHeight * ySize), uOffset, vOffset, (int) Math.ceil(textureWidth * xSize), (int) Math.ceil(textureHeight * ySize));
+                    drawTexturedModalRect(x + i * spriteWidth, y + j * spriteHeight, (float) (spriteWidth * xSize), (float) (spriteHeight * ySize), uOffset, vOffset, (int) Math.ceil(textureWidth * xSize), (int) Math.ceil(textureHeight * ySize));
                     i++;
                     nRepeatX -= 1;
                 } while (nRepeatX > 0);
@@ -98,13 +126,14 @@ public class GuiTextureSprite implements IGuiTexture {
         }
     }
 
-    private void drawTexturedModalRect(int x, int y, int spriteWidth, int spriteHeight, int uOffset, int vOffset, int textureWidth, int textureHeight) {
-        Gui.drawScaledCustomSizeModalRect(x, y, textureU + uOffset, textureV + vOffset, textureWidth, textureHeight, spriteWidth, spriteHeight, atlasWidth, atlasHeight);
+    private void drawTexturedModalRect(float x, float y, float width, float height, int uOffset, int vOffset, int textureWidth, int textureHeight) {
+        drawScaledCustomSizeModalRect(x, y, textureU + uOffset, textureV + vOffset, textureWidth, textureHeight, width, height, atlasWidth, atlasHeight);
     }
 
     /**
      * @return Texture sprite width
      */
+    @Override
     public int getTextureWidth() {
         return textureWidth;
     }
@@ -112,6 +141,7 @@ public class GuiTextureSprite implements IGuiTexture {
     /**
      * @return Texture sprite height
      */
+    @Override
     public int getTextureHeight() {
         return textureHeight;
     }
@@ -121,5 +151,18 @@ public class GuiTextureSprite implements IGuiTexture {
         return "GuiTextureSprite{" +
                 atlasTexture +
                 '}';
+    }
+
+    public static void drawScaledCustomSizeModalRect(float x, float y, float u, float v, int uWidth, int vHeight, float width, float height, float tileWidth, float tileHeight) {
+        float f = 1.0F / tileWidth;
+        float f1 = 1.0F / tileHeight;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, y + height, 0.0D).tex(u * f, (v + (float) vHeight) * f1).endVertex();
+        bufferbuilder.pos(x + width, y + height, 0.0D).tex((u + (float) uWidth) * f, (v + (float) vHeight) * f1).endVertex();
+        bufferbuilder.pos(x + width, y, 0.0D).tex((u + (float) uWidth) * f, v * f1).endVertex();
+        bufferbuilder.pos(x, y, 0.0D).tex(u * f, v * f1).endVertex();
+        tessellator.draw();
     }
 }

@@ -2,21 +2,39 @@ package fr.aym.acsguis.component.layout;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
-import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
+import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 import fr.aym.acsguis.utils.GuiConstants;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class FlowLayout implements PanelLayout<ComponentStyleManager> {
-    private final Map<GuiComponent<?>, ComponentPosition> cache = new HashMap<>();
-    private int currentX;
-    private int lastWidth;
-    private int currentY;
-    private int lastHeight;
+public class FlowLayout implements PanelLayout<InternalComponentStyle> {
+    private final Map<GuiComponent, ComponentPosition> cache = new HashMap<>();
+    private float currentX;
+    private float lastWidth;
+    private float currentY;
+    private float lastHeight;
+    private GuiConstants.COMPONENT_DISPLAY lastDisplay;
     private GuiPanel container;
 
-    public void placeElement(ComponentStyleManager target) {
+    public void placeElement(InternalComponentStyle target) {
+        if (target.getDisplay() == GuiConstants.COMPONENT_DISPLAY.INLINE) {
+            if (currentX + target.getRenderWidth() > container.getWidth()) {
+                currentX = 0;
+                currentY += lastHeight;
+            }
+        } else if (target.getDisplay() == GuiConstants.COMPONENT_DISPLAY.BLOCK && lastDisplay == GuiConstants.COMPONENT_DISPLAY.INLINE) {
+            currentX = 0;
+            currentY += lastHeight;
+        }
+        // System.out.println("TPlace element: " + target + " " + lastWidth + " " + lastHeight + " " + currentX + " " + currentY + " " + target.getWidth().getValue().getRawValue());
+        ComponentPosition pos = new ComponentPosition(currentX, currentY);
+        cache.put(target.getOwner(), pos);
+        if (target.getDisplay() != GuiConstants.COMPONENT_DISPLAY.NONE) {
+            lastWidth = target.getRenderWidth();
+            lastHeight = target.getRenderHeight();
+        }
         switch (target.getDisplay()) {
             case BLOCK:
                 currentX = 0;
@@ -24,46 +42,46 @@ public class FlowLayout implements PanelLayout<ComponentStyleManager> {
                 break;
             case INLINE:
                 currentX += lastWidth;
-                //TODO LINE WRAPPING
                 //TODO C QUOI LA DIFF AVEC INLINE_BLOCK ??
                 break;
         }
-        if (target.getDisplay() != GuiConstants.COMPONENT_DISPLAY.NONE) {
-            lastWidth = target.getRenderWidth();
-            lastHeight = target.getRenderHeight();
-        }
-        ComponentPosition pos = new ComponentPosition(currentX, currentY);
-        cache.put(target.getOwner(), pos);
+        lastDisplay = target.getDisplay();
     }
 
     @Override
-    public int getX(ComponentStyleManager target) {
-        if (!cache.containsKey(target.getOwner()))
-            placeElement(target);
-        return cache.get(target.getOwner()).x;
+    public float getX(InternalComponentStyle target) {
+        target.getXPos().setPositionFunction((style, xPos) -> {
+            if (!cache.containsKey(style.getOwner()))
+                placeElement(style);
+            xPos.setAbsolute(cache.get(style.getOwner()).x);
+        });
+        return 0;
     }
 
     @Override
-    public int getY(ComponentStyleManager target) {
-        if (!cache.containsKey(target.getOwner()))
-            placeElement(target);
-        return cache.get(target.getOwner()).y;
+    public float getY(InternalComponentStyle target) {
+        target.getYPos().setPositionFunction((style, yPos) -> {
+            if (!cache.containsKey(style.getOwner()))
+                placeElement(style);
+            yPos.setAbsolute(cache.get(style.getOwner()).y);
+        });
+        return 0;
     }
 
     @Override
-    public int getWidth(ComponentStyleManager target) {
+    public float getWidth(InternalComponentStyle target) {
         throw new UnsupportedOperationException("Flow layout does not support width computation");
     }
 
     @Override
-    public int getHeight(ComponentStyleManager target) {
+    public float getHeight(InternalComponentStyle target) {
         throw new UnsupportedOperationException("Flow layout does not support height computation");
     }
 
-    private final List<EnumCssStyleProperties> modifiedProperties = Arrays.asList(EnumCssStyleProperties.TOP, EnumCssStyleProperties.LEFT);
+    private final EnumCssStyleProperty[] modifiedProperties = {EnumCssStyleProperty.TOP, EnumCssStyleProperty.LEFT};
 
     @Override
-    public Collection<EnumCssStyleProperties> getModifiedProperties(ComponentStyleManager target) {
+    public EnumCssStyleProperty[] getModifiedProperties() {
         return modifiedProperties;
     }
 
@@ -84,10 +102,10 @@ public class FlowLayout implements PanelLayout<ComponentStyleManager> {
     }
 
     public static class ComponentPosition {
-        public int x, y;
-        public int width, height;
+        public float x, y;
+        public float width, height;
 
-        public ComponentPosition(int x, int y) {
+        public ComponentPosition(float x, float y) {
             this.x = x;
             this.y = y;
         }
