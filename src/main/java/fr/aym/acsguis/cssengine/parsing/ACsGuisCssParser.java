@@ -3,7 +3,7 @@ package fr.aym.acsguis.cssengine.parsing;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
 import fr.aym.acsguis.cssengine.font.CssFontStyle;
 import fr.aym.acsguis.cssengine.font.ICssFont;
 import fr.aym.acsguis.cssengine.font.McFontRenderer;
@@ -130,7 +130,7 @@ public class ACsGuisCssParser
     /**
      * Read a CSS 3.0 declaration from a string using UTF-8 encoding.
      */
-    public static Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> parseRawCss(GuiComponent<?> component, String css) {
+    public static Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> parseRawCss(GuiComponent component, String css) {
         css = "#"+component.getCssId()+"{ \n "+css+"\n }";
         Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> data = new HashMap<>();
         CssFileVisitor visitor = new ACsGuisStringCssVisitor(component, data);
@@ -179,10 +179,10 @@ public class ACsGuisCssParser
      *     The return {@link CssStackElement} will choose which style to apply, depending on the state of the element <br>
      *     A call to this method <i>may</i> be heavy, depending on the css code behind it
      */
-    public static CssStackElement getStyleFor(ComponentStyleManager component) {
+    public static CssStackElement getStyleFor(ComponentStyle component) {
         List<ResourceLocation> cssSheets = new ArrayList<>();
         //First retrieve the css sheets used in this gui, so find the gui
-        GuiComponent<?> parent = component.getOwner();
+        GuiComponent parent = component.getOwner();
         while(parent.getParent() != null)
             parent = parent.getParent();
         if(parent instanceof GuiFrame) {
@@ -214,9 +214,9 @@ public class ACsGuisCssParser
         //if(component.getOwner() instanceof GuiPanel && component.getOwner().getCssClass() != null && component.getOwner().getCssId() != null)
         //System.out.println("WDH GET PROP FOR "+component.getOwner()+" / "+component.getOwner().getCssId()+" / "+component.getOwner().getCssClass()+" / "+propertyMap+" / "+cssSheets);
 
-        if(component.getCustomParsedStyle() != null) {
+        if(component.getCustomizer().getCustomParsedStyle() != null) {
             //Apply custom style, with higher priority
-            component.getCustomParsedStyle().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach((e) -> {
+            component.getCustomizer().getCustomParsedStyle().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach((e) -> {
                 if (e.getKey().applies(component, null)) {
                     if (!propertyMap.containsKey(e.getKey()))
                         propertyMap.put(e.getKey(), new HashMap<>());

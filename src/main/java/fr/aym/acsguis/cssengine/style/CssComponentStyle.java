@@ -3,15 +3,15 @@ package fr.aym.acsguis.cssengine.style;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
-import fr.aym.acsguis.component.style.InjectedStyleList;
+import fr.aym.acsguis.component.panel.GuiScrollPane;
+import fr.aym.acsguis.component.style.ComponentStyle;
+import fr.aym.acsguis.component.style.ComponentStyleCustomizer;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.component.textarea.IChildSizeUpdateListener;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
 import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.cssengine.positionning.Position;
 import fr.aym.acsguis.cssengine.positionning.Size;
-import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.cssengine.selectors.CssStackElement;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.utils.GuiConstants;
@@ -20,23 +20,28 @@ import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 
-public class CssComponentStyleManager implements ComponentStyleManager
-{
-    private final GuiComponent<?> component;
-    
-    protected float computedX, computedY;
-    protected Position xPos = new Position(0, GuiConstants.ENUM_POSITION.ABSOLUTE, GuiConstants.ENUM_RELATIVE_POS.START), yPos = new Position(0, GuiConstants.ENUM_POSITION.ABSOLUTE, GuiConstants.ENUM_RELATIVE_POS.START);
+public class CssComponentStyle implements InternalComponentStyle {
+    private final GuiComponent component;
+    private final ComponentStyleCustomizer styleCustomizer;
 
-    protected float computedWidth, computedHeight;
-    protected Size width = new Size(), height = new Size();
+    protected final Position xPos = new Position(0, GuiConstants.ENUM_POSITION.ABSOLUTE, GuiConstants.ENUM_RELATIVE_POS.START);
+    protected final Position yPos = new Position(0, GuiConstants.ENUM_POSITION.ABSOLUTE, GuiConstants.ENUM_RELATIVE_POS.START);
 
-    /**Offset values of the component, used for GuiScrollPane for example**/
-    protected int offsetX, offsetY; //TODO MOVE TO CONTAINERSTYLEMANAGER, with layout things
+    protected float computedX;
+    protected float computedY;
+
+    protected final Size width = new Size();
+    protected final Size height = new Size();
+
+    protected float computedWidth;
+    protected float computedHeight;
+
+    /**
+     * Offset values of the component, used for GuiScrollPane for example
+     **/
+    protected int offsetX, offsetY;
 
     /**
      * The render zLevel, use to sort the render pipeline, by default the components
@@ -44,7 +49,7 @@ public class CssComponentStyleManager implements ComponentStyleManager
      **/
     protected int zLevel = 0;
 
-    protected boolean visible;
+    protected boolean visible = true;
 
     private int foregroundColor = Color.WHITE.getRGB();
     private int backgroundColor = Color.TRANSLUCENT;
@@ -64,19 +69,24 @@ public class CssComponentStyleManager implements ComponentStyleManager
 
     protected GuiConstants.ENUM_SIZE textureHorizontalSize = GuiConstants.ENUM_SIZE.ABSOLUTE;
     protected GuiConstants.ENUM_SIZE textureVerticalSize = GuiConstants.ENUM_SIZE.ABSOLUTE;
-    
+
+    protected int paddingLeft = 0, paddingRight = 0, paddingTop = 0, paddingBottom = 0;
+
+    protected GuiConstants.COMPONENT_DISPLAY display = GuiConstants.COMPONENT_DISPLAY.BLOCK;
+
     protected CssStackElement cssStack;
-    protected final List<AutoStyleHandler<?>> autoStyleHandler = new ArrayList<>();
-    protected InjectedStyleList injectedStyleList;
-
-    protected Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> customStyle;
-
-    public CssComponentStyleManager(GuiComponent<?> component)
-    {
-        this.component = component;
-    }
 
     private EnumSelectorContext lastContext = EnumSelectorContext.NORMAL;
+
+    public CssComponentStyle(GuiComponent component) {
+        this.component = component;
+        this.styleCustomizer = new CssComponentStyleCustomizer(component, this);
+    }
+
+    public CssComponentStyle(GuiComponent component, Function<CssComponentStyle, ComponentStyleCustomizer> styleCustomizerFactory) {
+        this.component = component;
+        this.styleCustomizer = styleCustomizerFactory.apply(this);
+    }
 
     @Nullable
     public CssStackElement getCssStack() {
@@ -84,60 +94,32 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public void setCustomParsedStyle(Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> data) {
-        this.customStyle = data;
-        refreshCss(getOwner().getGui(), true);
-    }
-
-    @Override
-    public Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> getCustomParsedStyle() {
-        return customStyle;
+    public ComponentStyleCustomizer getCustomizer() {
+        return styleCustomizer;
     }
 
     @Override
     public void update(GuiFrame.APIGuiScreen gui) {
-        if(component.getState() != lastContext || cssStack == null) {
-            onCssChange(component.getState());
-        }
-        float sx = gui != null ? gui.getScaleX() : 1;
-        float sy = gui != null ? gui.getScaleY() : 1;
-        if(getWidth().isDirty() || getHeight().isDirty())
-            updateComponentSize((int) (GuiFrame.resolution.getScaledWidth()/sx), (int) (GuiFrame.resolution.getScaledHeight()/sy));
-        if(getXPos().isDirty() || getYPos().isDirty())
-            updateComponentPosition((int) (GuiFrame.resolution.getScaledWidth()/sx), (int) (GuiFrame.resolution.getScaledHeight()/sy));
-        /*if (component instanceof GuiPanel) {
-            for (GuiComponent<?> c : ((GuiPanel) component).getChildComponents()) {
-                if(!((GuiPanel)component).getToRemoveComponents().contains(c))
-                    c.getStyle().refreshCss(gui, false, "i_u");
-            }
-        }*/
-    }
-
-    private void onCssChange(EnumSelectorContext context) {
-        if(cssStack == null && (getParent() == null || getParent().getCssStack() != null)) {
-            //System.out.println("Init stack with opt "+context);
-            reloadCssStack();
-        }
-        if(cssStack != null) {
-            //System.out.println("Change context from "+lastContext+" to "+context+" "+getOwner());
-            lastContext = context;
-            //Reset
-            refreshCss(getOwner().getGui(), false);
+        if (component.getState() != lastContext || cssStack == null) {
+            refreshStyle(getOwner().getGui());
+        } else if (styleCustomizer.hasChanges()) {
+            refreshStyle(gui, styleCustomizer.getChanges());
         }
     }
 
     @Override
     public void reloadCssStack() {
-        //System.out.println("RELOAD stack of "+getOwner());
         cssStack = ACsGuisCssParser.getStyleFor(this);
-        if(injectedStyleList != null) {
-            injectedStyleList.inject(getOwner(), cssStack);
-        }
+    }
+
+    @Override
+    public void resetCssStack() {
+        cssStack = null;
     }
 
     @Override //reload css
-    public void refreshCss(GuiFrame.APIGuiScreen gui, boolean reloadCssStack, EnumCssStyleProperty... properties) {
-        if(reloadCssStack && cssStack != null) {
+    public void refreshStyle(GuiFrame.APIGuiScreen gui, EnumCssStyleProperty... properties) {
+        if (cssStack == null && (getParent() == null || getParent().getCssStack() != null)) {
             reloadCssStack();
         }
         if (cssStack == null) {
@@ -148,17 +130,26 @@ public class CssComponentStyleManager implements ComponentStyleManager
 
         //update
         cssStack.applyProperties(getContext(), this, properties);
-        float sx = gui != null ? gui.getScaleX() : 1;
-        float sy = gui != null ? gui.getScaleY() : 1;
-        updateComponentSize((int) (GuiFrame.resolution.getScaledWidth()/sx), (int) (GuiFrame.resolution.getScaledHeight()/sy));
-        updateComponentPosition((int) (GuiFrame.resolution.getScaledWidth()/sx), (int) (GuiFrame.resolution.getScaledHeight()/sy));
+        int sx = gui != null ? (int) (gui.getFrame().getResolution().getScaledWidth() / gui.getScaleX()) : 1;
+        int sy = gui != null ? (int) (gui.getFrame().getResolution().getScaledHeight() / gui.getScaleY()) : 1;
+        updateComponentSize(sx, sy);
+        updateComponentPosition(sx, sy);
 
         //refresh children
-        if (component instanceof GuiPanel) {
-            for (GuiComponent<?> c : ((GuiPanel) component).getChildComponents()) {
-                if(!((GuiPanel)component).getToRemoveComponents().contains(c))
-                    c.getStyle().refreshCss(getOwner().getGui(), reloadCssStack, properties);
+        if (!(component instanceof GuiPanel)) {
+            return;
+        }
+        for (GuiComponent c : ((GuiPanel) component).getChildComponents()) {
+            if (!((GuiPanel) component).getToRemoveComponents().contains(c)) {
+                if (c.getStyle().getCssStack() == null) {
+                    c.getStyle().reloadCssStack();
+                }
+                c.getStyle().refreshStyle(getOwner().getGui(), properties);
             }
+        }
+        //TODO PAS OUF
+        if (component instanceof GuiScrollPane) {
+            ((GuiScrollPane) component).updateSlidersVisibility();
         }
     }
 
@@ -168,44 +159,7 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager addAutoStyleHandler(AutoStyleHandler<?> handler) {
-        autoStyleHandler.add(handler);
-        return this;
-    }
-    @Override
-    public ComponentStyleManager removeAutoStyleHandler(AutoStyleHandler<?> handler) {
-        autoStyleHandler.remove(handler);
-        return this;
-    }
-    @Override
-    public Collection<AutoStyleHandler<?>> getAutoStyleHandlers() {
-        return autoStyleHandler;
-    }
-
-    @Override
-    public ComponentStyleManager injectStyle(EnumCssStyleProperty property, String value) {
-        if(injectedStyleList == null) {
-            injectedStyleList = new InjectedStyleList();
-        }
-        injectedStyleList.addProperty(property, value);
-        return this;
-    }
-    @Override
-    public ComponentStyleManager injectStyle(CssStyleProperty<?> property) {
-        if(injectedStyleList == null) {
-            injectedStyleList = new InjectedStyleList();
-        }
-        injectedStyleList.addProperty(property);
-        return this;
-    }
-    @Override
-    @Nullable
-    public InjectedStyleList getInjectedStyleList() {
-        return injectedStyleList;
-    }
-
-    @Override
-    public ComponentStyleManager setForegroundColor(int color) {
+    public InternalComponentStyle setForegroundColor(int color) {
         this.foregroundColor = color;
         return this;
     }
@@ -216,12 +170,11 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setBorderRadius(CssValue radius) {
-        if(radius.getUnit() == CssValue.Unit.RELATIVE_INT) {
+    public InternalComponentStyle setBorderRadius(CssValue radius) {
+        if (radius.getUnit() == CssValue.Unit.RELATIVE_TO_PARENT) {
             this.relBorderRadius = (float) radius.intValue() / 100;
             this.borderRadius = (int) (relBorderRadius * getRenderWidth());
-        }
-        else {
+        } else {
             this.relBorderRadius = -1;
             this.borderRadius = radius.intValue();
         }
@@ -236,63 +189,73 @@ public class CssComponentStyleManager implements ComponentStyleManager
     /**
      * Updates component size, sliders and borders...
      *
-     * @param screenWidth scaled mc screen with
+     * @param screenWidth  scaled mc screen with
      * @param screenHeight scaled mc screen height
      */
-    public void updateComponentSize(int screenWidth, int screenHeight)
-    {
+    public void updateComponentSize(int screenWidth, int screenHeight) {
         float parentWidth = component.getParent() != null ? component.getParent().getWidth() : screenWidth;
         computedWidth = width.computeValue(screenWidth, screenHeight, parentWidth);
 
         float parentHeight = component.getParent() != null ? component.getParent().getHeight() : screenHeight;
         computedHeight = height.computeValue(screenWidth, screenHeight, parentHeight);
+     //   System.out.println("Set height " + computedHeight + " on " + component + " " + component.hashCode());
 
-        if(relBorderSize != -1)
+        if (relBorderSize != -1)
             this.borderSize = (int) (relBorderSize * getRenderWidth());
-        if(relBorderRadius != -1)
+        if (relBorderRadius != -1)
             this.borderRadius = (int) (relBorderRadius * getRenderWidth());
 
-        if(component.getParent() instanceof IChildSizeUpdateListener) {
+        if (component.getParent() instanceof IChildSizeUpdateListener) {
             ((IChildSizeUpdateListener) component.getParent()).onComponentChildSizeUpdate();
         }
 
-        if(getTextureHorizontalSize() == GuiConstants.ENUM_SIZE.RELATIVE) {
+        if (getTextureHorizontalSize() == GuiConstants.ENUM_SIZE.RELATIVE) {
             setTextureWidth((int) (getRenderWidth() * getTextureRelativeWidth()));
         }
 
-        if(getTextureVerticalSize() == GuiConstants.ENUM_SIZE.RELATIVE) {
+        if (getTextureVerticalSize() == GuiConstants.ENUM_SIZE.RELATIVE) {
             setTextureHeight((int) (getRenderHeight() * getTextureRelativeHeight()));
         }
+
+        //refresh children
+        /*if (component instanceof GuiPanel) {
+            for (GuiComponent c : ((GuiPanel) component).getChildComponents()) {
+                if (!((GuiPanel) component).getToRemoveComponents().contains(c)) {
+                    ((CssComponentStyle) c.getStyle()).updateComponentSize(screenWidth, screenHeight);
+                    ((CssComponentStyle) c.getStyle()).updateComponentPosition(screenWidth, screenHeight);
+                }
+            }
+        }*/
     }
 
     /**
      * Update the x and y coordinates
      *
-     * @param screenWidth scaled mc screen with
+     * @param screenWidth  scaled mc screen with
      * @param screenHeight scaled mc screen height
      */
-    public void updateComponentPosition(int screenWidth, int screenHeight)
-    {
+    public void updateComponentPosition(int screenWidth, int screenHeight) {
         float parentWidth = component.getParent() != null ? component.getParent().getWidth() : screenWidth;
         float parentHeight = component.getParent() != null ? component.getParent().getHeight() : screenHeight;
 
         //.out.println("Compute "+getOwner()+" x and from "+computedX);
-        computedX = getXPos().computeValue(screenWidth, screenHeight, parentWidth, getRenderWidth());
+        computedX = getXPos().computeValue(this, screenWidth, screenHeight, parentWidth, getRenderWidth());
         //System.out.println("Got "+computedX);
         //System.out.println("Compute "+getOwner()+" y and from "+computedY);
-        computedY = getYPos().computeValue(screenWidth, screenHeight, parentHeight, getRenderHeight());
+        computedY = getYPos().computeValue(this, screenWidth, screenHeight, parentHeight, getRenderHeight());
         //System.out.println("Got "+computedY);
     }
 
     @Override
-    public IGuiTexture getTexture()
-    {
+    public IGuiTexture getTexture() {
         return texture;
     }
 
     @Override
     public void resize(GuiFrame.APIGuiScreen gui) {
-        refreshCss(gui, false);
+        if (getCssStack() != null) {
+            refreshStyle(gui);
+        }
     }
 
     @Override
@@ -301,9 +264,9 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setVisible(boolean visible) {
+    public InternalComponentStyle setVisible(boolean visible) {
         this.visible = visible;
-        if(!visible) {
+        if (!visible) {
             component.setPressed(false);
             component.setHovered(false);
         }
@@ -341,6 +304,17 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
+    public GuiConstants.COMPONENT_DISPLAY getDisplay() {
+        return display;
+    }
+
+    @Override
+    public InternalComponentStyle setDisplay(GuiConstants.COMPONENT_DISPLAY componentDisplay) {
+        this.display = componentDisplay;
+        return this;
+    }
+
+    @Override
     public float getRenderWidth() {
         return computedWidth;
     }
@@ -356,7 +330,7 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setOffsetX(int offsetX) {
+    public ComponentStyle setOffsetX(int offsetX) {
         this.offsetX = offsetX;
         return this;
     }
@@ -367,7 +341,7 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setOffsetY(int offsetY) {
+    public ComponentStyle setOffsetY(int offsetY) {
         this.offsetY = offsetY;
         return this;
     }
@@ -378,7 +352,7 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setZLevel(int zLevel) {
+    public InternalComponentStyle setZLevel(int zLevel) {
         this.zLevel = zLevel;
         return this;
     }
@@ -387,28 +361,29 @@ public class CssComponentStyleManager implements ComponentStyleManager
     public int getBackgroundColor() {
         return backgroundColor;
     }
+
     @Override
-    public ComponentStyleManager setBackgroundColor(int backgroundColor) {
+    public InternalComponentStyle setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
         return this;
     }
 
     @Override
-    public ComponentStyleManager setRepeatBackgroundX(boolean repeatBackgroundX) {
+    public InternalComponentStyle setRepeatBackgroundX(boolean repeatBackgroundX) {
         this.repeatBackgroundX = repeatBackgroundX;
         return this;
     }
+
     @Override
-    public ComponentStyleManager setRepeatBackgroundY(boolean repeatBackgroundY) {
+    public InternalComponentStyle setRepeatBackgroundY(boolean repeatBackgroundY) {
         this.repeatBackgroundY = repeatBackgroundY;
         return this;
     }
 
     @Override
-    public ComponentStyleManager setTexture(IGuiTexture texture) {
+    public InternalComponentStyle setTexture(IGuiTexture texture) {
         this.texture = texture;
-        if(texture != null)
-        {
+        if (texture != null) {
             setTextureWidth(texture.getTextureWidth());
             setTextureHeight(texture.getTextureHeight());
         }
@@ -419,8 +394,9 @@ public class CssComponentStyleManager implements ComponentStyleManager
     public int getTextureWidth() {
         return textureWidth;
     }
+
     @Override
-    public ComponentStyleManager setTextureWidth(int textureWidth) {
+    public InternalComponentStyle setTextureWidth(int textureWidth) {
         this.textureWidth = textureWidth;
         return this;
     }
@@ -429,21 +405,23 @@ public class CssComponentStyleManager implements ComponentStyleManager
     public int getTextureHeight() {
         return textureHeight;
     }
+
     @Override
-    public ComponentStyleManager setTextureHeight(int textureHeight) {
+    public InternalComponentStyle setTextureHeight(int textureHeight) {
         this.textureHeight = textureHeight;
         return this;
     }
 
+    //TODO WHAT TO DO WITH THIS ??
     public float getTextureRelativeWidth() {
         return textureRelWidth;
     }
 
-    public ComponentStyleManager setTextureRelativeWidth(float textureRelWidth) {
+    public InternalComponentStyle setTextureRelativeWidth(float textureRelWidth) {
         setTextureHorizontalSize(GuiConstants.ENUM_SIZE.RELATIVE);
         this.textureRelWidth = MathHelper.clamp(textureRelWidth, 0, Float.MAX_VALUE);
 
-        if(getParent() != null) {
+        if (getParent() != null) {
             setTextureWidth((int) (getTextureRelativeWidth() * getParent().getRenderWidth()));
         }
 
@@ -454,11 +432,11 @@ public class CssComponentStyleManager implements ComponentStyleManager
         return textureRelHeight;
     }
 
-    public ComponentStyleManager setTextureRelativeHeight(float textureRelHeight) {
+    public InternalComponentStyle setTextureRelativeHeight(float textureRelHeight) {
         setTextureVerticalSize(GuiConstants.ENUM_SIZE.RELATIVE);
         this.textureRelHeight = MathHelper.clamp(textureRelHeight, 0, Float.MAX_VALUE);
 
-        if(getParent() != null) {
+        if (getParent() != null) {
             setTextureHeight((int) (getTextureRelativeHeight() * getParent().getRenderHeight()));
         }
 
@@ -469,8 +447,9 @@ public class CssComponentStyleManager implements ComponentStyleManager
     public GuiConstants.ENUM_SIZE getTextureHorizontalSize() {
         return textureHorizontalSize;
     }
+
     @Override
-    public ComponentStyleManager setTextureHorizontalSize(GuiConstants.ENUM_SIZE textureHorizontalSize) {
+    public InternalComponentStyle setTextureHorizontalSize(GuiConstants.ENUM_SIZE textureHorizontalSize) {
         this.textureHorizontalSize = textureHorizontalSize;
         return this;
     }
@@ -479,8 +458,9 @@ public class CssComponentStyleManager implements ComponentStyleManager
     public GuiConstants.ENUM_SIZE getTextureVerticalSize() {
         return textureVerticalSize;
     }
+
     @Override
-    public ComponentStyleManager setTextureVerticalSize(GuiConstants.ENUM_SIZE textureVerticalSize) {
+    public InternalComponentStyle setTextureVerticalSize(GuiConstants.ENUM_SIZE textureVerticalSize) {
         this.textureVerticalSize = textureVerticalSize;
         return this;
     }
@@ -489,16 +469,18 @@ public class CssComponentStyleManager implements ComponentStyleManager
     public boolean isRepeatBackgroundX() {
         return repeatBackgroundX; //TODO USE
     }
+
     @Override
     public boolean isRepeatBackgroundY() {
         return repeatBackgroundY;
     }
 
     @Override
-    public ComponentStyleManager setBorderPosition(BORDER_POSITION borderPosition) {
+    public InternalComponentStyle setBorderPosition(BORDER_POSITION borderPosition) {
         this.borderPosition = borderPosition;
         return this;
     }
+
     @Override
     public BORDER_POSITION getBorderPosition() {
         return borderPosition;
@@ -510,12 +492,11 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setBorderSize(CssValue borderSize) {
-        if(borderSize.getUnit() == CssValue.Unit.RELATIVE_INT) {
+    public InternalComponentStyle setBorderSize(CssValue borderSize) {
+        if (borderSize.getUnit() == CssValue.Unit.RELATIVE_TO_PARENT) {
             this.relBorderSize = (float) borderSize.intValue() / 100;
             this.borderSize = (int) (relBorderSize * getRenderWidth());
-        }
-        else {
+        } else {
             this.relBorderSize = -1;
             this.borderSize = borderSize.intValue();
         }
@@ -528,7 +509,7 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setShouldRescaleBorder(boolean inverseScreenScale) {
+    public InternalComponentStyle setShouldRescaleBorder(boolean inverseScreenScale) {
         this.rescaleBorder = inverseScreenScale;
         return this;
     }
@@ -539,14 +520,58 @@ public class CssComponentStyleManager implements ComponentStyleManager
     }
 
     @Override
-    public ComponentStyleManager setBorderColor(int borderColor) {
+    public InternalComponentStyle setBorderColor(int borderColor) {
         this.borderColor = borderColor;
         return this;
     }
 
     @Override
+    public int getPaddingTop() {
+        return paddingTop;
+    }
+
+    @Override
+    public int getPaddingBottom() {
+        return paddingBottom;
+    }
+
+    @Override
+    public int getPaddingLeft() {
+        return paddingLeft;
+    }
+
+    @Override
+    public int getPaddingRight() {
+        return paddingRight;
+    }
+
+    @Override
+    public InternalComponentStyle setPaddingTop(int paddingTop) {
+        this.paddingTop = paddingTop;
+        return this;
+    }
+
+    @Override
+    public InternalComponentStyle setPaddingBottom(int paddingBottom) {
+        this.paddingBottom = paddingBottom;
+        return this;
+    }
+
+    @Override
+    public InternalComponentStyle setPaddingLeft(int paddingLeft) {
+        this.paddingLeft = paddingLeft;
+        return this;
+    }
+
+    @Override
+    public InternalComponentStyle setPaddingRight(int paddingRight) {
+        this.paddingRight = paddingRight;
+        return this;
+    }
+
+    @Override
     @Nullable
-    public ComponentStyleManager getParent() {
+    public ComponentStyle getParent() {
         return component.getParent() == null ? null : component.getParent().getStyle();
     }
 

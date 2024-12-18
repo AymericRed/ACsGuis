@@ -4,11 +4,13 @@ import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
+import fr.aym.acsguis.component.style.ComponentStyleCustomizer;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
 import fr.aym.acsguis.cssengine.selectors.CompoundCssSelector;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
-import fr.aym.acsguis.cssengine.style.CssComponentStyleManager;
+import fr.aym.acsguis.cssengine.style.CssComponentStyle;
 import fr.aym.acsguis.cssengine.style.CssStyleProperty;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 import fr.aym.acsguis.event.ComponentKeyboardEvent;
@@ -22,6 +24,7 @@ import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.event.listeners.mouse.IMouseWheelListener;
 import fr.aym.acsguis.utils.CircleBackground;
 import fr.aym.acsguis.utils.ComponentRenderContext;
+import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.utils.IGuiTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -37,10 +40,8 @@ import java.util.Map;
 
 /**
  * Base of any gui component
- *
- * @param <T> The type of the {@link ComponentStyleManager}
  */
-public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui implements Comparable<GuiComponent<T>> {
+public abstract class GuiComponent extends Gui implements Comparable<GuiComponent> {
     /**
      * Very useful
      */
@@ -52,9 +53,10 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     protected GuiPanel parent;
 
     /**
-     * The {@link ComponentStyleManager} of this_component
+     * The {@link ComponentStyle} of this_component
+     * todo doc
      */
-    protected T style;
+    private final InternalComponentStyle style;
 
     /**
      * The css id of this_component
@@ -99,32 +101,17 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * Creates a new component
      */
     public GuiComponent() {
-        this(0, 0, 0, 0);
-    }
-
-    /**
-     * Creates a new component this custom pos and size
-     *
-     * @deprecated Use the css to modify element size and position
-     */
-    @Deprecated
-    public GuiComponent(int x, int y, int width, int height) {
         style = createStyleManager();
         setEnabled(true);
-        setVisible(true);
-        style.getXPos().setAbsolute(x);
-        style.getYPos().setAbsolute(y);
-        style.getWidth().setAbsolute(width);
-        style.getHeight().setAbsolute(height);
         setCanLooseFocus(true);
     }
 
     /**
      * Sets the css class of this_component, use <code>.cssId</code> in your css code to refer to this element
      */
-    public GuiComponent<T> setCssClass(@Nullable String cssClass) {
+    public GuiComponent setCssClass(@Nullable String cssClass) {
         this.cssClass = cssClass;
-        getStyle().refreshCss(getGui(), true);
+        getStyle().resetCssStack();
         return this;
     }
 
@@ -140,9 +127,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * Sets the css id of this_component, use <code>#cssId</code> in your css code to refer to this element <br>
      * It's a convention to make it unique for each component in your gui
      */
-    public GuiComponent<T> setCssId(@Nullable String cssId) {
+    public GuiComponent setCssId(@Nullable String cssId) {
         this.cssId = cssId;
-        getStyle().refreshCss(getGui(), true);
+        getStyle().resetCssStack();
         return this;
     }
 
@@ -162,11 +149,11 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      *
      * @param cssCode The css code to set, this must be properties and values, but no selector is allowed here (as in html code)
      */
-    public GuiComponent<T> setCssCode(String cssCode) {
+    public GuiComponent setCssCode(String cssCode) {
         if (getCssId() == null)
             throw new IllegalArgumentException("You should the css id of the element before !");
         Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> data = ACsGuisCssParser.parseRawCss(this, cssCode);
-        getStyle().setCustomParsedStyle(data);
+        getStyleCustomizer().setCustomParsedStyle(data);
         return this;
     }
 
@@ -179,7 +166,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * @param cssId   the css id to set, use <code>#cssId</code> in your css code to refer to this element
      * @param cssCode The css code to set, this must be properties and values, but no selector is allowed here (as in html code)
      */
-    public GuiComponent<T> setCssCode(String cssId, String cssCode) {
+    public GuiComponent setCssCode(String cssId, String cssCode) {
         setCssId(cssId);
         return setCssCode(cssCode);
     }
@@ -190,12 +177,12 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     public abstract EnumComponentType getType();
 
     /**
-     * Called before class init to create a {@link ComponentStyleManager}
+     * Called before class init to create a {@link ComponentStyle}
      *
-     * @return By default, a new {@link CssComponentStyleManager}
+     * @return By default, a new {@link CssComponentStyle}
      */
-    protected T createStyleManager() {
-        return (T) new CssComponentStyleManager(this);
+    protected InternalComponentStyle createStyleManager() {
+        return new CssComponentStyle(this);
     }
 
     /**
@@ -211,28 +198,25 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * You can override drawBackground and drawForeground
      */
     public void render(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
-        if (isVisible() && !MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderAllEvent(this))) {
-            if (renderContext.enableScissors())
-                bindLayerBounds();
-
-            GlStateManager.translate(0, 0, getStyle().getZLevel());
-            if (!MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderBackgroundEvent(this))) {
-                drawBackground(mouseX, mouseY, partialTicks, renderContext);
-                renderListeners.forEach(IRenderListener::onRenderBackground);
-            }
-            if (!MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderForegroundEvent(this))) {
-                if (renderContext.getGuiType() == GuiFrame.GuiType.IN_WORLD)
-                    GlStateManager.translate(0, 0, -0.02);
-                drawForeground(mouseX, mouseY, partialTicks, renderContext);
-                renderListeners.forEach(IRenderListener::onRenderForeground);
-                if (renderContext.getGuiType() == GuiFrame.GuiType.IN_WORLD)
-                    GlStateManager.translate(0, 0, 0.02);
-            }
-            GlStateManager.translate(0, 0, -getStyle().getZLevel());
-
-            if (renderContext.enableScissors())
-                unbindLayerBounds();
+        if (!isVisible() || MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderAllEvent(this))) {
+            return;
         }
+        bindLayerBounds(renderContext);
+        GlStateManager.translate(0, 0, getStyle().getZLevel());
+        if (!MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderBackgroundEvent(this))) {
+            drawBackground(mouseX, mouseY, partialTicks, renderContext);
+            renderListeners.forEach(IRenderListener::onRenderBackground);
+        }
+        if (!MinecraftForge.EVENT_BUS.post(new ComponentRenderEvent.ComponentRenderForegroundEvent(this))) {
+            if (renderContext.getGuiType() == GuiFrame.GuiType.IN_WORLD)
+                GlStateManager.translate(0, 0, -0.02);
+            drawForeground(mouseX, mouseY, partialTicks, renderContext);
+            renderListeners.forEach(IRenderListener::onRenderForeground);
+            if (renderContext.getGuiType() == GuiFrame.GuiType.IN_WORLD)
+                GlStateManager.translate(0, 0, 0.02);
+        }
+        GlStateManager.translate(0, 0, -getStyle().getZLevel());
+        unbindLayerBounds(renderContext);
     }
 
     /**
@@ -240,9 +224,12 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      */
     public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
         if (getScaledBorderSize() > 0) {
-            if (style.getBorderPosition() == ComponentStyleManager.BORDER_POSITION.EXTERNAL) {
-                if (renderContext.enableScissors())
-                    GuiAPIClientHelper.glScissor(getRenderMinX() - getScaledBorderSize(), getRenderMinY() - getScaledBorderSize(), getRenderMaxX() - getRenderMinX() + getScaledBorderSize() * 2, getRenderMaxY() - getRenderMinY() + getScaledBorderSize() * 2);
+            if (style.getBorderPosition() == ComponentStyle.BORDER_POSITION.EXTERNAL) {
+                if (renderContext.enableScissors()) {
+                    GuiAPIClientHelper.glScissor(getGui().getFrame().getResolution().getScaleFactor(),
+                            getRenderMinX() - getScaledBorderSize(), getRenderMinY() - getScaledBorderSize(),
+                            getRenderMaxX() - getRenderMinX() + getScaledBorderSize() * 2, getRenderMaxY() - getRenderMinY() + getScaledBorderSize() * 2);
+                }
                 GuiAPIClientHelper.drawBorderedRectangle(getScreenX() - getScaledBorderSize(), getScreenY() - getScaledBorderSize(), getScreenX() + getWidth() + getScaledBorderSize(),
                         getScreenY() + getHeight() + getScaledBorderSize(), getScaledBorderSize(), style.getBackgroundColor(), style.getBorderColor(), style.getBorderRadius());
             } else {
@@ -276,10 +263,9 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      */
     public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
         if (isHovered() && !hoveringText.isEmpty()) {
-            GuiFrame.hoveringText = hoveringText;
+            renderContext.getParentGui().hoveringText = hoveringText;
         }
-
-        if (isHovered() && !isFocused() && !GuiFrame.hasDebugInfo) {
+        if (isHovered() && !GuiFrame.hasDebugInfo) {
             displayComponentOnDebugPane();
         }
     }
@@ -294,10 +280,16 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         debug.addAll(ACsGuisCssParser.getStyleFor(style).getProperties(getState(), style));
         //debug.add("-------------");
         debug.add(TextFormatting.BLUE + "Auto styles :");
-        style.getAutoStyleHandlers().forEach(h -> {
-            AutoStyleHandler<T> hc = (AutoStyleHandler<T>) h;
-            debug.add(hc.getPriority(style) + " " + hc + " " + hc.getModifiedProperties(style));
-        });
+        for (EnumCssStyleProperty property : EnumCssStyleProperty.values()) {
+            List<AutoStyleHandler<?>> handlers = getStyleCustomizer().getAutoStyleHandlers(property);
+            if (handlers == null) {
+                continue;
+            }
+            handlers.forEach(h -> {
+                AutoStyleHandler<InternalComponentStyle> hc = (AutoStyleHandler<InternalComponentStyle>) h;
+                debug.add(property + " : " + hc.getPriority(style) + " " + hc);
+            });
+        }
         GuiFrame.setupDebug(getStyle().getParent(), debug);
 
         if (this instanceof GuiPanel) {
@@ -308,12 +300,20 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     /**
      * Bind the scissor test to render only the child component's part in this_component boundaries.
      */
-    protected void bindLayerBounds() {
+    protected void bindLayerBounds(ComponentRenderContext renderContext) {
+        if (!renderContext.enableScissors()) {
+            return;
+        }
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GuiAPIClientHelper.glScissor(getRenderMinX(), getRenderMinY(), getRenderMaxX() - getRenderMinX(), getRenderMaxY() - getRenderMinY());
+        GuiAPIClientHelper.glScissor(renderContext.getParentGui().getResolution().getScaleFactor(),
+                getRenderMinX(), getRenderMinY(),
+                getRenderMaxX() - getRenderMinX(), getRenderMaxY() - getRenderMinY());
     }
 
-    protected void unbindLayerBounds() {
+    protected void unbindLayerBounds(ComponentRenderContext renderContext) {
+        if (!renderContext.enableScissors()) {
+            return;
+        }
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
@@ -375,40 +375,41 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * Updates the component
      */
     public void tick() {
-        if (isVisible() && !MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentTickEvent(this))) {
-            tickListeners.forEach(ITickListener::onTick);
-
-            if (isPressed() && GuiFrame.press() && !MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMousePressEvent(this, GuiFrame.mouseX, GuiFrame.mouseY, GuiFrame.mouseButton))) {
-                for (IMouseExtraClickListener extraClickListener : extraClickListeners) {
-                    extraClickListener.onMousePressed(GuiFrame.mouseX, GuiFrame.mouseY, GuiFrame.mouseButton);
-                }
-            }
+        if (!isVisible() || MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentTickEvent(this))) {
             style.update(getGui());
-
-            if (this instanceof GuiPanel) {
-                ((GuiPanel) this).flushRemovedComponents();
-                ((GuiPanel) this).flushComponentsQueue();
-                ((GuiPanel) this).getChildComponents().forEach(GuiComponent::tick);
-            }
-        } else {
-            style.update(getGui());
+            return;
         }
+        tickListeners.forEach(ITickListener::onTick);
+        GuiFrame frame = getGui().getFrame();
+        if (isPressed() && frame.press() && !MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMousePressEvent(this, frame.mouseX, frame.mouseY, frame.mouseButton))) {
+            for (IMouseExtraClickListener extraClickListener : extraClickListeners) {
+                extraClickListener.onMousePressed(frame.mouseX, frame.mouseY, frame.mouseButton);
+            }
+        }
+        style.update(getGui());
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        ((GuiPanel) this).flushRemovedComponents();
+        ((GuiPanel) this).flushComponentsQueue();
+        ((GuiPanel) this).getChildComponents().forEach(GuiComponent::tick);
     }
 
     /**
      * Handles keyboard input
      */
     public void keyTyped(char typedChar, int keyCode) {
-        if (canInteract() && !MinecraftForge.EVENT_BUS.post(new ComponentKeyboardEvent.ComponentKeyTypeEvent(this, typedChar, keyCode))) {
-            for (IKeyboardListener keyboardListener : keyboardListeners) {
-                keyboardListener.onKeyTyped(typedChar, keyCode);
-            }
-
-            if (this instanceof GuiPanel) {
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-                    component.keyTyped(typedChar, keyCode);
-                }
-            }
+        if (!canInteract() || MinecraftForge.EVENT_BUS.post(new ComponentKeyboardEvent.ComponentKeyTypeEvent(this, typedChar, keyCode))) {
+            return;
+        }
+        for (IKeyboardListener keyboardListener : keyboardListeners) {
+            keyboardListener.onKeyTyped(typedChar, keyCode);
+        }
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+            component.keyTyped(typedChar, keyCode);
         }
     }
 
@@ -420,44 +421,36 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * @param canBeHovered Return false if another component took the priority (depending on zLevel)
      */
     public final void mouseMoved(int mouseX, int mouseY, boolean canBeHovered) {
-
-        if (canInteract() && !MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseMoveEvent(this, GuiFrame.lastMouseX, GuiFrame.lastMouseY, mouseX, mouseY))) {
-            for (IMouseMoveListener moveListener : moveListeners) {
-                moveListener.onMouseMoved(mouseX, mouseY);
-            }
-
-            if (!MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseHoverEvent(this, mouseX, mouseY))) {
-                boolean wasHovered = isHovered();
-
-                setHovered(isMouseOver(mouseX, mouseY) && canBeHovered);
-
-                if (isHovered() != wasHovered) {
-                    for (IMouseMoveListener moveListener : moveListeners) {
-                        if (isHovered()) {
-                            moveListener.onMouseHover(mouseX, mouseY);
-                        } else {
-                            moveListener.onMouseUnhover(mouseX, mouseY);
-                        }
+        GuiFrame frame = getGui().getFrame();
+        if (!canInteract() || MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseMoveEvent(this, frame.lastMouseX, frame.lastMouseY, mouseX, mouseY))) {
+            return;
+        }
+        for (IMouseMoveListener moveListener : moveListeners) {
+            moveListener.onMouseMoved(mouseX, mouseY);
+        }
+        if (!MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseHoverEvent(this, mouseX, mouseY))) {
+            boolean wasHovered = isHovered();
+            setHovered(isMouseOver(mouseX, mouseY) && canBeHovered);
+            if (isHovered() != wasHovered) {
+                for (IMouseMoveListener moveListener : moveListeners) {
+                    if (isHovered()) {
+                        moveListener.onMouseHover(mouseX, mouseY);
+                    } else {
+                        moveListener.onMouseUnhover(mouseX, mouseY);
                     }
                 }
-            }
-
-            if (this instanceof GuiPanel) {
-
-                boolean canBeHovered1 = canBeHovered;
-
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-
-                    component.mouseMoved(mouseX, mouseY, canBeHovered1);
-
-                    if (component.isHovered()) {
-                        canBeHovered1 = false;
-                    }
-                }
-
             }
         }
-
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        boolean canBeHovered1 = canBeHovered;
+        for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+            component.mouseMoved(mouseX, mouseY, canBeHovered1);
+            if (component.isHovered()) {
+                canBeHovered1 = false;
+            }
+        }
     }
 
     /**
@@ -469,57 +462,51 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
      * @param canBePressed Return false if another component took the priority (depending on zLevel)
      */
     public final void mouseClicked(int mouseX, int mouseY, int mouseButton, boolean canBePressed) {
-        if (canInteract() && !MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseClickEvent(this, mouseX, mouseY, mouseButton))) {
-            if (this instanceof GuiPanel) {
-                boolean canBePressed1 = canBePressed;
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-                    component.mouseClicked(mouseX, mouseY, mouseButton, canBePressed1);
-                    if (component.isPressed()) {
-                        canBePressed1 = false;
-                    }
-                }
-                if (isHovered() && canBePressed && !canBePressed1) {
-                    // If a child has been pressed
-                    setFocused(true);
-                    setPressed(true);
-                    return;
-                }
-            }
-            if (isHovered() && canBePressed) {
-                setFocused(true);
-                setPressed(isInput());
-
-                for (IFocusListener focusListener : focusListeners) {
-                    focusListener.onFocus();
-                }
-
-                for (IMouseClickListener clickListener : clickListeners) {
-                    clickListener.onMouseClicked(mouseX, mouseY, mouseButton);
-                }
-
-                if (GuiFrame.doubleClick()) {
-
-                    if (!MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseDoubleClickEvent(this, GuiFrame.lastClickTime, mouseX, mouseY))) {
-                        for (IMouseExtraClickListener extraClickListener : extraClickListeners) {
-                            extraClickListener.onMouseDoubleClicked(mouseX, mouseY, mouseButton);
-                        }
-                    }
-                }
-            } else {
-                if (canLooseFocus()) {
-                    setFocused(false);
-
-                    for (IFocusListener focusListener : focusListeners) {
-                        focusListener.onFocusLoose();
-                    }
-                }
-                setPressed(false);
-            }
-        } else {
+        if (!canInteract() || MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseClickEvent(this, mouseX, mouseY, mouseButton))) {
             if (canLooseFocus()) {
                 setFocused(false);
             }
             setPressed(false);
+            return;
+        }
+        if (this instanceof GuiPanel) {
+            boolean canBePressed1 = canBePressed;
+            for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+                component.mouseClicked(mouseX, mouseY, mouseButton, canBePressed1);
+                if (component.isPressed()) {
+                    canBePressed1 = false;
+                }
+            }
+            if (isHovered() && canBePressed && !canBePressed1) {
+                // If a child has been pressed
+                setFocused(true);
+                setPressed(true);
+                return;
+            }
+        }
+        if (!isHovered() || !canBePressed) {
+            if (canLooseFocus()) {
+                setFocused(false);
+                for (IFocusListener focusListener : focusListeners) {
+                    focusListener.onFocusLoose();
+                }
+            }
+            setPressed(false);
+            return;
+        }
+        setFocused(true);
+        setPressed(isInput());
+        for (IFocusListener focusListener : focusListeners) {
+            focusListener.onFocus();
+        }
+        for (IMouseClickListener clickListener : clickListeners) {
+            clickListener.onMouseClicked(mouseX, mouseY, mouseButton);
+        }
+        GuiFrame frame = getGui().getFrame();
+        if (frame.doubleClick() && !MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseDoubleClickEvent(this, frame.lastClickTime, mouseX, mouseY))) {
+            for (IMouseExtraClickListener extraClickListener : extraClickListeners) {
+                extraClickListener.onMouseDoubleClicked(mouseX, mouseY, mouseButton);
+            }
         }
     }
 
@@ -528,62 +515,65 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     public final void mouseReleased(int mouseX, int mouseY, int mouseButton) {
-        if (!MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseReleaseEvent(this, mouseX, mouseY, mouseButton))) {
-            setPressed(false);
-
-            for (IMouseExtraClickListener extraClickListener : extraClickListeners) {
-                extraClickListener.onMouseReleased(mouseX, mouseY, mouseButton);
-            }
-
-            if (this instanceof GuiPanel) {
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-                    component.mouseReleased(mouseX, mouseY, mouseButton);
-                }
-            }
+        if (MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseReleaseEvent(this, mouseX, mouseY, mouseButton))) {
+            return;
+        }
+        setPressed(false);
+        for (IMouseExtraClickListener extraClickListener : extraClickListeners) {
+            extraClickListener.onMouseReleased(mouseX, mouseY, mouseButton);
+        }
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+            component.mouseReleased(mouseX, mouseY, mouseButton);
         }
     }
 
     public final void mouseWheel(int dWheel) {
-        if (dWheel != 0 && canInteract() && !MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseWheelEvent(this, dWheel))) {
-            if (isHovered()) {
-                for (IMouseWheelListener wheelListener : wheelListeners) {
-                    wheelListener.onMouseWheel(dWheel);
-                }
+        if (dWheel == 0 || !canInteract() || MinecraftForge.EVENT_BUS.post(new ComponentMouseEvent.ComponentMouseWheelEvent(this, dWheel))) {
+            return;
+        }
+        if (isHovered()) {
+            for (IMouseWheelListener wheelListener : wheelListeners) {
+                wheelListener.onMouseWheel(dWheel);
             }
-
-            if (this instanceof GuiPanel) {
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-                    component.mouseWheel(dWheel);
-                }
-            }
+        }
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+            component.mouseWheel(dWheel);
         }
     }
 
     public void guiOpen() {
-        if (!MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentOpenEvent(this))) {
-            for (IGuiOpenListener openListener : openListeners) {
-                openListener.onGuiOpen();
-            }
-
-            if (this instanceof GuiPanel) {
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-                    component.guiOpen();
-                }
-            }
+        if (MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentOpenEvent(this))) {
+            return;
+        }
+        for (IGuiOpenListener openListener : openListeners) {
+            openListener.onGuiOpen();
+        }
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+            component.guiOpen();
         }
     }
 
     public void guiClose() {
-        if (!MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentCloseEvent(this))) {
-            for (IGuiCloseListener closeListener : closeListeners) {
-                closeListener.onGuiClose();
-            }
-
-            if (this instanceof GuiPanel) {
-                for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
-                    component.guiClose();
-                }
-            }
+        if (MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentCloseEvent(this))) {
+            return;
+        }
+        for (IGuiCloseListener closeListener : closeListeners) {
+            closeListener.onGuiClose();
+        }
+        if (!(this instanceof GuiPanel)) {
+            return;
+        }
+        for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
+            component.guiClose();
         }
     }
 
@@ -596,7 +586,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     public boolean isVisible() {
-        return style.isVisible() && (getParent() == null || getParent().isVisible());
+        return style.isVisible() && style.getDisplay() != GuiConstants.COMPONENT_DISPLAY.NONE && (getParent() == null || getParent().isVisible());
     }
 
     public boolean isEnabled() {
@@ -615,19 +605,18 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         return isVisible() && isEnabled() && focused;
     }
 
-    public final GuiComponent<? extends ComponentStyleManager> setFocused(boolean focused) {
-        if (isFocused() != focused && !MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentFocusEvent(this))) {
-            this.focused = focused;
-
-            if (this instanceof GuiPanel && !focused) {
-                for (GuiComponent<?> component : ((GuiPanel) this).getChildComponents()) {
-                    if (component.canLooseFocus()) {
-                        component.setFocused(false);
-                    }
+    public final GuiComponent setFocused(boolean focused) {
+        if (isFocused() == focused || MinecraftForge.EVENT_BUS.post(new ComponentStateEvent.ComponentFocusEvent(this))) {
+            return this;
+        }
+        this.focused = focused;
+        if (this instanceof GuiPanel && !focused) {
+            for (GuiComponent component : ((GuiPanel) this).getChildComponents()) {
+                if (component.canLooseFocus()) {
+                    component.setFocused(false);
                 }
             }
         }
-
         return this;
     }
 
@@ -635,7 +624,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         return canLooseFocus;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setCanLooseFocus(boolean canLooseFocus) {
+    public GuiComponent setCanLooseFocus(boolean canLooseFocus) {
         this.canLooseFocus = canLooseFocus;
         return this;
     }
@@ -644,7 +633,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
         return parent;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setParent(GuiPanel parent) {
+    public GuiComponent setParent(GuiPanel parent) {
         this.parent = parent;
         return this;
     }
@@ -688,7 +677,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     @Deprecated
-    public GuiComponent<? extends ComponentStyleManager> setBackgroundSrcBlend(int backgroundSrcBlend) {
+    public GuiComponent setBackgroundSrcBlend(int backgroundSrcBlend) {
         this.backgroundSrcBlend = backgroundSrcBlend;
         return this;
     }
@@ -699,89 +688,84 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     @Deprecated
-    public GuiComponent<? extends ComponentStyleManager> setBackgroundDstBlend(int backgroundDstBlend) {
+    public GuiComponent setBackgroundDstBlend(int backgroundDstBlend) {
         this.backgroundDstBlend = backgroundDstBlend;
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setEnabled(boolean enabled) {
+    public GuiComponent setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (!enabled)
             setHovered(false);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setVisible(boolean visible) {
-        style.setVisible(visible);
-        return this;
-    }
-
-    public GuiComponent<? extends ComponentStyleManager> setHovered(boolean hovered) {
+    public GuiComponent setHovered(boolean hovered) {
         this.hovered = hovered;
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setPressed(boolean pressed) {
+    public GuiComponent setPressed(boolean pressed) {
         this.pressed = pressed;
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> setHoveringText(List<String> hoveringText) {
+    public GuiComponent setHoveringText(List<String> hoveringText) {
         this.hoveringText = hoveringText;
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addClickListener(IMouseClickListener clickListener) {
+    public GuiComponent addClickListener(IMouseClickListener clickListener) {
         this.clickListeners.add(clickListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addExtraClickListener(IMouseExtraClickListener extraClickListener) {
+    public GuiComponent addExtraClickListener(IMouseExtraClickListener extraClickListener) {
         this.extraClickListeners.add(extraClickListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addMoveListener(IMouseMoveListener moveListener) {
+    public GuiComponent addMoveListener(IMouseMoveListener moveListener) {
         this.moveListeners.add(moveListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addWheelListener(IMouseWheelListener wheelListener) {
+    public GuiComponent addWheelListener(IMouseWheelListener wheelListener) {
         this.wheelListeners.add(wheelListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addKeyboardListener(IKeyboardListener keyboardListener) {
+    public GuiComponent addKeyboardListener(IKeyboardListener keyboardListener) {
         this.keyboardListeners.add(keyboardListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addTickListener(ITickListener tickListener) {
+    public GuiComponent addTickListener(ITickListener tickListener) {
         this.tickListeners.add(tickListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addRenderListener(IRenderListener tickListener) {
+    public GuiComponent addRenderListener(IRenderListener tickListener) {
         this.renderListeners.add(tickListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addOpenListener(IGuiOpenListener openListener) {
+    public GuiComponent addOpenListener(IGuiOpenListener openListener) {
         this.openListeners.add(openListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addCloseListener(IGuiCloseListener closeListener) {
+    public GuiComponent addCloseListener(IGuiCloseListener closeListener) {
         this.closeListeners.add(closeListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addResizeListener(IResizeListener resizeListener) {
+    public GuiComponent addResizeListener(IResizeListener resizeListener) {
         this.resizeListeners.add(resizeListener);
         return this;
     }
 
-    public GuiComponent<? extends ComponentStyleManager> addFocusListener(IFocusListener focusListener) {
+    public GuiComponent addFocusListener(IFocusListener focusListener) {
         this.focusListeners.add(focusListener);
         return this;
     }
@@ -831,17 +815,13 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     public float getMinHitboxX() {
-
         if (this instanceof GuiPanel) {
-
             float renderMinX = getRenderMinX();
-
-            for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
+            for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
                 if (component.isVisible() && component.getMinHitboxX() < renderMinX) {
                     renderMinX = component.getMinHitboxX();
                 }
             }
-
             return renderMinX;
         } else {
             return getRenderMinX();
@@ -852,7 +832,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     public float getMinHitboxY() {
         if (this instanceof GuiPanel) {
             float renderMinY = getRenderMinY();
-            for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
+            for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
                 if (component.isVisible() && component.getMinHitboxY() < renderMinY) {
                     renderMinY = component.getMinHitboxY();
                 }
@@ -866,7 +846,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     public float getMaxHitboxX() {
         if (this instanceof GuiPanel) {
             float renderMaxX = getRenderMaxX();
-            for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
+            for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
                 if (component.isVisible() && component.getMaxHitboxX() > renderMaxX) {
                     renderMaxX = component.getMaxHitboxX();
                 }
@@ -880,7 +860,7 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     public float getMaxHitboxY() {
         if (this instanceof GuiPanel) {
             float renderMaxY = getRenderMaxY();
-            for (GuiComponent<?> component : ((GuiPanel) this).getReversedChildComponents()) {
+            for (GuiComponent component : ((GuiPanel) this).getReversedChildComponents()) {
                 if (component.isVisible() && component.getMaxHitboxY() > renderMaxY) {
                     renderMaxY = component.getMaxHitboxY();
                 }
@@ -892,10 +872,14 @@ public abstract class GuiComponent<T extends ComponentStyleManager> extends Gui 
     }
 
     /**
-     * @return The {@link ComponentStyleManager} of this_component
+     * @return The {@link ComponentStyle} of this_component
      */
-    public T getStyle() {
+    public ComponentStyle getStyle() {
         return style;
+    }
+
+    public ComponentStyleCustomizer getStyleCustomizer() {
+        return style.getCustomizer();
     }
 
     @Override

@@ -5,11 +5,6 @@ import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.utils.ComponentRenderContext;
 
 public class GuiCameraView extends GuiComponent {
-	
-	public GuiCameraView(int x, int y, int width, int height) {
-		super(x, y, width, height);
-	}
-
 	@Override
 	public EnumComponentType getType() {
 		return EnumComponentType.CAMERA_VIEW;

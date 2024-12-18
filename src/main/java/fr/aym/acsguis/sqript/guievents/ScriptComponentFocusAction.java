@@ -26,7 +26,7 @@ public class ScriptComponentFocusAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addFocusListener(new IFocusListener() {
             @Override
             public void onFocus() {

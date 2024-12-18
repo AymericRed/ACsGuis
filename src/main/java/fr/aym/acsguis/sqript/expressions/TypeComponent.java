@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
         parsableAs = {}
 )
 @SideOnly(net.minecraftforge.fml.relauncher.Side.CLIENT)
-public class TypeComponent extends ScriptType<GuiComponent<?>>
+public class TypeComponent extends ScriptType<GuiComponent>
 {
     public ScriptElement<?> parse(String typeName) {
         return null;

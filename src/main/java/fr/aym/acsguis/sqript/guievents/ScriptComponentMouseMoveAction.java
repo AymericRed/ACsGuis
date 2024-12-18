@@ -28,7 +28,7 @@ public class ScriptComponentMouseMoveAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addMoveListener(new IMouseMoveListener() {
             @Override
             public void onMouseMoved(int mouseX, int mouseY) {

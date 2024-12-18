@@ -18,6 +18,8 @@ import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLStateEvent;
@@ -27,7 +29,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -67,7 +71,9 @@ public class ACsGuiApi implements ACsGuiApiService {
 
     @Override
     public void onFMLStateEvent(FMLStateEvent event) {
-        if (event instanceof FMLPreInitializationEvent) {
+        if (event instanceof FMLConstructionEvent) {
+            discoverStyleSheets((FMLConstructionEvent) event);
+        } else if (event instanceof FMLPreInitializationEvent) {
             if (Loader.isModLoaded("sqript")) {
                 log.info("Sqript detected, loading compatibility");
                 sqriptSupport = new SqriptCompatiblity();
@@ -179,6 +185,24 @@ public class ACsGuiApi implements ACsGuiApiService {
             event.getReloadOrigin().loadFonts();
             event.getReloadOrigin().postLoad();
         });
+    }
+
+    public static void discoverStyleSheets(FMLConstructionEvent event) {
+        Set<ASMDataTable.ASMData> modData = event.getASMHarvestedData().getAll(ACsGuiFrame.class.getName());
+        for (ASMDataTable.ASMData data : modData) {
+            String name = data.getClassName();
+            try {
+                Class<?> classToParse = Class.forName(data.getClassName());
+                for (Field f : classToParse.getDeclaredFields()) {
+                    if (ResourceLocation.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(ACsGuiFrame.RegisteredStyleSheet.class)) {
+                        ResourceLocation location = (ResourceLocation) f.get(null);
+                        registerStyleSheetToPreload(location);
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to detect style sheets to register in " + name, e);
+            }
+        }
     }
 
     /**

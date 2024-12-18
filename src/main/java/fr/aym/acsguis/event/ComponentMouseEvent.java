@@ -7,9 +7,9 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 @Cancelable
 public abstract class ComponentMouseEvent extends Event {
 
-    public final GuiComponent<?> component;
+    public final GuiComponent component;
 
-    public ComponentMouseEvent(GuiComponent<?> component) {
+    public ComponentMouseEvent(GuiComponent component) {
         this.component = component;
     }
 
@@ -24,7 +24,7 @@ public abstract class ComponentMouseEvent extends Event {
         public final int mouseX, mouseY;
         public final int mouseButton;
 
-        public ComponentMouseClickEvent(GuiComponent<?> component, int mouseX, int mouseY, int mouseButton) {
+        public ComponentMouseClickEvent(GuiComponent component, int mouseX, int mouseY, int mouseButton) {
             super(component);
             this.mouseX = mouseX;
             this.mouseY = mouseY;
@@ -37,7 +37,7 @@ public abstract class ComponentMouseEvent extends Event {
         public final int mouseX, mouseY;
         public final int mouseButton;
 
-        public ComponentMousePressEvent(GuiComponent<?> component, int mouseX, int mouseY, int mouseButton) {
+        public ComponentMousePressEvent(GuiComponent component, int mouseX, int mouseY, int mouseButton) {
             super(component);
             this.mouseX = mouseX;
             this.mouseY = mouseY;
@@ -50,7 +50,7 @@ public abstract class ComponentMouseEvent extends Event {
         public final long lastClickTime;
         public final int mouseX, mouseY;
 
-        public ComponentMouseDoubleClickEvent(GuiComponent<?> component, long lastClickTime, int mouseX, int mouseY) {
+        public ComponentMouseDoubleClickEvent(GuiComponent component, long lastClickTime, int mouseX, int mouseY) {
             super(component);
             this.lastClickTime = lastClickTime;
             this.mouseX = mouseX;
@@ -63,7 +63,7 @@ public abstract class ComponentMouseEvent extends Event {
         public final int mouseX, mouseY;
         public final int mouseButton;
 
-        public ComponentMouseReleaseEvent(GuiComponent<?> component, int mouseX, int mouseY, int mouseButton) {
+        public ComponentMouseReleaseEvent(GuiComponent component, int mouseX, int mouseY, int mouseButton) {
             super(component);
             this.mouseX = mouseX;
             this.mouseY = mouseY;
@@ -86,7 +86,7 @@ public abstract class ComponentMouseEvent extends Event {
 
         public final int lastMouseX, lastMouseY, mouseX, mouseY;
 
-        public ComponentMouseMoveEvent(GuiComponent<?> component, int lastMouseX, int lastMouseY, int mouseX, int mouseY) {
+        public ComponentMouseMoveEvent(GuiComponent component, int lastMouseX, int lastMouseY, int mouseX, int mouseY) {
             super(component);
             this.lastMouseX = lastMouseX;
             this.lastMouseY = lastMouseY;
@@ -99,7 +99,7 @@ public abstract class ComponentMouseEvent extends Event {
 
         public final int dWheel;
 
-        public ComponentMouseWheelEvent(GuiComponent<?> component, int dWheel) {
+        public ComponentMouseWheelEvent(GuiComponent component, int dWheel) {
             super(component);
             this.dWheel = dWheel;
         }

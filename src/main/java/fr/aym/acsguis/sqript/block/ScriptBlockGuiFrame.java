@@ -115,8 +115,8 @@ public class ScriptBlockGuiFrame extends ScriptBlock
                         }
 
                         @Override
-                        public boolean allowDebugInGui() {
-                            return enableDebug;
+                        public boolean isEnableDebugPanel() {
+                            return  enableDebug;
                         }
 
                         @Override

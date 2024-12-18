@@ -24,7 +24,7 @@ public class ScriptComponentClickAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addClickListener((x, y, b) -> {
             ScriptContext context1;
             try {

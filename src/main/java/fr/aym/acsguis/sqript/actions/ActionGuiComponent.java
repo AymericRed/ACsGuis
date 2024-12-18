@@ -42,7 +42,7 @@ import static fr.aym.acsguis.sqript.block.ScriptBlockGuiComponent.lastRuntTab;
 public class ActionGuiComponent extends ScriptAction {
     private String name;
 
-    private GuiComponent<?> component;
+    private GuiComponent component;
 
     public String getName() {
         return name;
@@ -62,7 +62,7 @@ public class ActionGuiComponent extends ScriptAction {
         }
         //System.out.println("My type is " + type);
         ParseableComponent componentType = ParseableComponent.find(type);
-        GuiComponent<?> component = componentType.create();
+        GuiComponent component = componentType.create();
 
         String id = matcher.group(4);
         //System.out.println("The id is " + id);

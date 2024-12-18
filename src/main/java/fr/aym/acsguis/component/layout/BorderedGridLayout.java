@@ -1,6 +1,7 @@
 package fr.aym.acsguis.component.layout;
 
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 
 /**
  * A simple grid layout, with left and top paddings
@@ -26,12 +27,12 @@ public class BorderedGridLayout extends GridLayout {
     }
 
     @Override
-    public float getX(ComponentStyleManager target) {
+    public float getX(InternalComponentStyle target) {
         return super.getX(target) + paddingLeft;
     }
 
     @Override
-    public float getY(ComponentStyleManager target) {
+    public float getY(InternalComponentStyle target) {
         return super.getY(target) + paddingTop;
     }
 }

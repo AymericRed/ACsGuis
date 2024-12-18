@@ -1,6 +1,7 @@
 package fr.aym.acsguis.test;
 
 import fr.aym.acsguis.api.ACsGuiApi;
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.button.GuiButtonWithItem;
 import fr.aym.acsguis.component.layout.GridLayout;
@@ -15,29 +16,32 @@ import fr.aym.acsguis.component.textarea.GuiTextField;
 import fr.aym.acsguis.utils.GuiCssError;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
-import java.awt.Color;
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 
+@ACsGuiFrame
 public class GuiDnxDebug extends GuiFrame {
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation RESOURCE_LOCATION = new ResourceLocation(ACsGuiApi.RES_LOC_ID, "css/dnx_debug.css");
 
     public GuiDnxDebug() {
         super(new GuiScaler.Identity());
-        style.setBackgroundColor(Color.TRANSLUCENT);
+        getStyleCustomizer().setBackgroundColor(Color.TRANSLUCENT);
         setCssClass("home");
+        setApplyMcScale(false);
         //DnxCssParser.loadGui(this);
         GuiTabbedPane pane = new GuiTabbedPane();
 
         setEnableDebugPanel(true);
 
-        GuiPanel general = new GuiPanel(0, 0, 0, 0);
+        GuiPanel general = new GuiPanel();
         general.setCssId("general");
-        general.add(new GuiLabel(50, 50, 0, 0, "DynamX debug - general").setCssClass("title"));
+        general.add(new GuiLabel("DynamX debug - general").setCssClass("title"));
         //Options :
         {
             GuiScrollPane pane1 = new GuiScrollPane();
@@ -50,8 +54,8 @@ public class GuiDnxDebug extends GuiFrame {
                 b.setCssClass("switch-button-" + (ClientDebugSystem.enableDebugDrawing ? "on" : "off"));
                 label.setText("Rendu du debug : " + (ClientDebugSystem.enableDebugDrawing ? "activé" : "désactivé"));
             }));
-            b.getStyle().getYPos().setAbsolute(0);
-            label.getStyle().getYPos().setAbsolute(0);
+            b.getStyleCustomizer().setYPos(0);
+            label.getStyleCustomizer().setYPos(0);
 
             //Profiling
             boolean active = EnumTerrainDebugOptions.PROFILING.isActive(ClientDebugSystem.terrainDebugMode);
@@ -74,8 +78,8 @@ public class GuiDnxDebug extends GuiFrame {
                 b1.setCssClass("switch-button-" + (nactive ? "on" : "off"));
                 label1.setText("Profiling : " + (nactive ? "activé" : "désactivé"));
             }));
-            b1.getStyle().getYPos().setAbsolute(25);
-            label1.getStyle().getYPos().setAbsolute(25);
+            b1.getStyleCustomizer().setYPos(25);
+            label1.getStyleCustomizer().setYPos(25);
 
             GuiLabel box = new GuiLabel("Recharger les packs");
             box.setCssId("reload_packs").setCssClass("reload_button");
@@ -119,17 +123,17 @@ public class GuiDnxDebug extends GuiFrame {
             });
             pane1.add(box4);
 
-            GuiButtonWithItem icon = new GuiButtonWithItem(new ItemStack(Blocks.GLASS_PANE));
+            /*GuiButtonWithItem icon = new GuiButtonWithItem(new ItemStack(Blocks.GLASS_PANE));
             icon.setCssId("acacia.icon");
-            pane1.add(icon);
+            pane1.add(icon);*/
 
             general.add(pane1);
         }
         pane.addTab("General", general);
 
-        general = new GuiPanel(0, 0, 0, 0);
+        general = new GuiPanel();
         general.setCssId("terrain");
-        general.add(new GuiLabel(0, 0, 0, 0, "DynamX debug - terrain").setCssClass("title"));
+        general.add(new GuiLabel("DynamX debug - terrain").setCssClass("title"));
         int y = 0;
         {
             Map<EnumTerrainDebugOptions, GuiButton> terrainButtons = new HashMap<>();
@@ -159,8 +163,8 @@ public class GuiDnxDebug extends GuiFrame {
                     }
                 }));
 
-                b1.getStyle().getYPos().setAbsolute(y);
-                label1.getStyle().getYPos().setAbsolute(y);
+                b1.getStyleCustomizer().setYPos(y);
+                label1.getStyleCustomizer().setYPos(y);
                 y += 25;
             }
             general.add(pane1);
@@ -169,7 +173,7 @@ public class GuiDnxDebug extends GuiFrame {
 
         general = new GuiPanel();
         general.setLayout(new GridLayout(-1, 20, 0, GridLayout.GridDirection.HORIZONTAL, 1));
-        general.add(new GuiLabel(0, 0, 0, 0, "DynamX debug - vehicles").setCssClass("title"));
+        general.add(new GuiLabel("DynamX debug - vehicles").setCssClass("title"));
         general.setCssId("vehicles");
         y = 0;
         {
@@ -201,15 +205,15 @@ public class GuiDnxDebug extends GuiFrame {
                     }
                 }));
 
-                b1.getStyle().getYPos().setAbsolute(y);
-                label1.getStyle().getYPos().setAbsolute(y);
+                b1.getStyleCustomizer().setYPos(y);
+                label1.getStyleCustomizer().setYPos(y);
                 y += 25;
             }
             general.add(pane1);
         }
         pane.addTab("Vehicles", general);
 
-        general = new GuiPanel(0, 0, 0, 0);
+        general = new GuiPanel();
         general.setCssId("loadinglog");
         pane.addTab(TextFormatting.GOLD + "Erreurs", general);
         general.setLayout(new GridLayout(-1, 20, 0, GridLayout.GridDirection.HORIZONTAL, 1));
@@ -231,7 +235,7 @@ public class GuiDnxDebug extends GuiFrame {
                 Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().displayGuiScreen(new GuiLoadingErrors().getGuiScreen()));
         });*/
 
-        general = new GuiPanel(0, 0, 0, 0);
+        general = new GuiPanel();
         general.setCssId("showcsslog");
         pane.addTab("Log CSS", general);
         pane.getTabButton(4).addClickListener((mx, my, button) -> {
@@ -243,7 +247,7 @@ public class GuiDnxDebug extends GuiFrame {
         add(pane);
 
 
-        add(new GuiLabel(0, 0, 0, 0, "Entièrement designé en CSS").setCssId("credits"));
+        add(new GuiLabel("Entièrement designé en CSS").setCssId("credits"));
 
         setCssId("lol");
         setCssCode("color: red; background-color: orange;");

@@ -6,10 +6,13 @@ public class GuiFloatField extends GuiTextField {
     private float max;
 
     public GuiFloatField(float min, float max) {
-        super();
+        this(min, max, 0);
+    }
+
+    public GuiFloatField(float min, float max, float value) {
         this.min = min;
         this.max = max;
-        setText("0");
+        setValue(value);
     }
 
     public float getMin() {

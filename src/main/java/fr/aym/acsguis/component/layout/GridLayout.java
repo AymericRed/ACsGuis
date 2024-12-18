@@ -2,7 +2,8 @@ package fr.aym.acsguis.component.layout;
 
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.cssengine.parsing.core.objects.CssValue;
 import fr.aym.acsguis.cssengine.positionning.Size.SizeValue;
 import fr.aym.acsguis.utils.GuiConstants;
@@ -15,8 +16,8 @@ import java.util.Map;
  *
  * @see BorderedGridLayout
  */
-public class GridLayout implements PanelLayout<ComponentStyleManager> {
-    private final Map<ComponentStyleManager, Integer> cache = new HashMap<>();
+public class GridLayout implements PanelLayout<InternalComponentStyle> {
+    private final Map<ComponentStyle, Integer> cache = new HashMap<>();
     private int nextIndex;
 
     private final SizeValue width, height, spacing;
@@ -34,10 +35,10 @@ public class GridLayout implements PanelLayout<ComponentStyleManager> {
     public GridLayout(int width, int height, int spacing, GridDirection direction, int elementsPerLine) {
         this(new SizeValue(width, GuiConstants.ENUM_SIZE.ABSOLUTE), new SizeValue(height, GuiConstants.ENUM_SIZE.ABSOLUTE), new SizeValue(spacing, GuiConstants.ENUM_SIZE.ABSOLUTE), direction, elementsPerLine);
         // Retro-compatibility (-1 was 100%)
-        if(width == -1)
-            this.width.setRelative(1, CssValue.Unit.RELATIVE_INT);
-        if(height == -1)
-            this.height.setRelative(1, CssValue.Unit.RELATIVE_INT);
+        if (width == -1)
+            this.width.setRelative(1, CssValue.Unit.RELATIVE_TO_PARENT);
+        if (height == -1)
+            this.height.setRelative(1, CssValue.Unit.RELATIVE_TO_PARENT);
     }
 
     /**
@@ -89,7 +90,7 @@ public class GridLayout implements PanelLayout<ComponentStyleManager> {
     }
 
     @Override
-    public float getX(ComponentStyleManager target) {
+    public float getX(InternalComponentStyle target) {
         if (!cache.containsKey(target)) {
             cache.put(target, nextIndex);
             nextIndex++;
@@ -99,11 +100,12 @@ public class GridLayout implements PanelLayout<ComponentStyleManager> {
             elementsPerLine = (int) (target.getParent().getRenderWidth() / getWidth(target));
         }
         float spacing = this.spacing.computeValue(container.getWidth(), container.getHeight(), container.getWidth());
-        return direction == GridDirection.HORIZONTAL ? (getWidth() + spacing) * (cache.get(target) % elementsPerLine) : (getWidth() + spacing) * (cache.get(target) / elementsPerLine);
+        float width = getWidth(target);
+        return direction == GridDirection.HORIZONTAL ? (width + spacing) * (cache.get(target) % elementsPerLine) : (width + spacing) * (cache.get(target) / elementsPerLine);
     }
 
     @Override
-    public float getY(ComponentStyleManager target) {
+    public float getY(InternalComponentStyle target) {
         if (!cache.containsKey(target)) {
             cache.put(target, nextIndex);
             nextIndex++;
@@ -113,31 +115,26 @@ public class GridLayout implements PanelLayout<ComponentStyleManager> {
             elementsPerLine = (int) (target.getParent().getRenderHeight() / getHeight(target));
         }
         float spacing = this.spacing.computeValue(container.getWidth(), container.getHeight(), container.getHeight());
-        return direction == GridDirection.VERTICAL ? (getHeight() + spacing) * (cache.get(target) % elementsPerLine) : (getHeight() + spacing) * (cache.get(target) / elementsPerLine);
+        float height = getHeight(target);
+        return direction == GridDirection.VERTICAL ? (height + spacing) * (cache.get(target) % elementsPerLine) : (height + spacing) * (cache.get(target) / elementsPerLine);
     }
 
     @Override
-    public float getWidth(ComponentStyleManager target) {
-        return getWidth();
+    public float getWidth(InternalComponentStyle target) {
+        GuiFrame frame = target.getOwner().getGui().getFrame();
+        return width.computeValue(frame.getResolution().getScaledWidth(), frame.getResolution().getScaledHeight(), container.getWidth());
     }
 
     @Override
-    public float getHeight(ComponentStyleManager target) {
-        return getHeight();
+    public float getHeight(InternalComponentStyle target) {
+        GuiFrame frame = target.getOwner().getGui().getFrame();
+        return height.computeValue(frame.getResolution().getScaledWidth(), frame.getResolution().getScaledHeight(), container.getHeight());
     }
 
     @Override
     public void clear() {
         cache.clear();
         nextIndex = 0;
-    }
-
-    public float getWidth() {
-        return width.computeValue(GuiFrame.resolution.getScaledWidth(), GuiFrame.resolution.getScaledHeight(), container.getWidth());
-    }
-
-    public float getHeight() {
-        return height.computeValue(GuiFrame.resolution.getScaledWidth(), GuiFrame.resolution.getScaledHeight(), container.getHeight());
     }
 
     @Override

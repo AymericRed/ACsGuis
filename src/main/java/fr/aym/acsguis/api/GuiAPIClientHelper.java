@@ -3,10 +3,10 @@ package fr.aym.acsguis.api;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.cssengine.font.ICssFont;
 import fr.aym.acsguis.cssengine.parsing.ACsGuisCssParser;
+import fr.aym.acsguis.utils.ACsScaledResolution;
 import fr.aym.acsguis.utils.CircleBackground;
 import fr.aym.acsguis.utils.GuiConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -130,8 +130,10 @@ public class GuiAPIClientHelper {
             boolean flag = lastChar == null || lastChar == ' ' || nextChar == null || nextChar == ' ' || lastSpace == 0 || lastSpace == -1;
 
             String line;
+            int off = 0;
             if (rawTrim.contains("\n") && (rawTrim.indexOf("\n") == 0 || rawTrim.charAt(rawTrim.indexOf("\n") - 1) != '\\')) {
-                line = rawTrim.substring(0, rawTrim.indexOf("\n") + 1);
+                line = rawTrim.substring(0, rawTrim.indexOf("\n") + 0);
+                off = 1;
             } else {
                 if (flag) {
                     line = rawTrim;
@@ -148,7 +150,7 @@ public class GuiAPIClientHelper {
                 return renderedLines;
             }
 
-            text = text.substring(line.length());
+            text = text.substring(line.length() + off);
             renderedLines.add(line);
             totalHeight += fontHeight;
         }
@@ -202,10 +204,9 @@ public class GuiAPIClientHelper {
     /**
      * Create rendering boundaries, the elements' parts outside of them will not be rendered.
      */
-    public static void glScissor(float x, float y, float width, float height) {
-        int f = GuiFrame.resolution.getScaleFactor();
-        GL11.glScissor(MathHelper.floor(x * f * currentScaleX), MathHelper.ceil(mc.displayHeight - (y + height) * f * currentScaleY),
-                MathHelper.clamp(MathHelper.ceil(width * f * currentScaleX), 0, Integer.MAX_VALUE), MathHelper.clamp(MathHelper.ceil(height * f * currentScaleY), 0, Integer.MAX_VALUE));
+    public static void glScissor(int resolutionScaleFactor, float x, float y, float width, float height) {
+        GL11.glScissor(MathHelper.floor(x * resolutionScaleFactor * currentScaleX), MathHelper.ceil(mc.displayHeight - (y + height) * resolutionScaleFactor * currentScaleY),
+                MathHelper.clamp(MathHelper.ceil(width * resolutionScaleFactor * currentScaleX), 0, Integer.MAX_VALUE), MathHelper.clamp(MathHelper.ceil(height * resolutionScaleFactor * currentScaleY), 0, Integer.MAX_VALUE));
     }
 
     public static void drawBorderedRectangle(float left, float top, float right, float bottom, float borderSize, int backgroundColor, int borderColor, float borderRadius) {
@@ -215,9 +216,9 @@ public class GuiAPIClientHelper {
     }
 
     /**
-     * Basically just a copy of the vanilla method {@link net.minecraft.client.gui.GuiScreen#drawHoveringText(String, int, int)} 
+     * Basically just a copy of the vanilla method {@link net.minecraft.client.gui.GuiScreen#drawHoveringText(String, int, int)}
      */
-    public static void drawHoveringText(List<String> textLines, int x, int y) {
+    public static void drawHoveringText(ACsScaledResolution resolution, List<String> textLines, int x, int y) {
         if (!textLines.isEmpty()) {
             GlStateManager.disableRescaleNormal();
             RenderHelper.disableStandardItemLighting();
@@ -241,12 +242,12 @@ public class GuiAPIClientHelper {
                 k += 2 + (textLines.size() - 1) * 10;
             }
 
-            if (l1 + i > GuiFrame.resolution.getScaledWidth()) {
+            if (l1 + i > resolution.getScaledWidth()) {
                 l1 -= 28 + i;
             }
 
-            if (i2 + k + 6 > GuiFrame.resolution.getScaledHeight()) {
-                i2 = GuiFrame.resolution.getScaledHeight() - k - 6;
+            if (i2 + k + 6 > resolution.getScaledHeight()) {
+                i2 = resolution.getScaledHeight() - k - 6;
             }
 
             if (i2 - 4 < 0) {
@@ -330,15 +331,52 @@ public class GuiAPIClientHelper {
      */
     public static boolean addEllipsisToLastLine(ICssFont font, int maxWidth, int maxTextHeight, List<String> lines, int totalHeight, String word) {
         if (maxTextHeight > 0 && totalHeight + font.getHeight(word) > maxTextHeight) {
-            String lastLine = lines.get(lines.size() - 1);
+            String lastLine = lines.isEmpty() ? word : lines.get(lines.size() - 1);
             if (lastLine.length() > 3 && font.getWidth(lastLine + "...") > maxWidth) {
                 lastLine = lastLine.substring(0, lastLine.length() - 3) + "...";
             } else {
                 lastLine += "...";
             }
-            lines.set(lines.size() - 1, lastLine);
+            if (lines.isEmpty()) {
+                lines.add(lastLine);
+            } else {
+                lines.set(lines.size() - 1, lastLine);
+            }
             return true;
         }
         return false;
+    }
+
+    public static void drawRect(float left, float top, float right, float bottom, int color) {
+        if (left < right) {
+            float i = left;
+            left = right;
+            right = i;
+        }
+
+        if (top < bottom) {
+            float j = top;
+            top = bottom;
+            bottom = j;
+        }
+
+        float f3 = (float) (color >> 24 & 255) / 255.0F;
+        float f = (float) (color >> 16 & 255) / 255.0F;
+        float f1 = (float) (color >> 8 & 255) / 255.0F;
+        float f2 = (float) (color & 255) / 255.0F;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.color(f, f1, f2, f3);
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
+        bufferbuilder.pos((double) left, (double) bottom, 0.0D).endVertex();
+        bufferbuilder.pos((double) right, (double) bottom, 0.0D).endVertex();
+        bufferbuilder.pos((double) right, (double) top, 0.0D).endVertex();
+        bufferbuilder.pos((double) left, (double) top, 0.0D).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
     }
 }

@@ -13,14 +13,11 @@ public class GuiList extends GuiScrollPane {
 	protected GuiSlotList slotList;
 	protected List<String> entries = new ArrayList<String>();
 	
-	public GuiList(List<String> entries, int x, int y, int width, int height)
+	public GuiList(List<String> entries)
 	{
-		super(x, y, width, height);
-		
 		if(entries != null) {
 			this.entries.addAll(entries);
 		}
-		
 		slotList = new GuiSlotList(this);
 		slotList.updateSlotList();
 		add(slotList);

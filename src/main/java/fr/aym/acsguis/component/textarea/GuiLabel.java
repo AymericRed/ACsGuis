@@ -4,7 +4,8 @@ import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.TextComponentStyleManager;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
+import fr.aym.acsguis.component.style.TextComponentStyle;
 import fr.aym.acsguis.cssengine.font.CssFontHelper;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
@@ -12,29 +13,23 @@ import fr.aym.acsguis.utils.GuiConstants;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextComponentStyleManager> {
-    public GuiLabel(String text) {
-        super(0, 0, 0, 0);
-        setMaxTextLength(Integer.MAX_VALUE);
-        setEditable(false);
-        setText(text);
+public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextComponentStyle.InternalStyle> {
+    public GuiLabel() {
+        this("");
     }
 
-    public GuiLabel(int x, int y, int width, int height, String text) {
-        super(x, y, width, height);
+    public GuiLabel(String text) {
         setMaxTextLength(Integer.MAX_VALUE);
         setEditable(false);
         setText(text);
     }
 
     @Override
-    protected TextComponentStyleManager createStyleManager() {
-        TextComponentStyleManager s = super.createStyleManager();
-        s.addAutoStyleHandler(this);
+    protected InternalComponentStyle createStyleManager() {
+        InternalComponentStyle s = super.createStyleManager();
+        s.getCustomizer().withAutoStyles(this, EnumCssStyleProperty.WIDTH, EnumCssStyleProperty.HEIGHT);
         return s;
     }
 
@@ -55,10 +50,9 @@ public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextCompon
 
     @Override
     protected void drawTextLines(List<String> lines, float scale) {
-
         GlStateManager.enableTexture2D();
 
-        String formatting = getStyle().getFontColor() == null ? "" : getStyle().getFontColor().toString();
+        String formatting = getStyle().getFontStyle() == null ? "" : getStyle().getFontStyle().toString();
         //System.out.println("Draw "+formatting+" "+lines+" in "+this+" "+getWidth()+" "+getHeight()+" "+getX()+" "+getScreenX());
         for (int i = 0; i < lines.size(); i++) {
             String line = formatting + lines.get(i);
@@ -113,7 +107,9 @@ public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextCompon
     @Override
     public GuiTextArea setText(String text) {
         super.setText(text);
-        getStyle().refreshCss(getGui(), false); //Refresh style, for auto width and height
+        if (getStyle().getCssStack() != null) {
+            getStyle().refreshStyle(getGui(), EnumCssStyleProperty.WIDTH, EnumCssStyleProperty.HEIGHT); //Refresh style, for auto width and height
+        }
         return this;
     }
 
@@ -123,7 +119,7 @@ public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextCompon
     }
 
     @Override
-    public boolean handleProperty(EnumCssStyleProperty property, EnumSelectorContext context, TextComponentStyleManager target) {
+    public boolean handleProperty(EnumCssStyleProperty property, EnumSelectorContext context, TextComponentStyle.InternalStyle target) {
         if (property == EnumCssStyleProperty.WIDTH) {
             target.getWidth().setAbsolute((int) ((getPaddingLeft() + getPaddingRight() + 5 + mc.fontRenderer.getStringWidth(getText())) * ((float) target.getFontSize() / mc.fontRenderer.FONT_HEIGHT)));
             return true;
@@ -136,12 +132,5 @@ public class GuiLabel extends GuiTextArea implements AutoStyleHandler<TextCompon
             return true;
         }
         return false;
-    }
-
-    private static final List<EnumCssStyleProperty> affectedProperties = Arrays.asList(EnumCssStyleProperty.WIDTH, EnumCssStyleProperty.HEIGHT);
-
-    @Override
-    public Collection<EnumCssStyleProperty> getModifiedProperties(TextComponentStyleManager target) {
-        return affectedProperties;
     }
 }

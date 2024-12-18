@@ -46,7 +46,7 @@ public class ExprCssCode extends ScriptExpression {
 
     @Override
     public ScriptType get(ScriptContext context, ScriptType[] parameters) {
-        ScriptType<GuiComponent<?>> param = parameters[0];
+        ScriptType<GuiComponent> param = parameters[0];
         switch (getMatchedIndex()) {
             case 0:
                 return new TypeString(param.getObject().getStyle().toString());
@@ -65,7 +65,7 @@ public class ExprCssCode extends ScriptExpression {
 
     @Override
     public boolean set(ScriptContext context, ScriptType to, ScriptType[] parameters) {
-        ScriptType<GuiComponent<?>> param = parameters[0];
+        ScriptType<GuiComponent> param = parameters[0];
         boolean isReturn = false;
         switch (getMatchedIndex()) {
             case 0:

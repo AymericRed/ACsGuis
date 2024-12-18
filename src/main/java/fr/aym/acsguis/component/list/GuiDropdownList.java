@@ -6,7 +6,8 @@ import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.layout.GridLayout;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.cssengine.positionning.Size;
 import fr.aym.acsguis.event.listeners.mouse.IMouseClickListener;
@@ -26,11 +27,11 @@ public class GuiDropdownList extends GuiPanel implements IMouseClickListener {
     public GuiDropdownList(String label, List<String> elements) {
         super();
         panel = new GuiScrollPane();
-        add((button = new GuiButton(label)).addClickListener((mouseX, mouseY, mouseButton) -> panel.setVisible(!panel.isVisible())));
+        add((button = new GuiButton(label)).addClickListener((mouseX, mouseY, mouseButton) -> ((InternalComponentStyle) panel.getStyleCustomizer()).setVisible(!panel.isVisible())));
 
         panel.setLayout(new GridLayout(new Size.SizeValue(1, GuiConstants.ENUM_SIZE.RELATIVE), new Size.SizeValue(20, GuiConstants.ENUM_SIZE.ABSOLUTE), new Size.SizeValue(1, GuiConstants.ENUM_SIZE.ABSOLUTE), GridLayout.GridDirection.HORIZONTAL, 1));
         setElements(elements);
-        panel.setVisible(false);
+        ((InternalComponentStyle) panel.getStyleCustomizer()).setVisible(false);
         add(panel);
     }
 
@@ -39,7 +40,7 @@ public class GuiDropdownList extends GuiPanel implements IMouseClickListener {
         for (String s : elements) {
             panel.add(new GuiLabel(s).addClickListener((mouseX, mouseY, mouseButton) -> {
                 selectedElement = s;
-                panel.setVisible(false);
+                ((InternalComponentStyle) panel.getStyleCustomizer()).setVisible(false);
                 if (changeCallback != null)
                     changeCallback.accept(s);
             }));
@@ -78,7 +79,7 @@ public class GuiDropdownList extends GuiPanel implements IMouseClickListener {
     }
 
     public void closeDropdown() {
-        panel.setVisible(false);
+        ((InternalComponentStyle) panel.getStyleCustomizer()).setVisible(false);
     }
 
     public void setLabel(String label) {
@@ -96,7 +97,7 @@ public class GuiDropdownList extends GuiPanel implements IMouseClickListener {
     }
 
     @Override
-    public GuiComponent<? extends ComponentStyleManager> setParent(GuiPanel parent) {
+    public GuiComponent setParent(GuiPanel parent) {
         if (this.parent != null && parent != this.parent) {
             this.parent.getClickListeners().remove(this);
         }

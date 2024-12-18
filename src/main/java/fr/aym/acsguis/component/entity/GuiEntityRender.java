@@ -2,7 +2,7 @@ package fr.aym.acsguis.component.entity;
 
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.ComponentStyle;
 import fr.aym.acsguis.event.listeners.mouse.IMouseExtraClickListener;
 import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
 
-public class GuiEntityRender extends GuiComponent<ComponentStyleManager> implements IMouseExtraClickListener
+public class GuiEntityRender extends GuiComponent implements IMouseExtraClickListener
 {
 	protected EntityLivingBase entity;
 	protected int paddingTop;

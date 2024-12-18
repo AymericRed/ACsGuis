@@ -25,7 +25,7 @@ public abstract class GuiActionScriptLoop extends ScriptLoop {
 
     @Override
     public void execute(ScriptContext context) throws ScriptException {
-        GuiComponent<?> component = ((TypeComponent) context.getAccessor("this_component").element).getObject();
+        GuiComponent component = ((TypeComponent) context.getAccessor("this_component").element).getObject();
         //System.out.println("Action : component is " + component);
         appendListener(() -> {
             ScriptContext context1 = new ScriptContext(context);
@@ -40,7 +40,7 @@ public abstract class GuiActionScriptLoop extends ScriptLoop {
         return getNext(context);
     }
 
-    public abstract void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component);
+    public abstract void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component);
 
     public void executeAction(ScriptContext context) {
         try {

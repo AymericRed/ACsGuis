@@ -1,0 +1,45 @@
+@font-face {
+    font-family: "dnx:test_font";
+    /*font-style: italic;*/
+    src: url("acsguis:css/font.ttf");
+    font-size: 52px;
+}
+
+#root {
+    background-color: rgba(0, 0, 0, 100);
+    width: 80%;
+    height: 80%;
+    top: 50%;
+    bottom: 50%;
+    left: 50%;
+    right: 50%;
+    border-radius: 18px;
+    border: 2px rgba(0, 0, 0, 0);
+}
+
+#root:hover {
+    border-color: rgba(0, 0, 0, 200);
+}
+
+#big_panel {
+    top: 180px;
+    width: 100%;
+    height: 30%;
+}
+
+#content {
+}
+
+.inline_labels, .inline_buttons {
+    display: inline;
+    background-color: green;
+}
+
+.inline_labels2 {
+    display: inline;
+    background-color: blue;
+}
+
+.block_labels2 {
+    background-color: red;
+}

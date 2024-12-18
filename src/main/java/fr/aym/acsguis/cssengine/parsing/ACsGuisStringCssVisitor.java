@@ -20,10 +20,10 @@ import java.util.Map;
  */
 public class ACsGuisStringCssVisitor implements CssFileVisitor
 {
-    private final GuiComponent<?> component;
+    private final GuiComponent component;
     private final Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> styleSheet;
 
-    public ACsGuisStringCssVisitor(GuiComponent<?> component, Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> styleSheet) {
+    public ACsGuisStringCssVisitor(GuiComponent component, Map<CompoundCssSelector, Map<EnumCssStyleProperty, CssStyleProperty<?>>> styleSheet) {
         this.component = component;
         this.styleSheet = styleSheet;
     }

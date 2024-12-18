@@ -2,8 +2,8 @@ package fr.aym.acsguis.component.style;
 
 import fr.aym.acsguis.component.layout.PanelLayout;
 
-public interface PanelStyleManager extends ComponentStyleManager
+public interface PanelStyle extends ComponentStyle
 {
     PanelLayout<?> getLayout();
-    PanelStyleManager setLayout(PanelLayout<?> panelLayout);
+    PanelStyle setLayout(PanelLayout<?> panelLayout);
 }

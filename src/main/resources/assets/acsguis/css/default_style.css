@@ -1,6 +1,7 @@
 button,button_with_icon
 {
     background-image: texture("textures/gui/widgets.png", 0, 66, 200, 20);
+    background-color: translucent;
     font-size: 9;
     width: 200px;
     height: 20px;

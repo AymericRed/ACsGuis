@@ -3,9 +3,10 @@ package fr.aym.acsguis.component.textarea;
 import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.EnumComponentType;
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.component.style.TextComponentStyleManager;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
+import fr.aym.acsguis.component.style.TextComponentStyle;
 import fr.aym.acsguis.cssengine.font.CssFontHelper;
-import fr.aym.acsguis.cssengine.style.CssTextComponentStyleManager;
+import fr.aym.acsguis.cssengine.style.CssTextComponentStyle;
 import fr.aym.acsguis.event.listeners.IFocusListener;
 import fr.aym.acsguis.event.listeners.IKeyboardListener;
 import fr.aym.acsguis.event.listeners.ITickListener;
@@ -22,7 +23,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class GuiTextArea extends GuiComponent<TextComponentStyleManager> implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener, TextComponent {
+public class GuiTextArea extends GuiComponent implements ITickListener, IKeyboardListener, IMouseClickListener, IMouseMoveListener, IFocusListener, IMouseWheelListener, TextComponent {
     private String text = "";
     private String hintText = "";
 
@@ -47,11 +48,6 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     protected float textScale = 1;
 
     public GuiTextArea() {
-        this(0, 0, 100, 50);
-    }
-
-    public GuiTextArea(int x, int y, int width, int height) {
-        super(x, y, width, height);
         setEditable(true);
 
         setMaxTextLength(200);
@@ -68,20 +64,35 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
         addWheelListener(this);
     }
 
+    public GuiTextArea(String text) {
+        this();
+        setText(text);
+    }
+
     @Override
     public EnumComponentType getType() {
         return EnumComponentType.TEXT_AREA;
     }
 
     @Override
-    protected TextComponentStyleManager createStyleManager() {
-        return new CssTextComponentStyleManager(this) {
+    protected InternalComponentStyle createStyleManager() {
+        return new CssTextComponentStyle(this) {
             @Override
             public void updateComponentSize(int screenWidth, int screenHeight) {
                 super.updateComponentSize(screenWidth, screenHeight);
                 clearCachedTextLines();
             }
         };
+    }
+
+    @Override
+    public TextComponentStyle getStyle() {
+        return (TextComponentStyle) super.getStyle();
+    }
+
+    @Override
+    public TextComponentStyle.TextComponentStyleCustomizer getStyleCustomizer() {
+        return getStyle().getCustomizer();
     }
 
     public boolean allowLineBreak() {
@@ -99,16 +110,23 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     }
 
     @Override
-    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext enableScissor) {
-        GuiAPIClientHelper.glScissor(getRenderMinX() + getPaddingLeft(), getRenderMinY() + getPaddingTop(), (getRenderMaxX() - getRenderMinX()) - (getPaddingLeft() + getPaddingRight()), (getRenderMaxY() - getRenderMinY()) - (getPaddingTop() + getPaddingBottom()));
-
+    public void drawForeground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
+        if (renderContext.enableScissors()) {
+            GuiAPIClientHelper.glScissor(renderContext.getParentGui().getResolution().getScaleFactor(),
+                    getRenderMinX() + getPaddingLeft(), getRenderMinY() + getPaddingTop(),
+                    (getRenderMaxX() - getRenderMinX()) - (getPaddingLeft() + getPaddingRight()), (getRenderMaxY() - getRenderMinY()) - (getPaddingTop() + getPaddingBottom()));
+        }
         textScale = (float) (getStyle().getFontSize()) / mc.fontRenderer.FONT_HEIGHT;
         GlStateManager.scale(textScale, textScale, 1);
         CssFontHelper.pushDrawing(getStyle().getFontFamily(), getStyle().getEffects());
         if (!getText().isEmpty())
             drawTextLines(getCachedTextLines(), textScale);
 
-        GuiAPIClientHelper.glScissor(getRenderMinX() + getScaledBorderSize(), getRenderMinY() + getScaledBorderSize(), getRenderMaxX() - getRenderMinX() - getScaledBorderSize(), getRenderMaxY() - getRenderMinY() - getScaledBorderSize());
+        if (renderContext.enableScissors()) {
+            GuiAPIClientHelper.glScissor(renderContext.getParentGui().getResolution().getScaleFactor(),
+                    getRenderMinX() + getScaledBorderSize(), getRenderMinY() + getScaledBorderSize(),
+                    getRenderMaxX() - getRenderMinX() - getScaledBorderSize(), getRenderMaxY() - getRenderMinY() - getScaledBorderSize());
+        }
         drawHintLines(textScale);
 
         if (isEditable() && isFocused()) {
@@ -116,44 +134,34 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
             drawSelectedRegion(textScale);
         }
         GlStateManager.scale(1f / textScale, 1f / textScale, 1);
-
-        /*GlStateManager.disableDepth();
-        GlStateManager.disableAlpha();
-				Gui.drawRect(0, getRenderMinY(), mc.displayWidth, getRenderMinY()+10, Color.RED.getRGB());
-				Gui.drawRect(0, (int) y, mc.displayWidth, (int) (y+1), Color.GREEN.getRGB());
-				Gui.drawRect(0, (int) y+getStyle().getFontHeight(line), mc.displayWidth, (int) (y+getStyle().getFontHeight(line)+1), Color.BLUE.getRGB());
-				Gui.drawRect(0, (int) getRenderMinY()+getHeight()/2-1, mc.displayWidth, (int) (getRenderMinY()+getHeight()/2+1), Color.PINK.getRGB());
-        //Gui.drawRect(0, getRenderMinY(), getMaxLineLength(), getRenderMaxX(), Color.PINK.getRGB());
-        GlStateManager.enableAlpha();
-        GlStateManager.enableDepth();*/
-        //TODOOLD VISUAL PLACING DEBUG
         CssFontHelper.popDrawing();
 
-        super.drawForeground(mouseX, mouseY, partialTicks, enableScissor);
+        super.drawForeground(mouseX, mouseY, partialTicks, renderContext);
     }
 
     protected void drawTextLines(List<String> lines, float scale) {
         GlStateManager.enableTexture2D();
-        String formatting = getStyle().getFontColor() == null ? "" : getStyle().getFontColor().toString();
+        String formatting = getStyle().getFontStyle() == null ? "" : getStyle().getFontStyle().toString();
 
         for (int i = 0; i < lines.size(); i++) {
             float height = scale * getStyle().getFontHeight(lines.get(i));
             CssFontHelper.draw(((getScreenX() + getPaddingLeft() - getLineScrollOffsetX()) / scale), ((getScreenY() + getPaddingTop() +
-                    GuiAPIClientHelper.getRelativeTextY(i, lines.size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY()) / scale), formatting + lines.get(i), style.getForegroundColor());
+                    GuiAPIClientHelper.getRelativeTextY(i, lines.size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY()) / scale), formatting + lines.get(i), getStyle().getForegroundColor());
         }
     }
 
     protected void drawHintLines(float scale) {
-        if (!isFocused() && text.isEmpty()) {
-            GlStateManager.enableTexture2D();
-            List<String> hintTextLines = getCachedTextLines();
-            if (hintTextLines != null) {
-                for (int i = 0; i < hintTextLines.size(); i++) {
-                    float height = scale * getStyle().getFontHeight(hintTextLines.get(i));
-                    CssFontHelper.draw(((getScreenX() + getPaddingLeft() - getLineScrollOffsetX()) / scale), ((getScreenY() + getPaddingTop() +
-                            GuiAPIClientHelper.getRelativeTextY(i, hintTextLines.size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY()) / scale), hintTextLines.get(i), Color.GRAY.getRGB());
-                    //old GuiComponent.mc.fontRenderer.drawString(TextFormatting.ITALIC + hintTextLines.get(i), (getScreenX() + getPaddingLeft())/scale, (getScreenY() + getPaddingTop())/scale + i * 9, Color.GRAY.getRGB(), false);
-                }
+        if (isFocused() || !text.isEmpty()) {
+            return;
+        }
+        GlStateManager.enableTexture2D();
+        List<String> hintTextLines = getCachedTextLines();
+        if (hintTextLines != null) {
+            for (int i = 0; i < hintTextLines.size(); i++) {
+                float height = scale * getStyle().getFontHeight(hintTextLines.get(i));
+                CssFontHelper.draw(((getScreenX() + getPaddingLeft() - getLineScrollOffsetX()) / scale), ((getScreenY() + getPaddingTop() +
+                        GuiAPIClientHelper.getRelativeTextY(i, hintTextLines.size(), getHeight() - (getPaddingTop() + getPaddingBottom()), getStyle().getVerticalTextAlignment(), height) - getLineScrollOffsetY()) / scale), hintTextLines.get(i), Color.GRAY.getRGB());
+                //old GuiComponent.mc.fontRenderer.drawString(TextFormatting.ITALIC + hintTextLines.get(i), (getScreenX() + getPaddingLeft())/scale, (getScreenY() + getPaddingTop())/scale + i * 9, Color.GRAY.getRGB(), false);
             }
         }
     }
@@ -785,6 +793,10 @@ public class GuiTextArea extends GuiComponent<TextComponentStyleManager> impleme
     public GuiTextArea setEditable(boolean editable) {
         this.editable = editable;
         return this;
+    }
+
+    public GuiTextArea setRegex(String regex) {
+        return setRegexPattern(Pattern.compile(regex));
     }
 
     public GuiTextArea setRegexPattern(Pattern regexPattern) {

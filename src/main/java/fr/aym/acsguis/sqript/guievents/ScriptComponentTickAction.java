@@ -21,7 +21,7 @@ public class ScriptComponentTickAction extends GuiActionScriptLoop {
     }
 
     @Override
-    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent<?> component) {
+    public void appendListener(Callable<ScriptContext> contextProvider, GuiComponent component) {
         component.addTickListener(() -> {
             try {
                 executeAction(contextProvider.call());

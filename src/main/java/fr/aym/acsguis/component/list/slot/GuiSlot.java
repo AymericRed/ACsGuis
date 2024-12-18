@@ -11,9 +11,8 @@ public abstract class GuiSlot extends GuiPanel implements IFocusListener, IMouse
 	protected final String entryName;
 	protected final int entryId;
 	
-	public GuiSlot(GuiList list, int x, int y, int width, int height, int entryId, String entryName)
+	public GuiSlot(GuiList list, int entryId, String entryName)
 	{
-		super(x, y, width, height);
 		this.list = list;
 		this.entryId = entryId;
 		this.entryName = entryName;

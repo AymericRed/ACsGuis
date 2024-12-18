@@ -5,7 +5,11 @@ import fr.aym.acsguis.component.EnumComponentType;
 public class GuiTextField extends GuiTextArea
 {
 	public GuiTextField() {
-		super(0, 0, 0, 0);
+		super();
+	}
+
+	public GuiTextField(String text) {
+		super(text);
 	}
 
 	@Override

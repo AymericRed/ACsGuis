@@ -188,6 +188,10 @@ public class WorldGui {
             RenderGlobal.drawSelectionBoundingBox(bounds, 0, 0, 1, 1);
         }
         GlStateManager.popMatrix();
+
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableDepth();
+        GlStateManager.enableLighting();
     }
 
     public void tick() {
@@ -208,7 +212,7 @@ public class WorldGui {
             glLoadIdentity();
             glTranslated(0.0F, 0.0F, -200.0F);
 
-            glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
             glDisable(GL_TEXTURE_2D);
@@ -344,14 +348,14 @@ public class WorldGui {
         rayTraceResult = raytraceresult;
     }
 
-    private boolean hasTextFocus(GuiComponent<?> component) {
+    private boolean hasTextFocus(GuiComponent component) {
         if (component instanceof GuiTextArea) {
             return ((GuiTextArea) component).isEditable() && component.isPressed();
         }
         if (!(component instanceof GuiPanel)) {
             return false;
         }
-        for (GuiComponent<?> c : ((GuiPanel) component).getChildComponents()) {
+        for (GuiComponent c : ((GuiPanel) component).getChildComponents()) {
             if (hasTextFocus(c)) {
                 return true;
             }

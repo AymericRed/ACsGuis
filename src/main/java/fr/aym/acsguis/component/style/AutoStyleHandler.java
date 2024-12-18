@@ -3,13 +3,11 @@ package fr.aym.acsguis.component.style;
 import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 
-import java.util.Collection;
-
 /**
  * Callback for elements that support "auto" css properties, to let them compute it
  * @param <T> The component receiving the auto style
  */
-public interface AutoStyleHandler<T extends ComponentStyleManager>
+public interface AutoStyleHandler<T extends InternalComponentStyle>
 {
     /**
      * Computes "auto" style of a property
@@ -30,20 +28,15 @@ public interface AutoStyleHandler<T extends ComponentStyleManager>
     default Priority getPriority(T forT) {return Priority.COMPONENT;}
 
     /**
-     * Should return the modified properties, used to filter handleProperty(...) calls <br>
-     *     You can store the return field in a static list for optimization
-     *
-     * @param target The component receiving the auto style
-     * @return The modified properties, including modified properties in super(...) implementations
-     */
-    Collection<EnumCssStyleProperty> getModifiedProperties(T target);
-
-    /**
      * Auto style priorities <br>
-     *     LAYOUT > PARENT > COMPONENT
+     *     IGNORE_LAYOUT > LAYOUT > COMPONENT
      */
     enum Priority
     {
-        LAYOUT, PARENT, COMPONENT
+        IGNORE_LAYOUT, LAYOUT, COMPONENT
+    }
+
+    interface SimpleStyleFunction {
+        void apply(InternalComponentStyle target);
     }
 }
