@@ -28,7 +28,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 apply plugin: "com.jfrog.artifactory"
 
-version = "1.3.0-wgui-dev7b"
+version = "1.3.0-dev9"
 group = "fr.aym.acsguis" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ACsGuis"
 
@@ -54,7 +54,7 @@ minecraft {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
-    implementation "fr.aym:ACsLib:1.2.12"
+    implementation "fr.aym:ACsLib:1.3.0"
     implementation ":Sqript+v1.2.6.2:"
     implementation ":slick:"
 
@@ -77,6 +77,15 @@ jar.finalizedBy('reobfJar')
 ext {
     builtFile = ""
     builtFileSources = ""
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
 
 
@@ -113,12 +122,13 @@ task outputNoTestJarSources(type: Jar) {
 tasks.reobfShadowJar.mustRunAfter shadowJar
 tasks.onBuild.mustRunAfter reobfShadowJar
 outputNoTestJar.dependsOn onBuild
+outputNoTestJarSources.dependsOn sourcesJar
 outputNoTestJarSources.dependsOn onBuild
 
 build {
     dependsOn reobfShadowJar
     dependsOn outputNoTestJar
-    //dependsOn outputNoTestJarSources
+    dependsOn outputNoTestJarSources
 }
 
 artifactoryPublish.dependsOn build
@@ -128,7 +138,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact source : ("build/libs/fixed/${builtFile}"), extension: 'jar'
-            //artifact source: ("build/libs/fixed/${builtFileSources}"), classifier: "sources", extension: 'jar'
+            artifact source: ("build/libs/fixed/${builtFileSources}"), classifier: "sources", extension: 'jar'
         }
     }
 }

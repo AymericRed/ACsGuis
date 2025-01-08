@@ -40,7 +40,7 @@ import java.util.concurrent.Callable;
 @ACsRegisteredService(name = ACsGuiApi.RES_LOC_ID, version = ACsGuiApi.VERSION, sides = Side.CLIENT, interfaceClass = ACsGuiApiService.class, initOnStartup = true)
 public class ACsGuiApi implements ACsGuiApiService {
     public static final String RES_LOC_ID = ACsGuiApiService.RES_LOC_ID;
-    public static final String VERSION = "1.3.0-wgui";
+    public static final String VERSION = "1.3.0-dev9";
     public static final Logger log = LogManager.getLogger("ACsGuis");
 
     private static ErrorManagerService errorTracker;
@@ -100,7 +100,7 @@ public class ACsGuiApi implements ACsGuiApiService {
     }
 
     /**
-     * Show the given GuiFrame on the screen <br>
+     * Immediately shows the given GuiFrame on the screen <br>
      * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowGui if you want to reload the css when displaying the gui.
      *
      * @param guiInstance The gui to display as interface
@@ -124,14 +124,15 @@ public class ACsGuiApi implements ACsGuiApiService {
     }
 
     /**
-     * Show the given GuiFrame on the HUD <br>
+     * Immediately shows the given GuiFrame on the HUD <br>
+     * A hud gui is only a visual gui, you can't interact with it <br>
      * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowHudGui if you want to reload the css when displaying the gui.
      *
      * @param guiInstance The gui to display on hud
      * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
      * @see CssHudHandler
      */
-    public void showHudGui(GuiFrame guiInstance) {
+    public static void showHudGui(GuiFrame guiInstance) {
         manager.showHudGui(guiInstance);
     }
 
@@ -149,7 +150,8 @@ public class ACsGuiApi implements ACsGuiApiService {
     }
 
     /**
-     * Show the given GuiFrame on the HUD <br>
+     * Immediately shows the given GuiFrame on the HUD <br>
+     * A hud gui is only a visual gui, you can't interact with it <br>
      * This doesn't support css reloading when the gui is shown. Use asyncLoadThenShowHudGui if you want to reload the css when displaying the gui.
      *
      * @param hudIndex    The index of the hud, used to change the display order of the huds
@@ -157,7 +159,7 @@ public class ACsGuiApi implements ACsGuiApiService {
      * @throws IllegalArgumentException If the gui wants to reload the css code when displayed
      * @see CssHudHandler
      */
-    public void showHudGui(int hudIndex, GuiFrame guiInstance) {
+    public static void showHudGui(int hudIndex, GuiFrame guiInstance) {
         manager.showHudGui(hudIndex, guiInstance);
     }
 
@@ -166,6 +168,13 @@ public class ACsGuiApi implements ACsGuiApiService {
      */
     public static List<GuiFrame.APIGuiScreen> getDisplayHudGuis() {
         return manager.getHud().getDisplayedHuds();
+    }
+
+    /**
+     * Closes the given hud gui
+     */
+    public static void closeHudGui(GuiFrame hudFrame) {
+        manager.getHud().closeHudGui(hudFrame);
     }
 
     /**
